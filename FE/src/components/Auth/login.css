@@ -1,0 +1,172 @@
+/* Login.css */
+.login-container {
+    display: flex;
+    min-height: 100vh;
+  }
+  
+  
+  .left-panel {
+    position: relative;
+    background-color: #138841; 
+   
+    background-image:
+      radial-gradient(rgba(255,255,255,0.08) 2px, transparent 2px),
+      linear-gradient(135deg, rgba(255,255,255,0.06), rgba(0,0,0,0.2));
+    background-size: 40px 40px, cover;
+    background-position: 0 0, center;
+    color: #ffffff;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2.5rem;
+    overflow: hidden;
+  }
+  
+  
+  .left-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+  }
+  Keep content above overlay
+  .left-panel > * { position: relative; z-index: 1; }
+
+ 
+  .left-panel ul { list-style: none; padding-left: 0; margin: 1.25rem 0 0; }
+  .left-panel li {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.16);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .left-panel li + li { margin-top: 0.75rem; }
+  .left-panel li::before {
+    content: "";
+    flex: 0 0 36px;
+    height: 36px;
+    border-radius: 9999px;
+    background: rgba(255,255,255,0.22);
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.28);
+    margin-top: 2px;
+  }
+  
+  /* Right side: light background with elevated card */
+  .right-panel {
+    background-color: #ffffff; 
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem;
+  }
+  
+  .login-form {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    /* box-shadow: 0 10px 24px rgba(2, 6, 23, 0.08); */
+    width: 100%;
+    max-width: 440px;
+  }
+  .login-form label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 0.95rem;
+    color: #131313ef;
+    font-weight: 600;
+  }
+  
+  .login-form input {
+    width: 100%;
+    padding: 0.9rem 0.95rem;
+    margin-bottom: 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background: #ffffff;
+  }
+  /* Password field toggle */
+  .password-field { position: relative; }
+  .password-field input { padding-right: 2.5rem; }
+  .password-field .toggle-visibility {
+    position: absolute;
+    right: 8px;
+    top: 40%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 28px;
+    width: 28px;
+    border: none;
+    background: transparent;
+    color: #6b7280;
+    cursor: pointer;
+    z-index: 1;
+  }
+  .password-field .toggle-visibility:hover { color: #374151; }
+  
+  .login-form input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+  }
+  
+  .login-form button {
+    width: 100%;
+    background-color: #138841;
+    color: #ffffff;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.05s ease;
+  }
+  
+  .login-form button:hover { background-color: #0a8b5f; }
+  .login-form button:active { transform: translateY(1px); }
+  
+  .login-form a {
+    color: #087e36;
+    text-decoration: none;
+    font-size: 1rem;
+  }
+  
+  .login-form a:hover { text-decoration: underline; }
+
+  /* Ensure password visibility button stays gray and transparent */
+  .password-field .toggle-visibility {
+    background: transparent !important;
+    color: #6b7280 !important;
+    padding: 0;
+  }
+  .password-field .toggle-visibility:hover,
+  .password-field .toggle-visibility:focus,
+  .password-field .toggle-visibility:active {
+    background: transparent !important;
+    color: #374151 !important;
+    box-shadow: none;
+  }
+
+  /* Divider and copyright */
+  .form-divider {
+    height: 1px;
+    background: rgba(0,0,0,0.08);
+    margin: 1rem 0 0.75rem;
+  }
+  .copyright {
+    margin: 0.25rem 0 0;
+    text-align: center;
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
+
+  /* Responsive: stack on small screens */
+  @media (max-width: 1024px) {
+    .login-container { flex-direction: column; }
+  }
