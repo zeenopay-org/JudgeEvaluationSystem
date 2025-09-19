@@ -2,7 +2,7 @@ import { useState, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-const Navbar = ({ onOpenSidebar, showHamburger }) => {
+const Navbar = ({ onOpenSidebar, showHamburger, sidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { admin, logout } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ const Navbar = ({ onOpenSidebar, showHamburger }) => {
   };
 
   return (
-    <nav className="bg-green-900 shadow-md px-4 md:px-6 h-16 flex justify-between items-center sticky top-0 z-30">
+    <nav className={`bg-green-900 shadow-md px-4 md:px-6 h-16 flex justify-between items-center fixed top-0 right-0 z-40 ${sidebarOpen ? 'md:left-64 left-0' : 'left-0'}`}>
       {/* Left: Logo + Links */}
       <div className="flex items-center space-x-3 md:space-x-6">
         {showHamburger && (

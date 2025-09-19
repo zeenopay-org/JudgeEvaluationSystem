@@ -42,7 +42,7 @@ export const signinAdmin = async (req, res) => {
     const {role} = admin
 
     //payload,secret,options
-    const token = jwt.sign({ id: admin._id }, JWT_SECRET, { expiresIn: "1h" }); 
+    const token = jwt.sign({ id: admin._id , role: admin.role}, JWT_SECRET, { expiresIn: "1h" }); 
 
     res.json({ message: "Login successful", token, admin : {email,role} });
   } catch (err) {

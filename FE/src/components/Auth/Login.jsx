@@ -56,7 +56,7 @@ const Login = () => {
     if (!validateForm()) return;
 
     try {
-      const response = await fetch("http://localhost:5000/users/signIn", {
+      const response = await fetch("http://localhost:5000/api/v1/users/signIn", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -70,7 +70,7 @@ const Login = () => {
       const data = await response.json();
 
       // Save token and user info to context
-      login(data.admin, data.token);
+      login({ admin: data.admin, token: data.token });
       console.log("Admin data on login:", data.admin);
 
       setEmail("");

@@ -3,12 +3,12 @@ import { createContext, useState, useEffect } from "react";
 // Create context
 export const AuthContext = createContext();
 
-// Provider component paxi main file ma halna prxa
+
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => localStorage.getItem("token") || null);
   const [admin, setAdmin] = useState(() => JSON.parse(localStorage.getItem("admin")) || null);
 
-  // token lai ra admin lai save grne localStorage ma whenever they change
+
   useEffect(() => {
     if (token) {
       localStorage.setItem("token", token);
@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
     setAdmin(data.admin);
   };
 
-  // Logout ko lagy function (sav clear hanxa)
+  // Logout
   const logout = () => {
     setToken(null);
     setAdmin(null);

@@ -12,9 +12,9 @@ const Layout = ({ children }) => {
       {/* Sidebar on the very left from top to bottom */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       {/* Right side: navbar and content */}
-      <div className={`flex-1 min-w-0 ${sidebarOpen ? 'md:ml-64' : 'md:ml-0'}`}>
+      <div className={`flex-1 min-w-0 pt-16 ${sidebarOpen ? 'md:ml-64' : 'md:ml-0'}`}>
         <div className={`${sidebarOpen ? 'md:ml-0' : ''}`}>
-          <Navbar onOpenSidebar={() => setSidebarOpen(true)} showHamburger={!sidebarOpen} />
+          <Navbar onOpenSidebar={() => setSidebarOpen(true)} showHamburger={!sidebarOpen} sidebarOpen={sidebarOpen} />
         </div>
         {/* No floating toggle; hamburger renders inside Navbar when sidebar is closed */}
         

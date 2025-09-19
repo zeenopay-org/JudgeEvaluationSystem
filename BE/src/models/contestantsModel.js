@@ -15,7 +15,8 @@ const contestantSchema = new mongoose.Schema({
         ref : "Events",
         required : true
     }
-   
-})
+  },
+{timestamps:true}
+)
 
 export default mongoose.model('Contestants',contestantSchema)
