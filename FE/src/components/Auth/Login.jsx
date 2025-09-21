@@ -56,7 +56,8 @@ const Login = () => {
     if (!validateForm()) return;
 
     try {
-      const response = await fetch("http://localhost:5000/api/v1/users/signIn", {
+      // Try admin login first
+      let response = await fetch("http://localhost:5000/api/v1/users/signIn", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -64,20 +65,49 @@ const Login = () => {
         body: JSON.stringify({ email, password }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to login");
+      let data;
+      let isAdmin = false;
+
+      if (response.ok) {
+        data = await response.json();
+        isAdmin = true;
+      } else {
+        // If admin login fails, try judge login
+        response = await fetch("http://localhost:5000/api/v1/judges/signIn", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Invalid credentials");
+        }
+        data = await response.json();
+        isAdmin = false;
       }
-      const data = await response.json();
+
+      // Debug: Log the full response data
+      console.log("Full response data:", data);
+      console.log("isAdmin flag:", isAdmin);
 
       // Save token and user info to context
-      login({ admin: data.admin, token: data.token });
-      console.log("Admin data on login:", data.admin);
+      if (isAdmin) {
+        login({ admin: data.admin, token: data.token });
+        console.log("Admin data on login:", data.admin);
+      } else {
+        login({ judge: data.judge, token: data.token });
+        console.log("Judge data on login:", data.judge);
+      }
 
       setEmail("");
       setPassword("");
       navigate("/",{ replace: true });
     } catch (error) {
       console.error("Error:", error);
+      setErrors({ general: error.message });
     }
   };
 
@@ -153,6 +183,12 @@ const Login = () => {
           <div className="flex justify-end mb-4">
             <a href="#">Forgot Password?</a>
           </div>
+
+          {errors.general && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {errors.general}
+            </div>
+          )}
 
           <button className="font-bold" type="submit">
             Sign In

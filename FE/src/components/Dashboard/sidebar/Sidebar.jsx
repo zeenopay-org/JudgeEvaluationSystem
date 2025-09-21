@@ -13,7 +13,7 @@ const navItems = [
       <path d="M3.75 20.25a8.25 8.25 0 1 1 16.5 0v.75H3.75v-.75Z" />
     </svg>
   ) },
-  { label: 'Judges', to: '/judges', icon: (
+  { label: 'Judges', to: '/judge', icon: (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
       <path d="M16.5 7.5a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" />
       <path d="M3.75 20.25a8.25 8.25 0 1 1 16.5 0v.75H3.75v-.75Z" />

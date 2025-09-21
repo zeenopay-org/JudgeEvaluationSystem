@@ -24,7 +24,14 @@ export const createContestant = async ( req , res ) => {
 //get contestants
 export const getContestant = async (req , res) =>{
     try {
-        const contestants = await Contestant.find({});
+        let query = {};
+        
+        // If user is a judge, filter by their assigned event
+        if (req.judge && req.judge.eventId) {
+            query.event = req.judge.eventId;
+        }
+        
+        const contestants = await Contestant.find(query).populate('event', 'name');
         res.status(200).json({contestants});
         
     } catch (err) {

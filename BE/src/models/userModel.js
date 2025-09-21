@@ -10,6 +10,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false,
     },
+  username: {
+    type: String,
+    required: false,
+    unique: true,
+    sparse: true // allows multiple null values
+  },
   role: {
     type: String,
     required: true,

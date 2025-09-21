@@ -1,11 +1,7 @@
 import mongoose, { Mongoose } from "mongoose"
 
 const judgeSchema = new mongoose.Schema({
-// id : {
-//     type : Number,
-//     require : true
-// },
-name : {
+contact : {
     type : String,
     required : true
 },
@@ -19,6 +15,8 @@ event : {
     ref : "Events",
     required : true
 }
-})
+},
+{timestamps:true}
+)
 
 export default mongoose.model('Judges',judgeSchema);

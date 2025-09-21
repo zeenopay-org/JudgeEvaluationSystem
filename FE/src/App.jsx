@@ -3,10 +3,12 @@ import LoginPage from './pages/loginPage'
 import HomePage from './pages/homePage';
 import EventPage from './pages/eventPage';
 import ContestantPage from './pages/contestantPage';
+import JudgePage from './pages/judgePage';
 import CreateEvent from './components/Dashboard/Event/CreateEvent';
 import EditEvent from './components/Dashboard/Event/EditEvent';
 import Layout from './components/Layout/Layout';
 import CreateContestant from './components/Dashboard/Contestant/CreateContestant';
+import createJudge from './components/Dashboard/Judge/createJudge';
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
         <Route path="/event/edit/:id" element={<Layout><EditEvent /></Layout>} />
         <Route path="/contestant" element={<ContestantPage/>} />
         <Route path="/contestant/create/:eventId" element={<Layout><CreateContestant /></Layout>} />
+        <Route path="/judge" element={<JudgePage />} />
+        <Route path="/judge/create" element={<createJudge />} />
       </Routes>
     </>
   )
