@@ -1,14 +1,16 @@
 import React, { useEffect, useState ,useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faPerson, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { AuthContext } from '../../../context/AuthContext';
 
 const DisplayEvent = ({eventId}) => {
  const { token } = useContext(AuthContext);
  const navigate = useNavigate();
+ const location = useLocation();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [successMessage, setSuccessMessage] = useState('');
  
 
   const handleCreateClick = () => {
@@ -16,30 +18,34 @@ const DisplayEvent = ({eventId}) => {
   };
 
   const handleEdit = (event) => {
-    console.log('Edit event clicked:', event);
+     navigate(`/event/edit/${event._id}`);
     };
 
-  // const handleDelete = async (event) => {
-  //   if (confirm(`Are you sure you want to delete ${event.name}?`)) {
-  //     try {
-  //       const res = await fetch(`http://localhost:5000/api/v1/events/delete/${event._id}`, {
-  //         method: 'DELETE',
-  //         headers: {
-  //           Authorization: 'Bearer YOUR_ADMIN_TOKEN', // Replace with your actual token
-  //           'Content-Type': 'application/json'
-  //         }
-  //       });
+    const handleContestant = (event) =>{
+      try { localStorage.setItem('selectedEventId', event._id); } catch {}
+      navigate(`/contestant/create/${event._id}`, { state: { eventId: event._id } });
+    }
 
-  //       if (res.ok) {
-  //         setEvents(prev => prev.filter(e => e._id !== event._id));
-  //       } else {
-  //         console.error('Failed to delete event');
-  //       }
-  //     } catch (err) {
-  //       console.error('Error deleting event:', err);
-  //     }
-  //   }
-  // };
+  const handleDelete = async (event) => {
+    if (confirm(`Are you sure you want to delete ${event.name}?`)) {
+      try {
+        const res = await fetch(`http://localhost:5000/api/v1/events/delete/${event._id}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`, 
+          }
+        });
+
+        if (res.ok) {
+          setEvents(prev => prev.filter(e => e._id !== event._id));
+        } else {
+          console.error('Failed to delete event');
+        }
+      } catch (err) {
+        console.error('Error deleting event:', err);
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -69,12 +75,28 @@ const DisplayEvent = ({eventId}) => {
     fetchEvents();
   }, [token]);
 
+  // Show success message from navigation state once
+  useEffect(() => {
+    if (location.state?.success) {
+      setSuccessMessage(location.state.success);
+      // Clear the state so the message doesn't persist on refresh/back
+      window.history.replaceState({}, document.title, window.location.pathname);
+      const t = setTimeout(() => setSuccessMessage(''), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [location.state]);
+
   if (loading) return <p className="p-6">Loading events...</p>;
 
   return (
     <div className="p-6">
+      {successMessage && (
+        <div className="mb-4 rounded border border-green-300 bg-green-50 text-green-800 px-4 py-2">
+          {successMessage}
+        </div>
+      )}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Events</h2>
+        <h2 className="text-2xl font-bold ">Ongoing Events</h2>
         <button
           onClick={handleCreateClick}
           className="bg-green-600 text-white px-4 py-2 rounded-md shadow hover:bg-green-700 transition duration-200"
@@ -109,14 +131,22 @@ const DisplayEvent = ({eventId}) => {
                   <FontAwesomeIcon icon={faEdit} />
                   Edit
                 </button>
-                {/* <button
+                <button
                   onClick={() => handleDelete(event)}
                   className="w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-md text-white bg-red-600 hover:bg-red-700 transition-colors text-sm shadow"
                 >
                   <FontAwesomeIcon icon={faTrash} />
                   Delete
-                </button> */}
+                </button>
+                
               </div>
+              <button
+                  onClick={() => handleContestant(event)}
+                  className="w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 mt-2 rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors text-sm shadow"
+                >
+                  <FontAwesomeIcon icon={faPerson} />
+                  Add contestant
+                </button>
             </div>
           </div>
         ))}

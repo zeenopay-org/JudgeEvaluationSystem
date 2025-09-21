@@ -7,7 +7,7 @@ const navItems = [
       <path d="M6.75 3A.75.75 0 0 0 6 3.75V5H4.5A2.25 2.25 0 0 0 2.25 7.25v10.5A2.25 2.25 0 0 0 4.5 20h15a2.25 2.25 0 0 0 2.25-2.25V7.25A2.25 2.25 0 0 0 19.5 5H18V3.75a.75.75 0 0 0-1.5 0V5H7.5V3.75A.75.75 0 0 0 6.75 3ZM3.75 9h16.5v8.75a.75.75 0 0 1-.75.75h-15a.75.75 0 0 1-.75-.75V9Z" />
     </svg>
   ) },
-  { label: 'Contestants', to: '/contestants', icon: (
+  { label: 'Contestants', to: '/contestant', icon: (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
       <path d="M16.5 7.5a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" />
       <path d="M3.75 20.25a8.25 8.25 0 1 1 16.5 0v.75H3.75v-.75Z" />

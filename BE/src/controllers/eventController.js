@@ -21,7 +21,6 @@ export const createEvent = async (req, res) => {
 // Get Event
 export const getEvent = async (req, res) => {
   try {
-    // Return all events; adjust filter later if needed (e.g., by creator)
     const events = await Event.find({});
     res.status(200).json({ events });
 
