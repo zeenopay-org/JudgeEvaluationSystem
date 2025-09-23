@@ -23,6 +23,32 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
+  // Reconcile persisted role with JWT on first load to avoid stale mixed roles
+  useEffect(() => {
+    try {
+      const storedToken = localStorage.getItem("token");
+      if (!storedToken) return;
+      const [, payload] = storedToken.split(".");
+      if (!payload) return;
+      const decoded = JSON.parse(atob(payload));
+      const roleFromToken = decoded?.role;
+
+      if (roleFromToken === 'admin') {
+        const storedAdmin = localStorage.getItem("admin");
+        setAdmin(storedAdmin ? JSON.parse(storedAdmin) : { role: 'admin' });
+        setJudge(null);
+        localStorage.removeItem("judge");
+      } else if (roleFromToken === 'judge') {
+        const storedJudge = localStorage.getItem("judge");
+        setJudge(storedJudge ? JSON.parse(storedJudge) : { role: 'judge' });
+        setAdmin(null);
+        localStorage.removeItem("admin");
+      }
+    } catch (_) {
+      // ignore decoding errors
+    }
+  }, []);
+
 
   useEffect(() => {
     if (token) {

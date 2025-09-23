@@ -57,7 +57,7 @@ const Login = () => {
 
     try {
       // Try admin login first
-      let response = await fetch("http://localhost:5000/api/v1/users/signIn", {
+      let response = await fetch("http://localhost:5000/api/v1/users/signin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -69,11 +69,30 @@ const Login = () => {
       let isAdmin = false;
 
       if (response.ok) {
-        data = await response.json();
-        isAdmin = true;
+        const possibleAdmin = await response.json();
+        // Only accept as admin if role is actually 'admin'
+        if (possibleAdmin?.admin?.role === 'admin') {
+          data = possibleAdmin;
+          isAdmin = true;
+        } else {
+          // Fall back to judge login if role is not admin
+          response = await fetch("http://localhost:5000/api/v1/judges/signin", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+          });
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Invalid credentials");
+          }
+          data = await response.json();
+          isAdmin = false;
+        }
       } else {
         // If admin login fails, try judge login
-        response = await fetch("http://localhost:5000/api/v1/judges/signIn", {
+        response = await fetch("http://localhost:5000/api/v1/judges/signin", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

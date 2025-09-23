@@ -24,14 +24,7 @@ export const createContestant = async ( req , res ) => {
 //get contestants
 export const getContestant = async (req , res) =>{
     try {
-        let query = {};
-        
-        // If user is a judge, filter by their assigned event
-        if (req.judge && req.judge.eventId) {
-            query.event = req.judge.eventId;
-        }
-        
-        const contestants = await Contestant.find(query).populate('event', 'name');
+        const contestants = await Contestant.find({}).populate('event', 'name');
         res.status(200).json({contestants});
         
     } catch (err) {
@@ -82,7 +75,7 @@ export const deleteContestants = async (req,res) => {
         const {id}= req.params;
         const deletedContestant = await Contestant.findByIdAndDelete(id);
     
-        if(!deleteContestants){
+        if(!deletedContestant){
             return res.status(404).json({message:"contestant not found"})
         }
         return res.status(200).json({message: 'Contestant deleted successfully'})

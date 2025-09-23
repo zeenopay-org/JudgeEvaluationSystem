@@ -11,6 +11,7 @@ const DisplayContestant = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState('');
+  const [judgeEventName, setJudgeEventName] = useState('');
 
   const role = admin ? 'admin' : judge ? 'judge' : null;
 
@@ -20,7 +21,7 @@ const DisplayContestant = () => {
   }
 
   const getEventName = (eventId) => {
-    if (role === 'judge') return 'Your Event';
+    if (role === 'judge') return judgeEventName || 'Your Event';
     const event = events.find(e => e._id === eventId || e.id === eventId);
     return event ? event.name : 'Unknown Event';
   };
@@ -59,26 +60,25 @@ const DisplayContestant = () => {
       }
 
       try {
-        const contestantsRes = await fetch('http://localhost:5000/api/v1/contestants', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        if (role === 'judge') {
+          const res = await fetch('http://localhost:5000/api/v1/judges/contestants/me', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const data = await res.json();
+          const fetchedContestants = Array.isArray(data.contestants) ? data.contestants : [];
+          setContestants(fetchedContestants);
+          if (typeof data.event === 'string') setJudgeEventName(data.event);
+        } else {
+          const contestantsRes = await fetch('http://localhost:5000/api/v1/contestants', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const contestantsData = await contestantsRes.json();
+          const fetchedContestants = Array.isArray(contestantsData.contestants)
+            ? contestantsData.contestants
+            : [];
+          setContestants(fetchedContestants);
 
-        const contestantsData = await contestantsRes.json();
-        let fetchedContestants = Array.isArray(contestantsData.contestants)
-          ? contestantsData.contestants
-          : [];
-
-        // Filter for judge
-        if (role === 'judge' && judge?.eventId) {
-          fetchedContestants = fetchedContestants.filter(c =>
-            c.event === judge.eventId || c.event?._id === judge.eventId
-          );
-        }
-
-        setContestants(fetchedContestants);
-
-        // Fetch events only for admin
-        if (role === 'admin') {
+          // Fetch events only for admin
           const eventsRes = await fetch('http://localhost:5000/api/v1/events', {
             headers: { Authorization: `Bearer ${token}` }
           });

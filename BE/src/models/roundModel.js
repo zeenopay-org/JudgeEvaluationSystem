@@ -1,10 +1,6 @@
 import mongoose from "mongoose"
 
 const roundSchema = new mongoose.Schema({
-    // id : {
-    //     type : Number,
-    //     required : true
-    // },
     name : {
         type : String,
         required : true
@@ -23,6 +19,5 @@ const roundSchema = new mongoose.Schema({
         ref : 'Events',
         required : true
     },
-
 })
 export default mongoose.model('Rounds', roundSchema)
