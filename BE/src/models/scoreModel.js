@@ -33,5 +33,6 @@ const scoreSchema = new mongoose.Schema({
     comment: {
         type :String,
        },
-})
+},
+{timestamps:true})
 export default mongoose.model('Scores', scoreSchema);

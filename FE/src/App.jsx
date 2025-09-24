@@ -8,7 +8,9 @@ import CreateEvent from './components/Dashboard/Event/CreateEvent';
 import EditEvent from './components/Dashboard/Event/EditEvent';
 import Layout from './components/Layout/Layout';
 import CreateContestant from './components/Dashboard/Contestant/CreateContestant';
-import createJudge from './components/Dashboard/Judge/createJudge';
+import CreateJudge from './components/Dashboard/Judge/createJudge';
+import CreateRound from './components/Dashboard/Round/createRound';
+import RoundPage from './pages/roundPage';
 
 function App() {
   return (
@@ -22,7 +24,9 @@ function App() {
         <Route path="/contestant" element={<ContestantPage/>} />
         <Route path="/contestant/create/:eventId" element={<Layout><CreateContestant /></Layout>} />
         <Route path="/judge" element={<JudgePage />} />
-        <Route path="/judge/create" element={<createJudge />} />
+        <Route path="/judge/create" element={<CreateJudge />} />
+        <Route path="/round" element={<RoundPage />} />
+        <Route path="/round/create" element={<Layout><CreateRound /></Layout>} />
       </Routes>
     </>
   )

@@ -20,10 +20,16 @@ const DisplayContestant = () => {
     return <Navigate to="/login" replace />;
   }
 
-  const getEventName = (eventId) => {
+  const getEventName = (eventRef) => {
     if (role === 'judge') return judgeEventName || 'Your Event';
-    const event = events.find(e => e._id === eventId || e.id === eventId);
-    return event ? event.name : 'Unknown Event';
+    if (!eventRef) return 'Unknown Event';
+    if (typeof eventRef === 'object') {
+      if (eventRef.name) return eventRef.name;
+      const eventObj = events.find(e => e._id === eventRef._id || e.id === eventRef.id);
+      return eventObj ? eventObj.name : 'Unknown Event';
+    }
+    const eventObj = events.find(e => e._id === eventRef || e.id === eventRef);
+    return eventObj ? eventObj.name : 'Unknown Event';
   };
 
   const handleDelete = async (contestant) => {

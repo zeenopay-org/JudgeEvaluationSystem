@@ -14,10 +14,18 @@ const roundSchema = new mongoose.Schema({
         type : Number,
         required : true
     },
+    questions: {
+        type: [{
+            question_text: { type: String, required: true }
+        }],
+        default: []
+    },
     event : {
         type : mongoose.Schema.Types.ObjectId ,
         ref : 'Events',
         required : true
     },
+    
 })
 export default mongoose.model('Rounds', roundSchema)
+

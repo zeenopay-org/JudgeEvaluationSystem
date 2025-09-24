@@ -44,8 +44,9 @@ export const AuthProvider = ({ children }) => {
         setAdmin(null);
         localStorage.removeItem("admin");
       }
-    } catch (_) {
-      // ignore decoding errors
+    } catch (error) {
+      console.error("Error reconciling persisted role with JWT:", error);
+      
     }
   }, []);
 
