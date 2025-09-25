@@ -1,6 +1,8 @@
 import Judge from "../models/judgeModel.js";
 import Users from "../models/userModel.js";
 import Contestant from "../models/contestantsModel.js";
+import Round from "../models/roundModel.js";
+import Event from "../models/eventModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -158,14 +160,93 @@ export const getJudgeContestants = async (req, res) => {
       return res.status(404).json({ message: "Judge not found" });
     }
 
-    const contestants = await Contestant.find({ event: judge.event._id }).populate("event", "name");
+    // Normalize judge events to an array of ObjectIds
+    const eventIds = Array.isArray(judge.event)
+      ? judge.event.map((evt) => (evt?._id ? evt._id : evt)).filter(Boolean)
+      : [judge.event?._id || judge.event].filter(Boolean);
+
+    const contestants = await Contestant.find({ event: { $in: eventIds } }).populate("event", "name");
 
     res.status(200).json({
       message: "Contestants for judge's event fetched successfully",
-      event: judge.event.name,
+      events: Array.isArray(judge.event)
+        ? judge.event.map((evt) => evt?.name).filter(Boolean)
+        : [judge.event?.name].filter(Boolean),
       contestants,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
+//get event for logged in judge
+
+export const getJudgeEvents = async (req, res) => {
+  try {
+    const judgeId = req.judge.judgeId;
+    console.log("Judge ID from token:", judgeId);
+
+    const judge = await Judge.findById(judgeId).populate("event");
+    if (!judge) {
+      return res.status(404).json({ message: "Judge not found" });
+    }
+
+    // If judge.event is an array of ObjectIds
+    const events = await Event.find({ _id: { $in: judge.event } });
+
+    res.status(200).json({
+      message: "Events assigned to judge fetched successfully",
+      events,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+export const getJudgeRounds = async(req, res) =>{
+  try {
+    const judgeId = req.judge.judgeId;
+    console.log("Judge ID from token:", judgeId);
+
+    const judge = await Judge.findById(judgeId).populate("event");
+    if (!judge) {
+      return res.status(404).json({ message: "Judge not found" });
+    }
+
+    //filter
+    const { type, name } = req.query;
+    const filter = {};
+
+    // Normalize judge events to an array of ObjectIds
+    const eventIds = Array.isArray(judge.event)
+      ? judge.event.map((evt) => (evt?._id ? evt._id : evt)).filter(Boolean)
+      : [judge.event?._id || judge.event].filter(Boolean);
+
+    if (eventIds.length > 0) {
+      filter.event = { $in: eventIds };
+    }
+
+    if (type) {
+      filter.type = type; 
+    }
+
+    if (name) {
+      filter.name = new RegExp(name, 'i'); // case-insensitive partial match
+    }
+
+const rounds = await Round.find(filter).populate("event", "name");
+
+    res.status(200).json({
+      message: "Rounds for events fetched successfully",
+      events: Array.isArray(judge.event)
+        ? judge.event.map((evt) => evt?.name).filter(Boolean)
+        : [judge.event?.name].filter(Boolean),
+      rounds,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+   }
+
+

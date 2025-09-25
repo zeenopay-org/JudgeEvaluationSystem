@@ -32,7 +32,7 @@ const displayRound = () => {
 
             if (res.ok){
                 setRounds(prev => prev.filter(r => r._id !== round._id));
-setSuccessMessage(`${round.name} deleted successfully!`);
+                setSuccessMessage(`${round.name} deleted successfully!`);
             } else{
                 console.error('Failed to delete round');
             }

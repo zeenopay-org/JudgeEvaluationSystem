@@ -10,11 +10,11 @@ user : {
     ref : 'Users',
     required : true
 },
-event : {
+event : [{
     type : mongoose.Schema.Types.ObjectId,
     ref : "Events",
     required : true
-}
+}]
 },
 {timestamps:true}
 )

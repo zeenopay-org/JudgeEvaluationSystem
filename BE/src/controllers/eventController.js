@@ -1,6 +1,7 @@
 import Event from '../models/eventModel.js'
 import { configDotenv } from 'dotenv';
 
+
 // Create Event
 export const createEvent = async (req, res) => {
     try {
@@ -87,6 +88,9 @@ export const deleteEvent = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+
+
 
 
 

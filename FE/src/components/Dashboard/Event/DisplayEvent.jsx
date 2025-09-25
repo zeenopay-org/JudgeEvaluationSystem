@@ -5,7 +5,7 @@ import { faEdit, faPerson, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { AuthContext } from '../../../context/AuthContext';
 
 const DisplayEvent = ({eventId}) => {
- const { token } = useContext(AuthContext);
+ const { token, } = useContext(AuthContext);
  const navigate = useNavigate();
  const location = useLocation();
   const [events, setEvents] = useState([]);
