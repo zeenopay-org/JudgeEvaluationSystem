@@ -1,50 +1,65 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { Navigate } from 'react-router-dom';
-import { AuthContext } from '../../../context/AuthContext';
+import React, { useEffect, useState, useContext } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../../context/AuthContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 
 const DisplayJudge = () => {
   const { token, judge } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [events, setEvents] = useState([]);
+  const [roundsByEvent, setRoundsByEvent] = useState({});
+  const [expandedEvent, setExpandedEvent] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  // Only judges can view this page
-  if (!token || !judge) {
-    return <Navigate to="/login" replace />;
-  }
+  if (!token || !judge) return <Navigate to="/login" replace />;
 
   useEffect(() => {
-    const fetchJudgeEvents = async () => {
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
+    const fetchEvents = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/v1/judges/events/me', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const res = await fetch("http://localhost:5000/api/v1/judges/events/me", {
+          headers: { Authorization: `Bearer ${token}` },
         });
-
-        if (!res.ok) {
-          const msg = `Failed to load events (${res.status})`;
-          setError(msg);
-          setEvents([]);
-          return;
-        }
-
+        if (!res.ok) throw new Error(`Failed to load events (${res.status})`);
         const data = await res.json();
         setEvents(Array.isArray(data.events) ? data.events : []);
       } catch (err) {
-        setError('Error fetching events');
+        setError(err.message || "Error fetching events");
+      }
+    };
+
+    const fetchRounds = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/v1/judges/rounds/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Failed to load rounds");
+        const data = await res.json();
+
+        const grouped = {};
+        (data.rounds || []).forEach((r) => {
+          const eid = r.event?._id || r.event;
+          if (!grouped[eid]) grouped[eid] = [];
+          grouped[eid].push(r);
+        });
+        setRoundsByEvent(grouped);
+      } catch (err) {
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchJudgeEvents();
+    if (token) {
+      fetchEvents();
+      fetchRounds();
+    }
   }, [token]);
+
+  const toggleExpand = (eventId) => {
+    setExpandedEvent((prev) => (prev === eventId ? null : eventId));
+  };
 
   if (loading) return <p className="p-6">Loading events...</p>;
 
@@ -63,27 +78,82 @@ const DisplayJudge = () => {
       {events.length === 0 ? (
         <p className="text-gray-600">No events assigned.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {events.map((event) => (
-            <div key={event._id || event.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-              {event.image && (
-                <img src={event.image} alt={event.name} className="w-full h-48 object-cover" />
-              )}
-              <div className="p-4">
-                <h3 className="text-xl font-semibold text-gray-800 mb-1">{event.name}</h3>
-                {event.created_by && (
-                  <p className="text-sm text-gray-500 mb-2">Organized by <strong>{event.created_by}</strong></p>
-                )}
-                <div className="mb-2">
-                  {event.createdAt && (
-                    <span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-3 py-1 rounded-full mr-2">
-                      {new Date(event.createdAt).toLocaleDateString()}
-                    </span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {events.map((event) => {
+            const isExpanded = expandedEvent === event._id;
+            const eventRounds = roundsByEvent[event._id] || [];
+
+            return (
+              <div
+                key={event._id}
+                className="bg-white rounded-xl shadow-md overflow-hidden transition hover:shadow-lg"
+              >
+                <div
+                  className="cursor-pointer relative"
+                  onClick={() => toggleExpand(event._id)}
+                >
+                  {event.image && (
+                    <img
+                      src={event.image}
+                      alt={event.name}
+                      className="w-full h-40 object-cover"
+                    />
                   )}
+                  <div className="p-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        {event.name}
+                      </h3>
+                      <FontAwesomeIcon
+                        icon={isExpanded ? faChevronUp : faChevronDown}
+                        className="text-gray-600 text-lg"
+                      />
+                    </div>
+                    {event.created_by && (
+                      <p className="text-sm text-gray-500">
+                        By <strong>{event.created_by}</strong>
+                      </p>
+                    )}
+                    {event.createdAt && (
+                      <span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-3 py-1 rounded-full mt-2">
+                        {new Date(event.createdAt).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
                 </div>
+
+                {isExpanded && (
+                  <div className="bg-gray-50 border-t border-gray-200 p-4 animate-fadeIn">
+                    <h4 className="text-md font-semibold text-gray-700 mb-2">
+                      Rounds
+                    </h4>
+                    {eventRounds.length === 0 ? (
+                      <p className="text-sm text-gray-500">No rounds available</p>
+                    ) : (
+                      <ul className="space-y-2">
+                        {eventRounds.map((round) => (
+                          <li
+                            key={round._id}
+                            className="flex justify-between items-center bg-white border rounded-lg px-3 py-2 shadow-sm hover:shadow transition"
+                          >
+                            <span className="text-sm font-medium text-gray-700">
+                              {round.name}
+                            </span>
+                            <button
+                              className="text-blue-600 text-xs font-semibold hover:underline"
+                              onClick={() => navigate(`/judge/rounds/${round._id}/contestants`)}
+                            >
+                              View Contestants
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

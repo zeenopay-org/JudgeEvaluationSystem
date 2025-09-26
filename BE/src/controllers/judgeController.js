@@ -204,49 +204,82 @@ export const getJudgeEvents = async (req, res) => {
 };
 
 
-export const getJudgeRounds = async(req, res) =>{
+export const getJudgeRounds = async (req, res) => {
   try {
     const judgeId = req.judge.judgeId;
-    console.log("Judge ID from token:", judgeId);
+    const { eventId } = req.query;
 
     const judge = await Judge.findById(judgeId).populate("event");
-    if (!judge) {
-      return res.status(404).json({ message: "Judge not found" });
-    }
+    if (!judge) return res.status(404).json({ message: "Judge not found" });
 
-    //filter
-    const { type, name } = req.query;
-    const filter = {};
-
-    // Normalize judge events to an array of ObjectIds
+    // Collect event IDs assigned to judge
     const eventIds = Array.isArray(judge.event)
-      ? judge.event.map((evt) => (evt?._id ? evt._id : evt)).filter(Boolean)
-      : [judge.event?._id || judge.event].filter(Boolean);
+      ? judge.event.map((evt) => evt._id)
+      : [judge.event?._id].filter(Boolean);
 
-    if (eventIds.length > 0) {
-      filter.event = { $in: eventIds };
+    // Ensure requested event belongs to judge
+    if (eventId && !eventIds.some((id) => id.toString() === eventId)) {
+      return res.status(403).json({ message: "Unauthorized event" });
     }
 
-    if (type) {
-      filter.type = type; 
-    }
+    const filter = eventId ? { event: eventId } : { event: { $in: eventIds } };
 
-    if (name) {
-      filter.name = new RegExp(name, 'i'); // case-insensitive partial match
-    }
-
-const rounds = await Round.find(filter).populate("event", "name");
+    const rounds = await Round.find(filter).populate("event", "name");
 
     res.status(200).json({
-      message: "Rounds for events fetched successfully",
-      events: Array.isArray(judge.event)
-        ? judge.event.map((evt) => evt?.name).filter(Boolean)
-        : [judge.event?.name].filter(Boolean),
+      message: "Rounds fetched successfully",
       rounds,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-   }
+};
+
+
+//get contestants per round
+export const getRoundContestants = async (req, res) => {
+  try {
+    const judgeId = req.judge.judgeId;
+    const { roundId } = req.params;
+
+    // Validate judge
+    const judge = await Judge.findById(judgeId).populate("event");
+    if (!judge) return res.status(404).json({ message: "Judge not found" });
+
+    // Validate round
+    const round = await Round.findById(roundId).populate("event", "name");
+    if (!round) return res.status(404).json({ message: "Round not found" });
+
+    // Collect event IDs assigned to judge
+    const judgeEventIds = Array.isArray(judge.event)
+      ? judge.event.map((evt) => (evt?._id ? evt._id.toString() : String(evt)))
+      : [judge.event?._id || judge.event].filter(Boolean).map((id) => id.toString());
+
+    // Ensure the round's event is assigned to this judge
+    const roundEventId = round.event?._id?.toString() || round.event?.toString();
+    if (!roundEventId || !judgeEventIds.includes(roundEventId)) {
+      return res.status(403).json({ message: "Unauthorized to view contestants for this round" });
+    }
+
+    // Contestants are linked to events; fetch by the round's event
+    const contestants = await Contestant.find({ event: roundEventId })
+      .select("name contestant_number event")
+      .populate("event", "name");
+
+    res.status(200).json({
+      message: "Contestants for round fetched successfully",
+      round: {
+        id: round._id,
+        name: round.name,
+        event: round.event,
+      },
+      contestants,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
 
 

@@ -1,5 +1,5 @@
 import express, { Router } from "express";
-import { createJudge, signInJudge ,getJudge, getSingleJudge, getJudgeContestants, getJudgeEvents , getJudgeRounds} from "../controllers/judgeController.js";
+import { createJudge, signInJudge ,getJudge, getSingleJudge, getJudgeContestants, getJudgeEvents , getJudgeRounds, getRoundContestants} from "../controllers/judgeController.js";
 import { authMiddleware, adminOnlyMiddleware } from "../middlewares/authMiddleware.js";
 import { judgeAuthMiddleware } from "../middlewares/judgeAuthMiddleware.js";
 
@@ -18,5 +18,6 @@ router.get('/:id', authMiddleware, adminOnlyMiddleware, getSingleJudge)
 router.get('/contestants/me', judgeAuthMiddleware, getJudgeContestants);
 router.get('/events/me', judgeAuthMiddleware, getJudgeEvents);
 router.get('/rounds/me', judgeAuthMiddleware,getJudgeRounds)
+router.get('/rounds/:roundId/contestants', judgeAuthMiddleware, getRoundContestants)
 
 export default router;

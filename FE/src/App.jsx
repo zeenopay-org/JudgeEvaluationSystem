@@ -11,6 +11,7 @@ import CreateContestant from './components/Dashboard/Contestant/CreateContestant
 import CreateJudge from './components/Dashboard/Judge/createJudge';
 import CreateRound from './components/Dashboard/Round/createRound';
 import RoundPage from './pages/roundPage';
+import RoundContestants from './components/Dashboard/Judge/RoundContestants';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <Route path="/judge/create" element={<CreateJudge />} />
         <Route path="/round" element={<RoundPage />} />
         <Route path="/round/create" element={<Layout><CreateRound /></Layout>} />
+        <Route path="/judge/rounds/:roundId/contestants" element={<Layout><RoundContestants /></Layout>} />
       </Routes>
     </>
   )
