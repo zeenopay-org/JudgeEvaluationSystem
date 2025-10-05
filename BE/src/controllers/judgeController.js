@@ -271,6 +271,9 @@ export const getRoundContestants = async (req, res) => {
       round: {
         id: round._id,
         name: round.name,
+        type: round.type,
+        max_score: round.max_score,
+        questions: round.questions,
         event: round.event,
       },
       contestants,

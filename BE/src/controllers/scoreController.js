@@ -1,129 +1,77 @@
-import { configDotenv } from "dotenv";
 import Score from "../models/scoreModel.js";
 import Round from "../models/roundModel.js";
+import Contestant from "../models/contestantsModel.js";
 
 /**
- * @desc Judge gives score to a contestant
+ * Submit a score for a contestant in a specific round (and question if applicable)
  */
-export const giveScore = async (req, res) => {
-    
+export const submitScore = async (req, res) => {
   try {
-    const { roundId, contestantId, score, comment, questionId } = req.body;
-    const judgeId = req.user.id; // judge from JWT
+    // Support both FE payload (round, contestant, question) and BE expected fields (roundId, contestantId, questionId)
+    const roundId = req.body.roundId || req.body.round;
+    const contestantId = req.body.contestantId || req.body.contestant;
+    const questionId = req.body.questionId || req.body.question || null;
+    const score = req.body.score;
+    const comment = req.body.comment;
+    const judgeId = req.judge?.judgeId || req.user?.id; // depending on middleware
 
-    // 1. Validate round
+    // 🔹 Validation
+    if (!roundId || !contestantId || score === undefined) {
+      return res.status(400).json({ message: "roundId, contestantId, and score are required" });
+    }
+
     const round = await Round.findById(roundId);
-    if (!round) return res.status(404).json({ message: "Round not found" });
+    if (!round) {
+      return res.status(404).json({ message: "Round not found" });
+    }
 
+    const contestant = await Contestant.findById(contestantId);
+    if (!contestant) {
+      return res.status(404).json({ message: "Contestant not found" });
+    }
+
+    // 🔹 For Q&A rounds, ensure questionId is provided
+    if (round.type === "qna" && !questionId) {
+      return res.status(400).json({ message: "questionId is required for Q&A rounds" });
+    }
+
+    // 🔹 Check duplicate score
+    const existingScore = await Score.findOne({
+      round: roundId,
+      judge: judgeId,
+      contestant: contestantId,
+      ...(round.type === "qna" ? { question: questionId } : {})
+    });
+
+    if (existingScore) {
+      return res.status(400).json({ message: "Score already submitted for this contestant in this round/question" });
+    }
+
+    // 🔹 Validate score limit
     if (score > round.max_score) {
-      return res
-        .status(400)
-        .json({ message: `Score cannot exceed ${round.max_score}` });
+      return res.status(400).json({
+        message: `Score cannot exceed maximum score of ${round.max_score}`
+      });
     }
 
-    let questionText = null;
-
-    // 2. Handle QnA rounds
-    if (round.type === "qna") {
-      const question = round.questions.id(questionId); // subdocument lookup
-
-      if (!question) {
-        return res
-          .status(404)
-          .json({ message: "Question not found in this round" });
-      }
-      if (question.used) {
-        return res
-          .status(400)
-          .json({ message: "This question has already been asked" });
-      }
-
-      // Mark question as used
-      question.used = true;
-      await round.save();
-
-      questionText = question.question_text;
-    }
-
-    // 3. Save score
+    // 🔹 Create score record
     const newScore = new Score({
       round: roundId,
       judge: judgeId,
       contestant: contestantId,
       score,
       comment,
-      question: questionId || null,
+      question: questionId || null
     });
 
     await newScore.save();
 
-    return res.status(201).json({
+    res.status(201).json({
       message: "Score submitted successfully",
-      data: newScore,
-      askedQuestion: questionText || null,
+      newScore
     });
   } catch (error) {
-    console.error("Error in giveScore:", error);
-    return res
-      .status(500)
-      .json({ message: "Server error", error: error.message });
-  }
-};
-
-/**
- * @desc Get all scores for a round
- */
-export const getScoresByRound = async (req, res) => {
-  try {
-    const { roundId } = req.params;
-    const scores = await Score.find({ round: roundId })
-      .populate("judge", "username email")
-      .populate("contestant", "name email")
-      .populate("round", "name type max_score");
-
-    return res.status(200).json(scores);
-  } catch (error) {
-    console.error("Error in getScoresByRound:", error);
-    return res
-      .status(500)
-      .json({ message: "Server error", error: error.message });
-  }
-};
-
-/**
- * @desc Get all scores of a contestant across rounds
- */
-export const getScoresByContestant = async (req, res) => {
-  try {
-    const { contestantId } = req.params;
-    const scores = await Score.find({ contestant: contestantId })
-      .populate("judge", "username email")
-      .populate("round", "name type max_score");
-
-    return res.status(200).json(scores);
-  } catch (error) {
-    console.error("Error in getScoresByContestant:", error);
-    return res
-      .status(500)
-      .json({ message: "Server error", error: error.message });
-  }
-};
-
-/**
- * @desc Get scores given by a specific judge
- */
-export const getScoresByJudge = async (req, res) => {
-  try {
-    const { judgeId } = req.params;
-    const scores = await Score.find({ judge: judgeId })
-      .populate("contestant", "name email")
-      .populate("round", "name type max_score");
-
-    return res.status(200).json(scores);
-  } catch (error) {
-    console.error("Error in getScoresByJudge:", error);
-    return res
-      .status(500)
-      .json({ message: "Server error", error: error.message });
+    console.error("Error submitting score:", error);
+    res.status(500).json({ error: error.message });
   }
 };
