@@ -13,7 +13,7 @@ export const submitScore = async (req, res) => {
     const questionId = req.body.questionId || req.body.question || null;
     const score = req.body.score;
     const comment = req.body.comment;
-    const judgeId = req.judge?.judgeId || req.user?.id; // depending on middleware
+    const judgeId = req.judge?.judgeId || req.user?.id; 
 
     // 🔹 Validation
     if (!roundId || !contestantId || score === undefined) {
@@ -75,3 +75,13 @@ export const submitScore = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
+export const getScores = async (req, res) => {
+  try {
+    const scores = await Score.find().populate('round', 'name type max_score').populate('contestant', 'name ').populate('judge', 'name ') ;
+    res.status(200).json(scores);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+} 

@@ -30,33 +30,33 @@ export const adminOnlyMiddleware = (req, res, next) => {
   }
   next();
 };
-// Combined middleware for admin and judge access
-export const adminOrJudgeMiddleware = (req, res, next) => {
-  const token = req.headers["authorization"]?.split(" ")[1];
+// // Combined middleware for admin and judge access
+// export const adminOrJudgeMiddleware = (req, res, next) => {
+//   const token = req.headers["authorization"]?.split(" ")[1];
 
-  if (!token) return res.status(401).json({ message: "Unauthorized User" });
+//   if (!token) return res.status(401).json({ message: "Unauthorized User" });
 
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+//   try {
+//     const decoded = jwt.verify(token, JWT_SECRET);
 
-    if (decoded.role === 'admin') {
-      req.admin = {
-        id: decoded.id,
-        role: decoded.role
-      };
-    } else if (decoded.role === 'judge') {
-      req.judge = {
-        id: decoded.id,
-        role: decoded.role,
-        judgeId: decoded.judgeId,
-        eventId: decoded.eventId
-      };
-    } else {
-      return res.status(403).json({ message: "Access denied. Admin or Judge access required." });
-    }
+//     if (decoded.role === 'admin') {
+//       req.admin = {
+//         id: decoded.id,
+//         role: decoded.role
+//       };
+//     } else if (decoded.role === 'judge') {
+//       req.judge = {
+//         id: decoded.id,
+//         role: decoded.role,
+//         judgeId: decoded.judgeId,
+//         eventId: decoded.eventId
+//       };
+//     } else {
+//       return res.status(403).json({ message: "Access denied. Admin or Judge access required." });
+//     }
 
-    next();
-  } catch (err) {
-    res.status(401).json({ message: "Invalid token" });
-  }
-};
+//     next();
+//   } catch (err) {
+//     res.status(401).json({ message: "Invalid token" });
+//   }
+// };
