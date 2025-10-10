@@ -122,7 +122,9 @@ export const signInJudge = async (req, res) => {
 // ============================
 export const getJudge = async (req, res) => {
   try {
-    const judges = await Judge.find({}).populate("user", "username email role").populate("event", "name");
+    const judges = await Judge.find({})
+      .populate("user", "username email role")
+      .populate("event", "name");
     res.status(200).json({ judges });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -135,7 +137,9 @@ export const getJudge = async (req, res) => {
 export const getSingleJudge = async (req, res) => {
   try {
     const { id } = req.params;
-    const judge = await Judge.findById(id).populate("user", "username email role").populate("event", "name");
+    const judge = await Judge.findById(id)
+      .populate("user", "username email role")
+      .populate("event", "name");
 
     if (!judge) {
       return res.status(404).json({ message: "Judge not found" });
@@ -165,7 +169,9 @@ export const getJudgeContestants = async (req, res) => {
       ? judge.event.map((evt) => (evt?._id ? evt._id : evt)).filter(Boolean)
       : [judge.event?._id || judge.event].filter(Boolean);
 
-    const contestants = await Contestant.find({ event: { $in: eventIds } }).populate("event", "name");
+    const contestants = await Contestant.find({
+      event: { $in: eventIds },
+    }).populate("event", "name");
 
     res.status(200).json({
       message: "Contestants for judge's event fetched successfully",
@@ -203,7 +209,6 @@ export const getJudgeEvents = async (req, res) => {
   }
 };
 
-
 export const getJudgeRounds = async (req, res) => {
   try {
     const judgeId = req.judge.judgeId;
@@ -235,7 +240,6 @@ export const getJudgeRounds = async (req, res) => {
   }
 };
 
-
 //get contestants per round
 export const getRoundContestants = async (req, res) => {
   try {
@@ -253,12 +257,17 @@ export const getRoundContestants = async (req, res) => {
     // Collect event IDs assigned to judge
     const judgeEventIds = Array.isArray(judge.event)
       ? judge.event.map((evt) => (evt?._id ? evt._id.toString() : String(evt)))
-      : [judge.event?._id || judge.event].filter(Boolean).map((id) => id.toString());
+      : [judge.event?._id || judge.event]
+          .filter(Boolean)
+          .map((id) => id.toString());
 
     // Ensure the round's event is assigned to this judge
-    const roundEventId = round.event?._id?.toString() || round.event?.toString();
+    const roundEventId =
+      round.event?._id?.toString() || round.event?.toString();
     if (!roundEventId || !judgeEventIds.includes(roundEventId)) {
-      return res.status(403).json({ message: "Unauthorized to view contestants for this round" });
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to view contestants for this round" });
     }
 
     // Contestants are linked to events; fetch by the round's event
@@ -282,7 +291,3 @@ export const getRoundContestants = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
-
-
-

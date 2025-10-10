@@ -1,17 +1,16 @@
-import {React, useState} from 'react'
-import DisplayContestant from '../components/Dashboard/Contestant/DisplayContestant'
-import Layout from '../components/Layout/Layout'
-
+import { React, useState } from "react";
+import DisplayContestant from "../components/Dashboard/Contestant/DisplayContestant";
+import Layout from "../components/Layout/Layout";
 
 const contestantPage = () => {
-    const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   return (
     <div>
-       <Layout>
-        <DisplayContestant/>
-   </Layout>
+      <Layout>
+        <DisplayContestant />
+      </Layout>
     </div>
-  )
-}
+  );
+};
 
-export default contestantPage
+export default contestantPage;

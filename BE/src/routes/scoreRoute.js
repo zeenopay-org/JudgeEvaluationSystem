@@ -2,7 +2,10 @@
 import express from "express";
 import { submitScore, getScores } from "../controllers/scoreController.js";
 import { judgeAuthMiddleware } from "../middlewares/judgeAuthMiddleware.js";
-import { adminOnlyMiddleware, authMiddleware } from "../middlewares/authMiddleware.js";
+import {
+  adminOnlyMiddleware,
+  authMiddleware,
+} from "../middlewares/authMiddleware.js";
 const router = express.Router();
 
 router.post("/create", judgeAuthMiddleware, submitScore);

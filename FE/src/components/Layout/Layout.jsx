@@ -1,23 +1,30 @@
-import React from 'react'
-import Navbar from '../Navbar/Navbar'
-import Sidebar from '../Dashboard/sidebar/Sidebar'
-import { useState } from 'react'
-
+import React from "react";
+import Navbar from "../Navbar/Navbar";
+import Sidebar from "../Dashboard/sidebar/Sidebar";
+import { useState } from "react";
 
 const Layout = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
     <div className="bg-gray-50 flex">
       {/* Sidebar on the very left from top to bottom */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       {/* Right side: navbar and content */}
-      <div className={`flex-1 min-w-0 pt-16 ${sidebarOpen ? 'md:ml-64' : 'md:ml-0'}`}>
-        <div className={`${sidebarOpen ? 'md:ml-0' : ''}`}>
-          <Navbar onOpenSidebar={() => setSidebarOpen(true)} showHamburger={!sidebarOpen} sidebarOpen={sidebarOpen} />
+      <div
+        className={`flex-1 min-w-0 pt-16 ${
+          sidebarOpen ? "md:ml-64" : "md:ml-0"
+        }`}
+      >
+        <div className={`${sidebarOpen ? "md:ml-0" : ""}`}>
+          <Navbar
+            onOpenSidebar={() => setSidebarOpen(true)}
+            showHamburger={!sidebarOpen}
+            sidebarOpen={sidebarOpen}
+          />
         </div>
         {/* No floating toggle; hamburger renders inside Navbar when sidebar is closed */}
-        
+
         {/* Overlay for mobile only when sidebar is open */}
         {sidebarOpen && (
           <div
@@ -27,12 +34,10 @@ const Layout = ({ children }) => {
         )}
         {/* Page content */}
         <main className="p-2 md:p-4">
-          <div className="max-w-6xl mx-auto">
-            {children}
-          </div>
+          <div className="max-w-6xl mx-auto">{children}</div>
         </main>
       </div>
     </div>
-  )
-}
-export default Layout
+  );
+};
+export default Layout;

@@ -18,9 +18,12 @@ const DisplayJudge = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/v1/judges/events/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(
+          "http://localhost:5000/api/v1/judges/events/me",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         if (!res.ok) throw new Error(`Failed to load events (${res.status})`);
         const data = await res.json();
         setEvents(Array.isArray(data.events) ? data.events : []);
@@ -31,9 +34,12 @@ const DisplayJudge = () => {
 
     const fetchRounds = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/v1/judges/rounds/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(
+          "http://localhost:5000/api/v1/judges/rounds/me",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         if (!res.ok) throw new Error("Failed to load rounds");
         const data = await res.json();
 
@@ -128,7 +134,9 @@ const DisplayJudge = () => {
                       Rounds
                     </h4>
                     {eventRounds.length === 0 ? (
-                      <p className="text-sm text-gray-500">No rounds available</p>
+                      <p className="text-sm text-gray-500">
+                        No rounds available
+                      </p>
                     ) : (
                       <ul className="space-y-2">
                         {eventRounds.map((round) => (
@@ -141,7 +149,11 @@ const DisplayJudge = () => {
                             </span>
                             <button
                               className="text-blue-600 text-xs font-semibold hover:underline"
-                              onClick={() => navigate(`/judge/rounds/${round._id}/contestants`)}
+                              onClick={() =>
+                                navigate(
+                                  `/judge/rounds/${round._id}/contestants`
+                                )
+                              }
                             >
                               View Contestants
                             </button>

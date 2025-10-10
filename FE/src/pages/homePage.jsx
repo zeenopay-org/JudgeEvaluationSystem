@@ -1,15 +1,15 @@
-import {React, useState} from 'react'
-import Layout from '../components/Layout/Layout'
-import CreateEvent from '../components/Dashboard/Event/CreateEvent'
+import { React, useState } from "react";
+import Layout from "../components/Layout/Layout";
+import CreateEvent from "../components/Dashboard/Event/CreateEvent";
 
 function homePage() {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   return (
     <div>
       <Layout>
-        <CreateEvent/>
+        <CreateEvent />
       </Layout>
     </div>
-  )
+  );
 }
-export default homePage
+export default homePage;

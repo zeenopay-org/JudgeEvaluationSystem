@@ -1,15 +1,16 @@
 import React, { useState } from "react";
 import Layout from "../components/Layout/Layout";
-import DisplayRound from "../components/Dashboard/Round/displayRound";
+import DisplayScore from "../components/Dashboard/Score/DisplayScore";
 
-const RoundPage = () => {
+const scorePage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   return (
     <>
       <Layout>
-        <DisplayRound />
+        <DisplayScore />
       </Layout>
     </>
   );
 };
-export default RoundPage;
+
+export default scorePage;

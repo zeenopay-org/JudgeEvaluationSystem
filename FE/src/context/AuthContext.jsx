@@ -3,9 +3,10 @@ import { createContext, useState, useEffect } from "react";
 // Create context
 export const AuthContext = createContext();
 
-
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(() => localStorage.getItem("token") || null);
+  const [token, setToken] = useState(
+    () => localStorage.getItem("token") || null
+  );
   const [admin, setAdmin] = useState(() => {
     try {
       const storedAdmin = localStorage.getItem("admin");
@@ -33,23 +34,21 @@ export const AuthProvider = ({ children }) => {
       const decoded = JSON.parse(atob(payload));
       const roleFromToken = decoded?.role;
 
-      if (roleFromToken === 'admin') {
+      if (roleFromToken === "admin") {
         const storedAdmin = localStorage.getItem("admin");
-        setAdmin(storedAdmin ? JSON.parse(storedAdmin) : { role: 'admin' });
+        setAdmin(storedAdmin ? JSON.parse(storedAdmin) : { role: "admin" });
         setJudge(null);
         localStorage.removeItem("judge");
-      } else if (roleFromToken === 'judge') {
+      } else if (roleFromToken === "judge") {
         const storedJudge = localStorage.getItem("judge");
-        setJudge(storedJudge ? JSON.parse(storedJudge) : { role: 'judge' });
+        setJudge(storedJudge ? JSON.parse(storedJudge) : { role: "judge" });
         setAdmin(null);
         localStorage.removeItem("admin");
       }
     } catch (error) {
       console.error("Error reconciling persisted role with JWT:", error);
-      
     }
   }, []);
-
 
   useEffect(() => {
     if (token) {

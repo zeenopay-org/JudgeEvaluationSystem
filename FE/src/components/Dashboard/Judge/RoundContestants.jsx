@@ -70,7 +70,7 @@ const [errorMessage, setErrorMessage] = useState("");
       }
       
 
-      const res = await fetch("http://localhost:5000/api/v1/scores", {
+      const res = await fetch("http://localhost:5000/api/v1/scores/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -81,7 +81,7 @@ const [errorMessage, setErrorMessage] = useState("");
           contestant: contestantId,
           score: Number(score),
           question: question || null,
-          comment: comment || "",
+          comment: comment || ""
         }),
       });
 

@@ -14,12 +14,12 @@ const Login = () => {
   const navigate = useNavigate();
   const { login, token } = useContext(AuthContext);
 
- useEffect(() => {
-  const storedToken = localStorage.getItem("token");
-  if (storedToken) {
-    navigate("/", { replace: true });
-  }
-}, [navigate]);
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
+      navigate("/", { replace: true });
+    }
+  }, [navigate]);
 
   const validateForm = () => {
     let formErrors = {};
@@ -71,7 +71,7 @@ const Login = () => {
       if (response.ok) {
         const possibleAdmin = await response.json();
         // Only accept as admin if role is actually 'admin'
-        if (possibleAdmin?.admin?.role === 'admin') {
+        if (possibleAdmin?.admin?.role === "admin") {
           data = possibleAdmin;
           isAdmin = true;
         } else {
@@ -123,7 +123,7 @@ const Login = () => {
 
       setEmail("");
       setPassword("");
-      navigate("/",{ replace: true });
+      navigate("/", { replace: true });
     } catch (error) {
       console.error("Error:", error);
       setErrors({ general: error.message });

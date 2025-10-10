@@ -1,12 +1,13 @@
 import jwt from "jsonwebtoken";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET || "hfdhgshdgghd";
 
 export const judgeAuthMiddleware = (req, res, next) => {
   const authHeader = req.headers["authorization"];
-  if (!authHeader) return res.status(401).json({ message: "Unauthorized judge" });
+  if (!authHeader)
+    return res.status(401).json({ message: "Unauthorized judge" });
 
   // Split "Bearer <token>"
   const token = authHeader.split(" ")[1];
@@ -17,9 +18,9 @@ export const judgeAuthMiddleware = (req, res, next) => {
 
     // Attach judge info to request
     req.judge = {
-      id: decoded.id,       // userId
+      id: decoded.id, // userId
       role: decoded.role,
-      judgeId: decoded.judgeId
+      judgeId: decoded.judgeId,
     };
 
     next();
