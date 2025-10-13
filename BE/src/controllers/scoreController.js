@@ -12,17 +12,22 @@ export const submitScore = async (req, res) => {
     const judgeId = req.judge?.judgeId || req.user?.id;
 
     if (!roundId || !contestantId || score === undefined) {
-      return res.status(400).json({ message: "roundId, contestantId, and score are required" });
+      return res
+        .status(400)
+        .json({ message: "roundId, contestantId, and score are required" });
     }
 
     const round = await Round.findById(roundId);
     if (!round) return res.status(404).json({ message: "Round not found" });
 
     const contestant = await Contestant.findById(contestantId);
-    if (!contestant) return res.status(404).json({ message: "Contestant not found" });
+    if (!contestant)
+      return res.status(404).json({ message: "Contestant not found" });
 
     if (round.type === "qna" && !questionId) {
-      return res.status(400).json({ message: "questionId is required for Q&A rounds" });
+      return res
+        .status(400)
+        .json({ message: "questionId is required for Q&A rounds" });
     }
 
     const existingScore = await Score.findOne({
@@ -33,14 +38,21 @@ export const submitScore = async (req, res) => {
     });
 
     if (existingScore) {
-      return res.status(400).json({ message: "Score already submitted for this contestant in this round/question" });
+      return res.status(400).json({
+        message:
+          "Score already submitted for this contestant in this round/question",
+      });
     }
 
     if (score > round.max_score) {
-      return res.status(400).json({ message: `Score cannot exceed maximum score of ${round.max_score}` });
+      return res.status(400).json({
+        message: `Score cannot exceed maximum score of ${round.max_score}`,
+      });
     }
 
-    const selectedQuestion = round.questions.find(q => q._id.toString() === questionId);
+    const selectedQuestion = round.questions.find(
+      (q) => q._id.toString() === questionId
+    );
     const newScore = new Score({
       round: roundId,
       judge: judgeId,
@@ -67,8 +79,8 @@ export const getScores = async (req, res) => {
         path: "judge",
         populate: [
           { path: "user", select: "username" },
-          { path: "event", select: "name" }
-        ]
+          { path: "event", select: "name" },
+        ],
       });
 
     res.status(200).json(scores);
@@ -76,3 +88,149 @@ export const getScores = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const getContestantAnalytics = async (req, res) => {
+  try {
+    const analytics = await Score.aggregate([
+      {
+        $group: {
+          _id: "$contestant", // Group by contestant ID
+          totalScore: { $sum: "$score" },
+          averageScore: { $avg: "$score" },
+          scoreCount: { $sum: 1 },
+        },
+      },
+      {
+        $lookup: {
+          from: "contestants",
+          localField: "_id",
+          foreignField: "_id",
+          as: "contestantDetails",
+        },
+      },
+      {
+        $unwind: "$contestantDetails",
+      },
+      {
+        $project: {
+          _id: 0,
+          contestantId: "$contestantDetails._id",
+          name: "$contestantDetails.name",
+          contestant_number: "$contestantDetails.contestant_number",
+          totalScore: 1,
+          averageScore: { $round: ["$averageScore", 2] }, // Optional: round to 2 decimals
+          scoreCount: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json(analytics);
+  } catch (error) {
+    console.error("Error fetching analytics:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+export const getScoresPerContestantPerRound = async (req, res) => {
+  try {
+    const result = await Score.aggregate([
+      {
+        $group: {
+          _id: {
+            contestant: "$contestant",
+            round: "$round",
+          },
+          totalScore: { $sum: "$score" },
+          averageScore: { $avg: "$score" },
+          scoreCount: { $sum: 1 },
+        },
+      },
+      {
+        $lookup: {
+          from: "contestants",
+          localField: "_id.contestant",
+          foreignField: "_id",
+          as: "contestantDetails",
+        },
+      },
+      { $unwind: "$contestantDetails" },
+      {
+        $lookup: {
+          from: "rounds",
+          localField: "_id.round",
+          foreignField: "_id",
+          as: "roundDetails",
+        },
+      },
+      { $unwind: "$roundDetails" },
+      {
+        $project: {
+          contestantId: "$contestantDetails._id",
+          contestantName: "$contestantDetails.name",
+          contestantNumber: "$contestantDetails.contestant_number",
+          roundName: "$roundDetails.name",
+          totalScore: 1,
+          averageScore: { $round: ["$averageScore", 2] },
+          scoreCount: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error fetching scores per contestant per round:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getJudgeWiseBreakdown = async (req, res) => {
+  try {
+    const result = await Score.aggregate([
+        {
+          $group: {
+            _id: {
+              judge: "$judge",
+              contestant : "$contestant"
+            },
+            totalScore: {$sum: "$score"},
+            averageScore: {$avg: "$score"},
+          },
+        },
+        {
+          $lookup: {
+            from: "judges",
+            localField: "_id.judge",
+            foreignField: "_id",
+            as: "judgeDetails",
+          },
+        },
+        {$unwind: "$judgeDetails"},
+        {
+          $lookup: {
+            from :"contestants",
+            localField: "_id.contestant",
+            foreignField:"_id",
+            as: "contestantDetails",
+          },
+        },
+        {$unwind: "$contestantDetails"},
+      {
+        $project: {
+          judgeId:"$judgeDetails._id",
+          contestantName:"$contestantDetails.name",
+          judgeName: "$judgeDetails.user.username",
+          totalScore: 1,
+          averageScore: {$round: ["$averageScore", 2]},
+        },
+      },
+
+    ]);
+    
+    res.status(200).json(result);
+    
+  } catch (err) {
+    console.error("Error breaking judgewise:", err);
+    res.status(500).json({ error: err.message });
+  }
+}

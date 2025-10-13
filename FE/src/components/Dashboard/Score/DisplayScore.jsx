@@ -6,6 +6,8 @@ const DisplayScore = () => {
   const { token } = useContext(AuthContext);
   const [error, setError] = useState("");
   const [scores, setScores] = useState([]);
+  const [analytics, setAnalytics] = useState([]);
+
   const [loading, setLoading] = useState(true);
 
   if (!token) return <Navigate to="/login" replace />;
@@ -28,13 +30,32 @@ const DisplayScore = () => {
       }
     };
     fetchScores();
+
+    const fetchanalytics = async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:5000/api/v1/scores/getanalytics",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (!res.ok)
+          throw new Error(`Failed to load analytics (${res.status})`);
+        const data = await res.json();
+
+        if (data.length > 0) {
+          setAnalytics(data);
+        }
+      } catch (err) {
+        setError(err.message || "Error fetching analytics");
+      }
+    };
+    fetchanalytics();
   }, [token]);
 
   if (loading) {
     return (
-      <div className="p-6 text-center text-gray-500">
-        Loading scores...
-      </div>
+      <div className="p-6 text-center text-gray-500">Loading scores...</div>
     );
   }
 
@@ -45,11 +66,7 @@ const DisplayScore = () => {
           Scores
         </div>
 
-        {error && (
-          <div className="p-6 text-red-500 text-center">
-            {error}
-          </div>
-        )}
+        {error && <div className="p-6 text-red-500 text-center">{error}</div>}
 
         {!loading && scores.length === 0 && (
           <div className="p-6 text-center text-gray-500">
@@ -87,9 +104,13 @@ const DisplayScore = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {scores.map((score, index) => (
-                  <tr key={score._id || index} className="hover:bg-gray-50 transition duration-150 ease-in-out">
+                  <tr
+                    key={score._id || index}
+                    className="hover:bg-gray-50 transition duration-150 ease-in-out"
+                  >
                     <td className="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
-                      {score.contestant?.contestant_number}.{score.contestant?.name || "N/A"}
+                      {score.contestant?.contestant_number}.
+                      {score.contestant?.name || "N/A"}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-700 text-center">
                       {score.score}
@@ -111,8 +132,12 @@ const DisplayScore = () => {
                     </td>
                   </tr>
                 ))}
+                
               </tbody>
+
             </table>
+            
+
           </div>
         )}
       </div>
