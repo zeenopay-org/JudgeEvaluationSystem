@@ -187,50 +187,73 @@ export const getScoresPerContestantPerRound = async (req, res) => {
 export const getJudgeWiseBreakdown = async (req, res) => {
   try {
     const result = await Score.aggregate([
-        {
-          $group: {
-            _id: {
-              judge: "$judge",
-              contestant : "$contestant"
-            },
-            totalScore: {$sum: "$score"},
-            averageScore: {$avg: "$score"},
-          },
-        },
-        {
-          $lookup: {
-            from: "judges",
-            localField: "_id.judge",
-            foreignField: "_id",
-            as: "judgeDetails",
-          },
-        },
-        {$unwind: "$judgeDetails"},
-        {
-          $lookup: {
-            from :"contestants",
-            localField: "_id.contestant",
-            foreignField:"_id",
-            as: "contestantDetails",
-          },
-        },
-        {$unwind: "$contestantDetails"},
       {
-        $project: {
-          judgeId:"$judgeDetails._id",
-          contestantName:"$contestantDetails.name",
-          judgeName: "$judgeDetails.user.username",
-          totalScore: 1,
-          averageScore: {$round: ["$averageScore", 2]},
+        $lookup: {
+          from: "judges",
+          localField: "judge",
+          foreignField: "_id",
+          as: "judgeDetails",
         },
       },
-
+      { $unwind: "$judgeDetails" },
+      {
+        $lookup: {
+          from: "users",
+          localField: "judgeDetails.user",
+          foreignField: "_id",
+          as: "userDetails",
+        },
+      },
+      { $unwind: "$userDetails" },
+      {
+        $lookup: {
+          from: "contestants",
+          localField: "contestant",
+          foreignField: "_id",
+          as: "contestantDetails",
+        },
+      },
+      { $unwind: "$contestantDetails" },
+      {
+        $project: {
+          judgeId: "$judgeDetails._id",
+          judgeName: "$userDetails.username",
+          contestantId: "$contestantDetails._id",
+          contestantName: "$contestantDetails.name",
+          contestantNumber: "$contestantDetails.contestant_number",
+          score: "$score",
+          roundName: "$round",
+        },
+      },
+      {
+        $lookup: {
+          from: "rounds",
+          localField: "roundName",
+          foreignField: "_id",
+          as: "roundDetails",
+        },
+      },
+      { $unwind: "$roundDetails" },
+      {
+        $project: {
+          judgeId: 1,
+          judgeName: 1,
+          contestantId: 1,
+          contestantName: 1,
+          contestantNumber: 1,
+          score: 1,
+          roundName: "$roundDetails.name",
+          maxScore: "$roundDetails.max_score",
+        },
+      },
+      {
+        $sort: { contestantNumber: 1, judgeName: 1 } // sort for neatness
+      }
     ]);
-    
+
     res.status(200).json(result);
-    
   } catch (err) {
-    console.error("Error breaking judgewise:", err);
+    console.error("Error fetching judge breakdown:", err);
     res.status(500).json({ error: err.message });
   }
-}
+};

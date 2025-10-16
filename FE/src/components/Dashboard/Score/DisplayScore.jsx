@@ -174,7 +174,7 @@ const DisplayScore = () => {
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={analytics}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
+                <XAxis dataKey="contestant_number" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
@@ -205,21 +205,115 @@ const DisplayScore = () => {
                   ))}
                 </tr>
               </thead>
+
               <tbody className="divide-y divide-gray-100">
                 {analytics.map((a, i) => (
                   <tr key={i} className="hover:bg-blue-50">
+                    <td className="px-6 py-4">{a.contestant_number}</td>
                     <td className="px-6 py-4">{a.name}</td>
                     <td className="px-6 py-4">{a.totalScore}</td>
                     <td className="px-6 py-4 text-blue-600 font-semibold">
                       {a.averageScore}
                     </td>
-                    <td className="px-6 py-4">{a.scoreCount}</td>
+                    <td className="px-6 py-4 ">{a.scoreCount}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
+
+        {/* === Contestant per Round === */}
+        {activeTab === "round" && (
+          <div className="bg-white rounded-2xl shadow-lg p-6 overflow-auto border border-gray-200">
+            <h2 className="text-xl font-bold mb-4">Contestant per Round</h2>
+            <table className="w-full border-collapse">
+              <thead className="bg-gray-50">
+                <tr>
+                  {[
+                    "Contestant Number",
+                    "Contestant",
+                    "Round",
+                    "Total Score",
+                    "Average Score",
+                    "Scores Count",
+                  ].map((h) => (
+                    <th
+                      key={h}
+                      className="px-6 py-3 text-left text-sm font-semibold  text-gray-700 uppercase tracking-wide border-b"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {perRound.map((round, index) => (
+                  <tr key={index} className="hover:bg-blue-50">
+                    <td className="py-3 px-3">{round.contestantNumber}</td>
+                    <td className="px-6 py-4">{round.contestantName}</td>
+                    <td className="py-6 px-3">{round.roundName}</td>
+                    <td className="py-6 px-3">{round.totalScore}</td>
+                    <td className="py-6 px-3">{round.averageScore}</td>
+                    <td className="py-6 px-3">{round.scoreCount}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* === Judge Breakdown === */}
+        {activeTab === "judge" && (
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h2 className="text-xl font-bold mb-4"> Judge Breakdown</h2>
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart data={judgeBreakdown}>
+                <CartesianGrid strokeDasharray={3} />
+                <XAxis dataKey="judgeName" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar
+                  dataKey="averageScore"
+                  fill="#3B82F6"
+                  name="Average Score"
+                />
+                <Bar dataKey="totalScore" fill="#A78BFA" name="Total Score" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+          {/* === Leaderboard === */}
+      {activeTab === "leaderboard" && (
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h2 className="text-xl font-bold mb-4">Final Leaderboard</h2>
+          <table className="w-full border-collapse">
+            <thead className="bg-gray-50">
+              <tr>
+                {["Rank", "Contestant", "Total Score", "Average Score"].map((h) => (
+                  <th key={h} className="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wide border-b">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {[...analytics]
+                .sort((a, b) => b.totalScore - a.totalScore)
+                .map((a, i) => (
+                  <tr key={i} className="hover:bg-blue-50">
+                    <td className="px-6 py-4 font-bold text-gray-800">{i + 1}</td>
+                    <td className="px-6 py-4">{a.name}</td>
+                    <td className="px-6 py-4">{a.totalScore}</td>
+                    <td className="px-6 py-4 text-blue-600 font-semibold">{a.averageScore}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      )}
       </div>
     </>
   );
