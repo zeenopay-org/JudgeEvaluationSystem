@@ -82,7 +82,7 @@ export const deleteRound = async (req, res) => {
   try {
     const { id } = req.params;
     const round = await Round.findByIdAndDelete(id);
-    res.status(200).json(round);
+    res.status(200).json({ message: "Round deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

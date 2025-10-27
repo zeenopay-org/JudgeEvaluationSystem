@@ -74,20 +74,20 @@ const navItems = [
       </svg>
     ),
   },
-  {
-    label: "Questions",
-    to: "/questions",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="h-5 w-5"
-      >
-        <path d="M12 3.75a6.25 6.25 0 0 0-6.25 6.25.75.75 0 0 0 1.5 0 4.75 4.75 0 1 1 6.87 4.27c-.77.35-1.12.86-1.12 1.48v.25a.75.75 0 0 0 1.5 0v-.08c0-.06.03-.11.12-.15A6.25 6.25 0 0 0 12 3.75Zm0 15.5a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Z" />
-      </svg>
-    ),
-  },
+  // {
+  //   label: "Questions",
+  //   to: "/questions",
+  //   icon: (
+  //     <svg
+  //       xmlns="http://www.w3.org/2000/svg"
+  //       viewBox="0 0 24 24"
+  //       fill="currentColor"
+  //       className="h-5 w-5"
+  //     >
+  //       <path d="M12 3.75a6.25 6.25 0 0 0-6.25 6.25.75.75 0 0 0 1.5 0 4.75 4.75 0 1 1 6.87 4.27c-.77.35-1.12.86-1.12 1.48v.25a.75.75 0 0 0 1.5 0v-.08c0-.06.03-.11.12-.15A6.25 6.25 0 0 0 12 3.75Zm0 15.5a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Z" />
+  //     </svg>
+  //   ),
+  // },
   {
     label: "Title",
     to: "/title",
@@ -102,22 +102,22 @@ const navItems = [
       </svg>
     ),
   },
-  {
-    label: "TitleAssignments",
-    to: "/titleassignments",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="h-5 w-5"
-      >
-        <path d="M12 2.75a5.25 5.25 0 1 0 0 10.5 5.25 5.25 0 0 0 0-10.5Z" />
-        <path d="M8.25 14.25a.75.75 0 0 0-.69 1.03l2 5a.75.75 0 0 0 1.17.32l2.27-1.7 2.28 1.7a.75.75 0 0 0 1.17-.32l2-5a.75.75 0 0 0-.69-1.03h-9.51Z" />
-        <path d="M12 6.75l.9 1.83 2.02.29-1.46 1.42.35 2-1.81-.95-1.81.95.35-2L9.08 8.87l2.02-.29L12 6.75Z" />
-      </svg>
-    ),
-  },
+  // {
+  //   label: "TitleAssignments",
+  //   to: "/titleassignments",
+  //   icon: (
+  //     <svg
+  //       xmlns="http://www.w3.org/2000/svg"
+  //       viewBox="0 0 24 24"
+  //       fill="currentColor"
+  //       className="h-5 w-5"
+  //     >
+  //       <path d="M12 2.75a5.25 5.25 0 1 0 0 10.5 5.25 5.25 0 0 0 0-10.5Z" />
+  //       <path d="M8.25 14.25a.75.75 0 0 0-.69 1.03l2 5a.75.75 0 0 0 1.17.32l2.27-1.7 2.28 1.7a.75.75 0 0 0 1.17-.32l2-5a.75.75 0 0 0-.69-1.03h-9.51Z" />
+  //       <path d="M12 6.75l.9 1.83 2.02.29-1.46 1.42.35 2-1.81-.95-1.81.95.35-2L9.08 8.87l2.02-.29L12 6.75Z" />
+  //     </svg>
+  //   ),
+  // },
 ];
 
 const Sidebar = ({ isOpen, onClose }) => {

@@ -14,6 +14,8 @@ import RoundPage from "./pages/roundPage";
 import RoundContestants from "./components/Dashboard/Judge/RoundContestants";
 import ScorePage from "./pages/scorePage";
 import DisplayJudge from "./components/Dashboard/Judge/DisplayJudge";
+import TitlePage from "./pages/titlePage";
+import CreateTitle from "./components/Dashboard/Title/CreateTitle";
 
 function App() {
   return (
@@ -60,6 +62,15 @@ function App() {
           }
         />
         <Route path="/scores" element={<ScorePage />}></Route>
+        <Route path="/title" element={<TitlePage />}></Route>
+        <Route
+          path="/title/create"
+          element={
+            <Layout>
+              <CreateTitle />
+            </Layout>
+          }
+        />
       </Routes>
     </>
   );

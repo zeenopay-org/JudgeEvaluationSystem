@@ -1,10 +1,7 @@
 import mongoose from "mongoose";
 
 const titleAssignmenrSchema = {
-  // id : {
-  //     type : Number,
-  //     required : true
-  // },
+
   title: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Titles",

@@ -15,12 +15,10 @@ export const createContestant = async (req, res) => {
 
     const { id } = contestant;
 
-    res
-      .status(201)
-      .json({
-        message: "contestant created successfully",
-        contestant: { id, name, contestant_number, eventId },
-      });
+    res.status(201).json({
+      message: "contestant created successfully",
+      contestant: { id, name, contestant_number, eventId },
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -83,5 +81,24 @@ export const deleteContestants = async (req, res) => {
     return res.status(200).json({ message: "Contestant deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+//get contestant for events
+export const getEventContestants = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+
+    if (!eventId) {
+      return res.status(400).json({ message: "Event ID is required" });
+    }
+
+    const contestants = await Contestant.find({ event: eventId }).populate(
+      "event",
+      "name"
+    );
+    res.status(200).json({ contestants });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };

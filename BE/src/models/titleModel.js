@@ -9,6 +9,9 @@ const titleSchema = {
     type: String,
     required: true,
   },
+   image: {
+      type: String,
+    },
   event: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Events",

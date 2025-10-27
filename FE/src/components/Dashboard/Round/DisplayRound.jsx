@@ -49,6 +49,8 @@ const displayRound = () => {
           navigate('/login');
           return;
         }
+        
+       
         const fetchRounds = async () => {
           try {
             const res = await fetch('http://localhost:5000/api/v1/rounds', {
