@@ -42,16 +42,7 @@ const Navbar = ({ onOpenSidebar, showHamburger, sidebarOpen }) => {
             </svg>
           </button>
         )}
-        {/* Links (collapse into hamburger on close via sidebar state in parent) */}
-        {/* <a href="/" className="text-white hover:text-gray-200 hidden sm:inline">
-          Home
-        </a>
-        <a href="#" className="text-white hover:text-gray-200 hidden sm:inline">
-          About
-        </a>
-        <a href="#" className="text-white hover:text-gray-200 hidden sm:inline">
-          Contact
-        </a> */}
+       
       </div>
 
       {/* Right: Welcome + Profile Dropdown */}

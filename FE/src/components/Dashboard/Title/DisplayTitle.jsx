@@ -1,43 +1,53 @@
 import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import AssignTitleModal from "./AssignTitleModal";
+import { toast } from "react-toastify";
 
 const DisplayTitle = () => {
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
+
   const [titles, setTitles] = useState([]);
   const [groupedTitles, setGroupedTitles] = useState({});
   const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [currentTitle, setCurrentTitle] = useState(null);
 
+  // 🟢 Navigate to Create Title page
   const handleCreateClick = () => {
     navigate("/title/create");
   };
 
+  // 🔴 Delete title
   const handleDelete = async (title) => {
     if (window.confirm(`Are you sure you want to delete ${title.name}?`)) {
       try {
-        const res = await fetch(`http://localhost:5000/api/v1/titles/delete/${title._id}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await fetch(
+          `http://localhost:5000/api/v1/titles/delete/${title._id}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (res.ok) {
           const updatedTitles = titles.filter((t) => t._id !== title._id);
           setTitles(updatedTitles);
           groupTitlesByEvent(updatedTitles);
-          setSuccessMessage(`${title.name} deleted successfully!`);
+          toast.success(`${title.name} deleted successfully!`);
         } else {
-          console.error("Failed to delete title");
+         toast.error("Failed to delete title.");
         }
       } catch (err) {
-        console.error("Error deleting title:", err);
+               toast.error("Something went wrong. Please try again.");
       }
     }
   };
 
+  // 🟡 Group titles by their associated event
   const groupTitlesByEvent = (titlesArray) => {
     const grouped = titlesArray.reduce((acc, title) => {
       const eventName = title.event?.name || "Unknown Event";
@@ -48,6 +58,7 @@ const DisplayTitle = () => {
     setGroupedTitles(grouped);
   };
 
+  // 🟢 Fetch titles when page loads
   useEffect(() => {
     if (!token) {
       navigate("/login");
@@ -65,6 +76,7 @@ const DisplayTitle = () => {
         });
 
         if (res.status === 401) {
+           toast.error("Session expired. Please log in again.");
           navigate("/login");
           return;
         }
@@ -74,7 +86,7 @@ const DisplayTitle = () => {
         setTitles(titleList);
         groupTitlesByEvent(titleList);
       } catch (err) {
-        console.error("Error fetching titles:", err);
+        toast.error("Error fetching titles:", err);
       } finally {
         setLoading(false);
       }
@@ -83,14 +95,19 @@ const DisplayTitle = () => {
     fetchTitles();
   }, [token, navigate]);
 
+   // 🟢 Open assign modal
+  const openAssignModal = (title) => {
+    if (!title?.event?._id) {
+      alert("This title is not linked to any event.");
+      return;
+    }
+    setCurrentTitle(title);
+    setAssignModalOpen(true);
+  };
+
   return (
     <div className="p-6">
-      {successMessage && (
-        <div className="mb-4 rounded border border-green-300 bg-green-50 text-green-800 px-4 py-2">
-          {successMessage}
-        </div>
-      )}
-
+     
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800">All Event Titles</h2>
         <button
@@ -106,7 +123,7 @@ const DisplayTitle = () => {
       ) : Object.keys(groupedTitles).length === 0 ? (
         <p className="text-gray-500 italic">No titles found.</p>
       ) : (
-        Object.entries(groupedTitles).map(([eventName, titles]) => (
+        Object.entries(groupedTitles).map(([eventName, eventTitles]) => (
           <div key={eventName} className="mb-8">
             <h3 className="text-xl font-bold text-gray-900 mb-3 border-b pb-2 flex items-center gap-3">
               <span className="text-blue-600">🏆</span>
@@ -114,7 +131,7 @@ const DisplayTitle = () => {
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {titles.map((title) => (
+              {eventTitles.map((title) => (
                 <div
                   key={title._id}
                   className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 hover:shadow-lg transition"
@@ -131,11 +148,18 @@ const DisplayTitle = () => {
                       {title.name}
                     </h4>
                     <div className="flex justify-between items-center mt-3 gap-4">
-                      <button className="basis-2/3 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm text-center">
+                      <button
+                        onClick={() => openAssignModal(title)}
+                        aria-label="Assign title to contestant"
+                        title="Assign title to contestant"
+                        className="basis-2/3 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm text-center"
+                      >
                         Assign to Contestant
                       </button>
                       <button
                         onClick={() => handleDelete(title)}
+                        aria-label="Delete title"
+                        title="Delete title"
                         className="basis-1/3 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 text-sm text-center"
                       >
                         Delete
@@ -147,6 +171,20 @@ const DisplayTitle = () => {
             </div>
           </div>
         ))
+      )}
+
+      {/* 🟢 Assign Modal */}
+      {assignModalOpen && currentTitle && (
+        <AssignTitleModal
+          key={currentTitle._id}
+          titleId={currentTitle._id}
+          eventId={currentTitle.event?._id}
+          onClose={() => setAssignModalOpen(false)}
+          onAssignSuccess={() => {
+            setAssignModalOpen(false);
+            toast.success("Title assigned successfully!");
+          }}
+        />
       )}
     </div>
   );

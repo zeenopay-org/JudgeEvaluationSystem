@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../../context/AuthContext";
+import { toast } from "react-toastify";
 
 const CreateTitleForm = ({ onSuccess }) => {
   const { token } = useContext(AuthContext);
@@ -7,8 +8,8 @@ const CreateTitleForm = ({ onSuccess }) => {
   const [titleName, setTitleName] = useState("");
   const [titleImage, setTitleImage] = useState("");
   const [selectedEvent, setSelectedEvent] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
+
 
   // Fetch events for dropdown
   useEffect(() => {
@@ -32,7 +33,7 @@ const CreateTitleForm = ({ onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!titleName || !selectedEvent) {
-      setMessage("Please enter title and select an event.");
+      toast.error("Please enter title and select an event.");
       return;
     }
     setLoading(true);
@@ -51,17 +52,17 @@ const CreateTitleForm = ({ onSuccess }) => {
       });
       const data = await res.json();
       if (res.ok) {
-        setMessage("Title created successfully!");
+       toast.success("Title created successfully!");
         setTitleName("");
         setTitleImage("");
         setSelectedEvent("");
         onSuccess && onSuccess(data);
       } else {
-        setMessage(data.message || "Failed to create title");
+        toast.error(data.message || "Failed to create title");
       }
     } catch (err) {
       console.error(err);
-      setMessage("Error creating title");
+      toast.error("Error creating title");
     } finally {
       setLoading(false);
     }
@@ -71,13 +72,7 @@ const CreateTitleForm = ({ onSuccess }) => {
     <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg mx-auto">
   <h2 className="text-2xl font-bold text-gray-800 mb-6">🎀 Create New Title</h2>
 
-  {message && (
-    <div className="mb-4 text-sm text-green-600 bg-red-50 border border-red-200 rounded px-4 py-2">
-      {message}
-    </div>
-  )}
-
-  <form onSubmit={handleSubmit} className="space-y-6">
+   <form onSubmit={handleSubmit} className="space-y-6">
     {/* Title Name */}
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-1">Title Name</label>

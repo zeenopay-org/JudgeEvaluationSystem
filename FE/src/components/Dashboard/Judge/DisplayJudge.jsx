@@ -3,6 +3,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import { toast } from "react-toastify";
 
 const DisplayJudge = () => {
   const { token, judge } = useContext(AuthContext);
@@ -11,7 +12,7 @@ const DisplayJudge = () => {
   const [roundsByEvent, setRoundsByEvent] = useState({});
   const [expandedEvent, setExpandedEvent] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+
 
   if (!token || !judge) return <Navigate to="/login" replace />;
 
@@ -28,7 +29,7 @@ const DisplayJudge = () => {
         const data = await res.json();
         setEvents(Array.isArray(data.events) ? data.events : []);
       } catch (err) {
-        setError(err.message || "Error fetching events");
+       toast.error(err.message || "Error fetching events");
       }
     };
 
@@ -51,7 +52,8 @@ const DisplayJudge = () => {
         });
         setRoundsByEvent(grouped);
       } catch (err) {
-        console.error(err);
+         toast.error(err.message || "Error fetching rounds");
+
       } finally {
         setLoading(false);
       }

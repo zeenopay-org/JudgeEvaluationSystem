@@ -5,43 +5,50 @@ import jwt from "jsonwebtoken";
 export const createTitle = async (req, res) => {
   try {
     const { name, eventId, image } = req.body;
-     if (!name || !eventId) {
-      return res.status(400).json({ message: 'Name and event ID are required.' });
+    if (!name || !eventId) {
+      return res
+        .status(400)
+        .json({ message: "Name and event ID are required." });
     }
 
+    const existingTitle = await Title.findOne({ name: name.trim() ,  event: eventId,
+});
+    if (existingTitle) {
+      return res
+        .status(409)
+        .json({ message: "A title with the same name already exists" });
+    }
     const title = new Title({
-      name,image,
+      name: name.trim(),
+      image,
       event: eventId,
     });
     const { id } = title;
     await title.save();
-    res
-      .status(201)
-      .json({
-        message: "Title created Successfylly",
-        title: { id, name,image, eventId },
-      });
+    res.status(201).json({
+      message: "Title created Successfylly",
+      title: { id, name, image, eventId },
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-export const getTitles = async (req,res) =>{
+export const getTitles = async (req, res) => {
   try {
     const titles = await Title.find().populate("event");
-    res.status(200).json({titles})
-    
+    res.status(200).json({ titles });
   } catch (err) {
-    res.status(500).json({err: err.message })
+    res.status(500).json({ err: err.message });
   }
-}
+};
 
-export const deleteTitle = async (req, res) =>{
+export const deleteTitle = async (req, res) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
     const title = await Title.findByIdAndDelete(id);
     res.status(200).json({ message: "title deleted successfully" });
   } catch (error) {
-    res.status(500).json({error: error.message})
+    res.status(500).json({ error: error.message });
   }
-}
+};

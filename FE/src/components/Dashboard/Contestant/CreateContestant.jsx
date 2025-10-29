@@ -1,14 +1,13 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../../../context/AuthContext';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 
 const CreateContestant = () => {
   const [contestantName, setContestantName] = useState('');
   const [contestant_number, setContestantNumber] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+   const [isLoading, setIsLoading] = useState(false);
   const { token } = useContext(AuthContext);
   const location = useLocation();
   const navigate = useNavigate();
@@ -18,19 +17,16 @@ const CreateContestant = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Clear previous messages
-    setErrorMessage('');
-    setSuccessMessage('');
 
     // Ensure we have an event id
     if (!eventId) {
-      setErrorMessage('Missing event context. Please start from the Events page.');
+      toast.error('Missing event context. Please start from the Events page.');
       return;
     }
     
     // Basic validation
     if (!contestantName || !contestant_number) {
-      setErrorMessage('Please fill out all fields.');
+      toast.error('Please fill out all fields.');
       return;
     }
 
@@ -60,18 +56,20 @@ const CreateContestant = () => {
         console.log('Response:', data);
        
         if (res.status === 200 || res.status === 201) {
-          setSuccessMessage('contestant created successfully');
-          setContestantName('');
+            setContestantName('');
           setContestantNumber('');
           try { localStorage.removeItem('selectedEventId'); } catch {}
-          // return to event page with banner
-          navigate('/event', { state: { success: 'Contestant added successfully' } });
+          
+        // return to event page with banner
+        localStorage.setItem('contestantCreated', 'true');
+
+          navigate('/contestant');
         } else {
-          setErrorMessage(data.message || data.error || 'Failed to create contestant');
+          toast.error(data.message || data.error || 'Failed to create contestant');
         }
       } catch (error) {
         console.error('Error:', error);
-        setErrorMessage('Network error. Please check if the server is running.');
+        toast.error('Network error. Please check if the server is running.');
       } finally {
         setIsLoading(false);
       }
@@ -129,14 +127,7 @@ const CreateContestant = () => {
             {isLoading ? 'Creating contestant' : 'Create Contestant'}
           </button>
           
-          {successMessage && (
-            <p className="mt-2 text-green-600 text-center">{successMessage}</p>
-          )}
-          
-          {errorMessage && (
-            <p className="mt-2 text-red-600 text-center">{errorMessage}</p>
-          )}
-        </div>
+                  </div>
       </form>
     </div>
   );

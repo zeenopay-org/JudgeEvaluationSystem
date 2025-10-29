@@ -16,6 +16,8 @@ import ScorePage from "./pages/scorePage";
 import DisplayJudge from "./components/Dashboard/Judge/DisplayJudge";
 import TitlePage from "./pages/titlePage";
 import CreateTitle from "./components/Dashboard/Title/CreateTitle";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
@@ -72,6 +74,7 @@ function App() {
           }
         />
       </Routes>
+      <ToastContainer position="top-center" autoClose={3000} />
     </>
   );
 }

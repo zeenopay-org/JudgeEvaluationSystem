@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { toast } from "react-toastify";
 
-const createJudge = () => {
+const CreateJudge = () => {
   const [username, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -12,8 +13,6 @@ const createJudge = () => {
   const [visible, setVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
 
   // Fetch events on component mount
   useEffect(() => {
@@ -38,7 +37,7 @@ const createJudge = () => {
       setEvents(data.events || data);
     } catch (error) {
       console.error("Error fetching events:", error);
-      setErrorMessage("Failed to load events. Please refresh the page.");
+      toast.error("Failed to load events. Please refresh the page.");
     } finally {
       setIsLoadingEvents(false);
     }
@@ -46,9 +45,15 @@ const createJudge = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    //basic validation
+    if (!username || !email || !password || !contact || !eventId) {
+      toast.error("Please fill out all fields.");
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
-    setErrorMessage("");
-    setSuccessMessage("");
 
     try {
       const response = await fetch(
@@ -69,22 +74,20 @@ const createJudge = () => {
         }
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create judge");
-      }
-
       const data = await response.json();
-      setSuccessMessage("Judge created successfully!");
-
-      // Reset form
-      setUserName("");
-      setEmail("");
-      setPassword("");
-      setContact("");
-      setEventId("");
+      if (!response.ok) {
+        toast.error(data.error || "Failed to create judge");
+      } else {
+        toast.success("Judge created successfully!");
+        // Reset form
+        setUserName("");
+        setEmail("");
+        setPassword("");
+        setContact("");
+        setEventId("");
+      }
     } catch (error) {
-      setErrorMessage(error.message);
+      toast.error(error.message);
     } finally {
       setIsLoading(false);
     }
@@ -258,50 +261,10 @@ const createJudge = () => {
               {isLoading ? "Creating Judge..." : "Create Judge"}
             </button>
           </div>
-
-          {/* Success Message */}
-          {successMessage && (
-            <div className="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-              <div className="flex items-center">
-                <svg
-                  className="w-5 h-5 mr-2"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                {successMessage}
-              </div>
-            </div>
-          )}
-
-          {/* Error Message */}
-          {errorMessage && (
-            <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-              <div className="flex items-center">
-                <svg
-                  className="w-5 h-5 mr-2"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                {errorMessage}
-              </div>
-            </div>
-          )}
         </form>
       </div>
     </div>
   );
 };
 
-export default createJudge;
+export default CreateJudge;

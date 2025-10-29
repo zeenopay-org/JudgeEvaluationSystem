@@ -1,6 +1,7 @@
 import { useState,useContext, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../../context/AuthContext';
+import { toast } from 'react-toastify';
 
 const EditEvent = () => {
   const { id } = useParams();
@@ -8,17 +9,14 @@ const EditEvent = () => {
   const [eventName, setEventName] = useState('');
   const [image, setImage] = useState('');
   const [organizer, setOrganizer] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchEvent = async () => {
       if (!id || !token) return;
       setIsLoading(true);
-      setErrorMessage('');
-      try {
+            try {
         const res = await fetch(`http://localhost:5000/api/v1/events/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -28,10 +26,10 @@ const EditEvent = () => {
           setImage(data.event.image || '');
           setOrganizer(data.event.created_by || '');
         } else {
-          setErrorMessage(data.message || data.error || 'Failed to load event');
+          toast.error(data.message || data.error || 'Failed to load event');
         }
       } catch (err) {
-        setErrorMessage('Network error while loading event');
+        toast.error('Network error while loading event');
       } finally {
         setIsLoading(false);
       }
@@ -41,9 +39,6 @@ const EditEvent = () => {
 
   const handleSubmit = async (e)=>{
     e.preventDefault();
-
-    setErrorMessage('');
-    setSuccessMessage('');
 
     const isValidImageUrl = (url) => {
         const imageExtensions = ['.jpg', '.jpeg', '.png', '.svg'];
@@ -58,7 +53,7 @@ const EditEvent = () => {
         // Basic validation
         
         if (!isValidImageUrl(image.trim())) {
-            setErrorMessage('Please enter a valid image URL (jpg, png, jpeg, etc).');
+           toast.error('Please enter a valid image URL (jpg, png, jpeg, etc).');
             return;
         }
         
@@ -86,14 +81,14 @@ const EditEvent = () => {
               console.log('Response:', data);
              
               if (res.ok) {
-                setSuccessMessage('Event updated successfully');
+                toast.success('Event updated successfully');
                 navigate('/event', { state: { success: 'Event updated successfully' } });
               } else {
-                setErrorMessage(data.message || data.error || 'Failed to edit event');
+               toast.error(data.message || data.error || 'Failed to edit event');
               }
             } catch (error) {
               console.error('Error:', error);
-              setErrorMessage('Network error. Please check if the server is running.');
+             toast.error('Network error. Please check if the server is running.');
             } finally {
               setIsLoading(false);
             }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
 import { AuthContext } from "../../../context/AuthContext";
+import { toast } from "react-toastify";
 
 const RoundScoring = () => {
   const { token, judge } = useContext(AuthContext);
@@ -9,8 +10,6 @@ const RoundScoring = () => {
   const [error, setError] = useState("");
   const [round, setRound] = useState(null);
   const [contestants, setContestants] = useState([]);
-  const [successMessage, setSuccessMessage] = useState("");
-const [errorMessage, setErrorMessage] = useState("");
   const [questionsUsed, setQuestionsUsed] = useState([]); // to track used questions
   const [scores, setScores] = useState({}); // form state per contestant
 
@@ -29,7 +28,7 @@ const [errorMessage, setErrorMessage] = useState("");
         setRound(data.round);
         setContestants(data.contestants);
       } catch (err) {
-        setError(err.message);
+        toast.error(err.message);
       } finally {
         setLoading(false);
       }
@@ -53,22 +52,20 @@ const [errorMessage, setErrorMessage] = useState("");
       const { score, question, comment } = scores[contestantId] || {};
 
       if (!score) {
-        setErrorMessage("Please enter a score");
-       return;
-      }
-
-       if (score > round.max_score) {
-        setErrorMessage(`Max score is ${round.max_score}`);
+        toast.error("Please enter a score");
         return;
       }
-      
+
+      if (score > round.max_score) {
+        toast.error(`Max score is ${round.max_score}`);
+        return;
+      }
 
       // for qna type, question is required
       if (round.type === "qna" && !question) {
-        setErrorMessage("Please select a question");
+        toast.error("Please select a question");
         return;
       }
-      
 
       const res = await fetch("http://localhost:5000/api/v1/scores/create", {
         method: "POST",
@@ -81,15 +78,14 @@ const [errorMessage, setErrorMessage] = useState("");
           contestant: contestantId,
           score: Number(score),
           question: question || null,
-          comment: comment || ""
+          comment: comment || "",
         }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to submit score");
 
-      setSuccessMessage("Score submitted successfully!");
-      setErrorMessage(""); 
+      toast.success("Score submitted successfully!");
 
       // Mark question as used if qna
       if (round.type === "qna" && question) {
@@ -102,8 +98,7 @@ const [errorMessage, setErrorMessage] = useState("");
         [contestantId]: { ...prev[contestantId], submitted: true },
       }));
     } catch (err) {
-      setErrorMessage(err.message);
-      setSuccessMessage("");
+      toast.error(err.message);
     }
   };
 
@@ -116,9 +111,8 @@ const [errorMessage, setErrorMessage] = useState("");
           <h2 className="text-xl font-semibold text-gray-800">
             {round?.name} - {round?.type.toUpperCase()} Round
           </h2>
-          <p className="text-gray-500 text-sm">
-            Max Score: {round?.max_score}
-          </p>
+
+          <p className="text-gray-500 text-sm">Max Score: {round?.max_score}</p>
         </div>
         <Link
           to="/judge"
@@ -126,23 +120,14 @@ const [errorMessage, setErrorMessage] = useState("");
         >
           Back
         </Link>
+        {contestants.length === 0 && (
+          <p className="text-gray-500 italic">
+            No contestants found for this round.
+          </p>
+        )}
       </div>
 
-      {error && (
-        <div className="text-red-600 bg-red-50 p-2 rounded mb-4">{error}</div>
-      )}
-
       <div className="overflow-x-auto bg-white rounded-lg shadow">
-      {successMessage && (
-          <div className="bg-green-100 text-green-800 px-4 py-2 rounded mb-4">
-            {successMessage}
-          </div>
-        )}
-        {errorMessage && (
-          <div className="bg-red-100 text-red-800 px-4 py-2 rounded mb-4">
-            {errorMessage}
-          </div>
-        )}
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>

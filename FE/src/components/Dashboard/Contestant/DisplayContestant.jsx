@@ -3,6 +3,7 @@ import { AuthContext } from '../../../context/AuthContext';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { toast } from 'react-toastify';
 
 const DisplayContestant = () => {
   const { token, admin, judge } = useContext(AuthContext);
@@ -10,8 +11,7 @@ const DisplayContestant = () => {
   const [contestants, setContestants] = useState([]);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [judgeEventName, setJudgeEventName] = useState('');
+    const [judgeEventName, setJudgeEventName] = useState('');
 
   const role = admin ? 'admin' : judge ? 'judge' : null;
 
@@ -47,12 +47,12 @@ const DisplayContestant = () => {
 
         if (res.ok) {
           setContestants(prev => prev.filter(c => c._id !== contestant._id));
-          setSuccessMessage(`${contestant.name} deleted successfully!`);
+          toast.success(`${contestant.name} deleted successfully!`);
         } else {
-          console.error('Failed to delete contestant');
+          toast.error('Failed to delete contestant');
         }
       } catch (err) {
-        console.error('Error deleting contestant:', err);
+       toast.error(`Error deleting contestant: ${err.message || err}`);
       }
     }
   };
@@ -60,7 +60,7 @@ const DisplayContestant = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (!token) {
-        console.error("No token available");
+        toast.error("No token available");
         setLoading(false);
         return;
       }
@@ -101,6 +101,14 @@ const DisplayContestant = () => {
 
     fetchData();
   }, [token, role, judge]);
+
+  useEffect(() => {
+  const created = localStorage.getItem('contestantCreated');
+  if (created === 'true') {
+    toast.success('Contestant added successfully!');
+    localStorage.removeItem('contestantCreated');
+  }
+}, []);
 
   if (loading) {
     return (

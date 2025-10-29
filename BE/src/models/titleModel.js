@@ -7,9 +7,10 @@ const titleSchema = {
   // },
   name: {
     type: String,
+    trim:true,
     required: true,
   },
-   image: {
+     image: {
       type: String,
     },
   event: {
