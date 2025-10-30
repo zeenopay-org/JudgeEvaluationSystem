@@ -1,9 +1,12 @@
 import { createContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {jwtDecode} from 'jwt-decode';
 
-// Create context
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
+
   const [token, setToken] = useState(
     () => localStorage.getItem("token") || null
   );
@@ -11,7 +14,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const storedAdmin = localStorage.getItem("admin");
       return storedAdmin ? JSON.parse(storedAdmin) : null;
-    } catch (error) {
+    } catch {
       return null;
     }
   });
@@ -19,71 +22,87 @@ export const AuthProvider = ({ children }) => {
     try {
       const storedJudge = localStorage.getItem("judge");
       return storedJudge ? JSON.parse(storedJudge) : null;
-    } catch (error) {
+    } catch {
       return null;
     }
   });
 
-  // Reconcile persisted role with JWT on first load to avoid stale mixed roles
+  // ✅ AUTO LOGOUT when token expires
+  useEffect(() => {
+    if (!token) return;
+
+    const checkTokenExpiry = () => {
+      try {
+        const decoded = jwtDecode(token); // <-- jwt-decode automatically parses the payload
+        const exp = decoded.exp * 1000;
+
+        if (Date.now() >= exp) {
+          handleLogout();
+          navigate("/login");
+        }
+      } catch (err) {
+        handleLogout();
+        navigate("/login");
+      }
+    };
+
+    // Run immediately and every 5 seconds
+    checkTokenExpiry();
+    const interval = setInterval(checkTokenExpiry, 5000);
+
+    return () => clearInterval(interval);
+  }, [token, navigate]);
+
+  // ✅ Sync role with token
   useEffect(() => {
     try {
       const storedToken = localStorage.getItem("token");
       if (!storedToken) return;
-      const [, payload] = storedToken.split(".");
-      if (!payload) return;
-      const decoded = JSON.parse(atob(payload));
-      const roleFromToken = decoded?.role;
+      const decoded = jwtDecode(storedToken);
+      const role = decoded?.role;
 
-      if (roleFromToken === "admin") {
+      if (role === "admin") {
         const storedAdmin = localStorage.getItem("admin");
         setAdmin(storedAdmin ? JSON.parse(storedAdmin) : { role: "admin" });
         setJudge(null);
         localStorage.removeItem("judge");
-      } else if (roleFromToken === "judge") {
+      } else if (role === "judge") {
         const storedJudge = localStorage.getItem("judge");
         setJudge(storedJudge ? JSON.parse(storedJudge) : { role: "judge" });
         setAdmin(null);
         localStorage.removeItem("admin");
       }
     } catch (error) {
-      console.error("Error reconciling persisted role with JWT:", error);
+      console.error("Error syncing role:", error);
     }
   }, []);
 
+  // ✅ Persist to localStorage
   useEffect(() => {
-    if (token) {
-      localStorage.setItem("token", token);
-    } else {
-      localStorage.removeItem("token");
-    }
+    if (token) localStorage.setItem("token", token);
+    else localStorage.removeItem("token");
 
-    if (admin) {
-      localStorage.setItem("admin", JSON.stringify(admin));
-    } else {
-      localStorage.removeItem("admin");
-    }
+    if (admin) localStorage.setItem("admin", JSON.stringify(admin));
+    else localStorage.removeItem("admin");
 
-    if (judge) {
-      localStorage.setItem("judge", JSON.stringify(judge));
-    } else {
-      localStorage.removeItem("judge");
-    }
+    if (judge) localStorage.setItem("judge", JSON.stringify(judge));
+    else localStorage.removeItem("judge");
   }, [token, admin, judge]);
 
-  // Login function (save token + admin/judge)
-  const login = (data) => {
+  // ✅ Login function
+  const handleLogin = (data) => {
     setToken(data.token);
     if (data.admin) {
       setAdmin(data.admin);
-      setJudge(null); // Clear judge if admin login
+      setJudge(null);
     } else if (data.judge) {
       setJudge(data.judge);
-      setAdmin(null); // Clear admin if judge login
+      setAdmin(null);
     }
   };
 
-  // Logout
-  const logout = () => {
+  // ✅ Logout function
+  const handleLogout = () => {
     setToken(null);
     setAdmin(null);
     setJudge(null);
@@ -93,7 +112,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ token, admin, judge, login, logout }}>
+    <AuthContext.Provider
+      value={{ token, admin, judge, login: handleLogin, logout: handleLogout }}
+    >
       {children}
     </AuthContext.Provider>
   );

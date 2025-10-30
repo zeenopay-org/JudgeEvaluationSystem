@@ -65,7 +65,7 @@ const CreateContestant = () => {
 
           navigate('/contestant');
         } else {
-          toast.error(data.message || data.error || 'Failed to create contestant');
+          toast.error('Failed to create contestant');
         }
       } catch (error) {
         console.error('Error:', error);

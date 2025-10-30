@@ -1,3 +1,5 @@
+import { useContext, useEffect } from "react";
+import { AuthContext } from "./context/AuthContext";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/loginPage";
 import HomePage from "./pages/homePage";
@@ -18,9 +20,20 @@ import TitlePage from "./pages/titlePage";
 import CreateTitle from "./components/Dashboard/Title/CreateTitle";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import EditRound from "./components/Dashboard/Round/EditRound";
 
 function App() {
-  return (
+const { admin, judge } = useContext(AuthContext);
+useEffect(() => {
+  if (admin) {
+    document.title = "JudgeEvaluationSystem - Admin";
+  } else if (judge) {
+    document.title = "JudgeEvaluationSystem - Judge";
+  } else {
+    document.title = "JudgeEvaluationSystem";
+  }
+}, [admin, judge]);
+    return (
     <>
       <Routes>
         <Route path="/" element={<HomePage />}></Route>
@@ -52,6 +65,14 @@ function App() {
           element={
             <Layout>
               <CreateRound />
+            </Layout>
+          }
+        />
+        <Route
+          path="/round/edit/:id"
+          element={
+            <Layout>
+              <EditRound />
             </Layout>
           }
         />

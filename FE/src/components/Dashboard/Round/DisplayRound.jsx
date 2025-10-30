@@ -3,10 +3,12 @@ import { AuthContext } from '../../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { toast
+
+ } from 'react-toastify';
 const displayRound = () => {
     const { token } = useContext(AuthContext);
     const navigate = useNavigate();
-    const [successMessage, setSuccessMessage] = useState('');
     const [rounds, setRounds] = useState([]);
 
     const handleCreateClick = () => {
@@ -32,13 +34,14 @@ const displayRound = () => {
 
             if (res.ok){
                 setRounds(prev => prev.filter(r => r._id !== round._id));
-                setSuccessMessage(`${round.name} deleted successfully!`);
+                toast.success(`${round.name} deleted successfully!`);
             } else{
-                console.error('Failed to delete round');
+                toast.error('Failed to delete round');
             }
             
         } catch (err) {
-            console.error('Error deleting round:', err);
+            toast.error('Error deleting round');
+            console.error(err);
         }
        }
       };
@@ -60,12 +63,11 @@ const displayRound = () => {
               }
             });
             if (res.status === 401) {
-              setSuccessMessage('');
               navigate('/login');
               return;
             }
             if (!res.ok) {
-              throw new Error('Failed to load rounds');
+             toast.error('Failed to load rounds');
             }
             const data = await res.json();
             setRounds(data.rounds || data);
@@ -78,11 +80,7 @@ const displayRound = () => {
 
   return (
     <div className="p-6">
-    {successMessage && (
-      <div className="mb-4 rounded border border-green-300 bg-green-50 text-green-800 px-4 py-2">
-        {successMessage}
-      </div>
-    )}
+    
     <div className="flex justify-between items-center mb-6">
       <h2 className="text-2xl font-bold ">Available Rounds</h2>
       <button

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../../context/AuthContext";
 import { Navigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import {
   BarChart,
   Bar,
@@ -14,7 +15,7 @@ import {
 
 const DisplayScore = () => {
   const { token } = useContext(AuthContext);
-  const [error, setError] = useState("");
+  // const [error, setError] = useState("");
   const [scores, setScores] = useState([]);
   const [analytics, setAnalytics] = useState([]);
   const [perRound, setPerRound] = useState([]);
@@ -33,8 +34,10 @@ const DisplayScore = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (!scoreRes.ok)
-          throw new Error(`Failed to load scores (${scoreRes.status})`);
+      if (!scoreRes.ok) {
+        toast.error(`Failed to load scores (${scoreRes.status})`);
+        return;
+      }
         const scoreData = await scoreRes.json();
         setScores(scoreData || []);
 
@@ -47,7 +50,7 @@ const DisplayScore = () => {
         );
 
         if (!analyticRes.ok)
-          throw new Error(`Failed to load analytics (${analyticRes.status})`);
+         toast.error(`Failed to load analytics (${analyticRes.status})`);
         const analyticData = await analyticRes.json();
         setAnalytics(analyticData || []);
 
@@ -57,7 +60,7 @@ const DisplayScore = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (!perContestantRes.ok)
-          throw new Error(
+          toast.error(
             `Failed to score per contestant per round (${perContestantRes.status})`
           );
         const perContestantData = await perContestantRes.json();
@@ -73,7 +76,7 @@ const DisplayScore = () => {
         const judgeBreakdownData = await judgeBreakdownRes.json();
         setJudgeBreakdown(judgeBreakdownData);
       } catch (err) {
-        setError(err.message || "Error fetching data");
+        toast.error(err.message || "Error fetching data");
       } finally {
         setLoading(false);
       }
@@ -116,11 +119,7 @@ const DisplayScore = () => {
           </div>
         </div>
 
-        {error && (
-          <div className="p-4 bg-red-100 text-red-600 rounded-md mb-6 text-center">
-            {error}
-          </div>
-        )}
+        
         {/* === Scores Tab === */}
         {activeTab === "scores" && (
           <div className="bg-white rounded-2xl shadow-lg p-6 overflow-auto border border-gray-200">

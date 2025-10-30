@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { toast } from 'react-toastify';
 
  const createRound = () => {
   const [name, setName] = useState('');
@@ -8,8 +9,6 @@ import React, { useState, useEffect } from 'react'
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(false);    
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
  const [visible, setVisible] = useState(false);
  const [questions, setQuestions] = useState(['']);
 
@@ -31,14 +30,14 @@ import React, { useState, useEffect } from 'react'
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch events');
+       toast.error('Failed to fetch events');
       }
 
       const data = await response.json();
             setEvents(data.events || data); 
     } catch (error) {
       console.error('Error fetching events:', error);
-        setErrorMessage('Failed to load events. Please refresh the page.');
+        toast.error('Failed to load events. Please refresh the page.');
     } finally {
       setIsLoadingEvents(false);
     }
@@ -62,9 +61,7 @@ import React, { useState, useEffect } from 'react'
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setErrorMessage('');
-    setSuccessMessage('');
-
+   
     try {
       const response = await fetch('http://localhost:5000/api/v1/rounds/create', {
         method: 'POST',
@@ -87,7 +84,7 @@ import React, { useState, useEffect } from 'react'
       }
 
       const data = await response.json();
-      setSuccessMessage('Round created successfully!');
+      toast.success('Round created successfully!');
       
       // Reset form
       setName('');
@@ -96,7 +93,7 @@ import React, { useState, useEffect } from 'react'
       setEventId('');
       
     } catch (error) {
-      setErrorMessage(error.message);
+      toast.error(error.message);
     } finally {
       setIsLoading(false);
     }
@@ -268,30 +265,7 @@ import React, { useState, useEffect } from 'react'
             </button>
           </div>
           
-          {/* Success Message */}
-          {successMessage && (
-            <div className="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-              <div className="flex items-center">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                {successMessage}
-              </div>
-            </div>
-          )}
-          
-          {/* Error Message */}
-          {errorMessage && (
-            <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-              <div className="flex items-center">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-                {errorMessage}
-              </div>
-            </div>
-          )}
-        </form>
+         </form>
       </div>
     </div>
   )

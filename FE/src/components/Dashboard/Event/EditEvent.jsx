@@ -160,13 +160,7 @@ const EditEvent = () => {
             {isLoading ? 'Loading...' : 'Update Event'}
           </button>
           
-          {successMessage && (
-            <p className="mt-2 text-green-600 text-center">{successMessage}</p>
-          )}
           
-          {errorMessage && (
-            <p className="mt-2 text-red-600 text-center">{errorMessage}</p>
-          )}
         </div>
       </form>
     </div>
