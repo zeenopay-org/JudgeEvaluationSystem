@@ -115,7 +115,7 @@ const RoundScoring = () => {
           <p className="text-gray-500 text-sm">Max Score: {round?.max_score}</p>
         </div>
         <Link
-          to="/judge"
+          to="/event"
           className="text-blue-600 text-sm font-medium hover:underline"
         >
           Back

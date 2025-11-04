@@ -44,11 +44,12 @@ export const getRounds = async (req, res) => {
   }
 };
 
+
 export const getRoundById = async (req, res) => {
   try {
     const { id } = req.params;
     const round = await Round.findById(id);
-    res.status(200).json(round);
+    res.status(200).json({ message: "Fetched data by id", round });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

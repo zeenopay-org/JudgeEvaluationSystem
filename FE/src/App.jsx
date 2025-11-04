@@ -1,3 +1,4 @@
+
 import { useContext, useEffect } from "react";
 import { AuthContext } from "./context/AuthContext";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -21,6 +22,7 @@ import CreateTitle from "./components/Dashboard/Title/CreateTitle";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import EditRound from "./components/Dashboard/Round/EditRound";
+import EditContestant from "./components/Dashboard/Contestant/EditContestant";
 
 function App() {
 const { admin, judge } = useContext(AuthContext);
@@ -54,6 +56,14 @@ useEffect(() => {
           element={
             <Layout>
               <CreateContestant />
+            </Layout>
+          }
+        />
+        <Route
+          path="/contestant/edit/:id"
+          element={
+            <Layout>
+              <EditContestant />
             </Layout>
           }
         />

@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import express from 'express';
+import multer from 'multer';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import db from './src/config/db.js'; 
@@ -11,11 +12,11 @@ import roundRoute from './src/routes/roundRoute.js'
 import scoreRoute from './src/routes/scoreRoute.js'
 import titleRoute from './src/routes/titleRoute.js'
 import titleAssignmentRoute from './src/routes/titleAssignmentRoute.js'; 
+import uploadRoute from './src/routes/uploadRoute.js';
 
 dotenv.config();
 
 const app = express();
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors({
@@ -30,6 +31,7 @@ app.use('/api/v1/rounds', roundRoute)
 app.use('/api/v1/scores',scoreRoute)
 app.use('/api/v1/titles',titleRoute)
 app.use('/api/v1/titleassignment',titleAssignmentRoute)
+app.use('/api/v1', uploadRoute);
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {

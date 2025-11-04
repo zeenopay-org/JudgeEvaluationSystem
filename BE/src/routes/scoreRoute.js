@@ -6,6 +6,7 @@ import {
   getContestantAnalytics,
   getScoresPerContestantPerRound,
   getJudgeWiseBreakdown,
+   getJudgeScoresDetailed,
 } from "../controllers/scoreController.js";
 import { judgeAuthMiddleware } from "../middlewares/judgeAuthMiddleware.js";
 import {
@@ -34,5 +35,6 @@ router.get(
   adminOnlyMiddleware,
   getJudgeWiseBreakdown
 );
+router.get("/my-scores/detailed", judgeAuthMiddleware,getJudgeScoresDetailed)
 
 export default router;

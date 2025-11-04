@@ -11,14 +11,11 @@ const DisplayContestant = () => {
   const [contestants, setContestants] = useState([]);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-    const [judgeEventName, setJudgeEventName] = useState('');
+  const [judgeEventName, setJudgeEventName] = useState('');
 
   const role = admin ? 'admin' : judge ? 'judge' : null;
 
-  // Redirect if not logged in
-  if (!role) {
-    return <Navigate to="/login" replace />;
-  }
+  if (!role) return <Navigate to="/login" replace />;
 
   const getEventName = (eventRef) => {
     if (role === 'judge') return judgeEventName || 'Your Event';
@@ -39,9 +36,7 @@ const DisplayContestant = () => {
           `http://localhost:5000/api/v1/contestants/delete/${contestant._id}`,
           {
             method: 'DELETE',
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
 
@@ -52,7 +47,7 @@ const DisplayContestant = () => {
           toast.error('Failed to delete contestant');
         }
       } catch (err) {
-       toast.error(`Error deleting contestant: ${err.message || err}`);
+        toast.error(`Error deleting contestant: ${err.message || err}`);
       }
     }
   };
@@ -103,19 +98,17 @@ const DisplayContestant = () => {
   }, [token, role, judge]);
 
   useEffect(() => {
-  const created = localStorage.getItem('contestantCreated');
-  if (created === 'true') {
-    toast.success('Contestant added successfully!');
-    localStorage.removeItem('contestantCreated');
-  }
-}, []);
+    const created = localStorage.getItem('contestantCreated');
+    if (created === 'true') {
+      toast.success('Contestant added successfully!');
+      localStorage.removeItem('contestantCreated');
+    }
+  }, []);
 
   if (loading) {
     return (
-      <div className='p-6'>
-        <div className="flex justify-center items-center h-64">
-          <div className="text-lg text-gray-600">Loading contestants...</div>
-        </div>
+      <div className='p-6 flex justify-center items-center h-64 text-sm text-gray-600'>
+        Loading contestants...
       </div>
     );
   }
@@ -123,45 +116,59 @@ const DisplayContestant = () => {
   return (
     <div className='p-6'>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Contestants</h2>
+        <h2 className="text-xl font-bold">Available Contestants</h2>
         <div className="text-sm text-gray-500">
           {contestants.length} contestant{contestants.length !== 1 ? 's' : ''} found
         </div>
       </div>
 
       {contestants.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="text-gray-500 text-lg">No contestants found</div>
+        <div className="text-center py-12 text-gray-500 text-lg">
+          No contestants found
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {contestants.map((c) => (
             <div key={c._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              
+              {/* Contestant Image */}
+              <div className="w-full h-60 bg-gray-100 flex items-center justify-center overflow-hidden">
+                {c.image ? (
+                  <img
+                    src={c.image}
+                    alt={c.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="text-gray-400 text-sm">No Image</div>
+                )}
+              </div>
+
+              {/* Contestant Info */}
               <div className="p-4">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="h-10 w-10 rounded-full bg-green-100 text-green-800 flex items-center justify-center font-semibold">
                     {c.contestant_number || c.number || 'N/A'}
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800">{c.name || c.full_name || 'Unknown'}</h3>
+                    <h3 className="text-md font-semibold text-gray-800">{c.name || 'Unknown'}</h3>
                     <p className="text-xs text-gray-500">Event: {getEventName(c.event)}</p>
                   </div>
                 </div>
+
                 <div className="mt-2">
                   <span className="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full">
-                    Contestant #{c.contestant_number || c.number || 'N/A'}
+                    Contestant #{c.contestant_number || 'N/A'}
                   </span>
                 </div>
-                {c.email && (
-                  <div className="mt-2 text-xs text-gray-600">{c.email}</div>
-                )}
-                {c.phone && (
-                  <div className="mt-1 text-xs text-gray-600">{c.phone}</div>
-                )}
+
+                {c.email && <div className="mt-2 text-xs text-gray-600">{c.email}</div>}
+                {c.phone && <div className="mt-1 text-xs text-gray-600">{c.phone}</div>}
 
                 {role === 'admin' && (
                   <div className="mt-4 grid grid-cols-2 gap-3">
                     <button
+                      onClick={() => navigate(`/contestant/edit/${c._id}`, { state: { contestant: c } })}
                       className="w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors text-sm shadow"
                     >
                       <FontAwesomeIcon icon={faEdit} />

@@ -128,7 +128,7 @@ const DisplayTitle = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">All Event Titles</h2>
+        <h2 className="text-xl font-bold text-gray-800">All Event Titles</h2>
         <button
           onClick={handleCreateClick}
           className="bg-green-600 text-white px-4 py-2 rounded-md shadow hover:bg-green-700 transition"
@@ -143,8 +143,8 @@ const DisplayTitle = () => {
         <p className="text-gray-500 italic">No titles found.</p>
       ) : (
         Object.entries(groupedTitles).map(([eventName, eventTitles]) => (
-          <div key={eventName} className="mb-8">
-            <h3 className="text-xl font-bold text-gray-900 mb-3 border-b pb-2 flex items-center gap-3">
+          <div key={eventName} className="mb-8 ">
+            <h3 className="text-md font-bold text-gray-900 mb-3 border-b pb-2 flex items-center gap-3">
               <span className="text-blue-600">🏆</span>
               {eventName}
             </h3>
@@ -163,7 +163,7 @@ const DisplayTitle = () => {
                     />
                   )}
                   <div className="p-4">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                    <h4 className="text-sm font-semibold text-gray-800 mb-2">
                       {title.name}
                     </h4>
 
@@ -217,7 +217,7 @@ const DisplayTitle = () => {
           onClose={() => setAssignModalOpen(false)}
           onAssignSuccess={() => {
             setAssignModalOpen(false);
-            fetchAssignments(titles); 
+            fetchAssignments(titles);
           }}
         />
       )}

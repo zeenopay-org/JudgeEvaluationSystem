@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
+import { toast } from "react-toastify";
 
 import "./login.css";
 
@@ -10,10 +11,10 @@ const Login = () => {
   const [visible, setVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
-  const { login, token } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
 
+  // 🔹 Redirect if already logged in
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
@@ -21,47 +22,45 @@ const Login = () => {
     }
   }, [navigate]);
 
+  // 🔹 Validate form fields
   const validateForm = () => {
-    let formErrors = {};
     let isValid = true;
 
-    // Email validation
     if (!email) {
-      formErrors.email = "email is required";
+      toast.error("Email is required");
       isValid = false;
     }
 
-    // Password validation
+    // password validation
     const passwordRegex =
       /^(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+
     if (!password) {
-      formErrors.password = "password is required";
+      toast.error("Password is required");
       isValid = false;
-    } else if (password.length < 4) {
-      formErrors.password = "password must be at least 8 characters";
+    } else if (password.length < 8) {
+      toast.error("Password must be at least 8 characters long");
       isValid = false;
     } else if (!passwordRegex.test(password)) {
-      formErrors.password =
-        "Password must be at least 8 characters, include 1 uppercase letter , 1 number and 1 special character";
+      toast.error(
+        "Password must include 1 lowercase letter, 1 number, and 1 special character"
+      );
       isValid = false;
     }
 
-    setErrors(formErrors);
     return isValid;
   };
 
+  // 🔹 Handle login
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validateForm()) return;
 
     try {
-      // Try admin login first
       let response = await fetch("http://localhost:5000/api/v1/users/signin", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
@@ -70,33 +69,29 @@ const Login = () => {
 
       if (response.ok) {
         const possibleAdmin = await response.json();
-        // Only accept as admin if role is actually 'admin'
         if (possibleAdmin?.admin?.role === "admin") {
           data = possibleAdmin;
           isAdmin = true;
         } else {
-          // Fall back to judge login if role is not admin
+          // Try judge login if not admin
           response = await fetch("http://localhost:5000/api/v1/judges/signin", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password }),
           });
+
           if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.message || "Invalid credentials");
+            throw new Error(errorData.message || "Invalid judge credentials");
           }
+
           data = await response.json();
-          isAdmin = false;
         }
       } else {
-        // If admin login fails, try judge login
+        // Try judge login directly if admin fails
         response = await fetch("http://localhost:5000/api/v1/judges/signin", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
         });
 
@@ -104,29 +99,28 @@ const Login = () => {
           const errorData = await response.json();
           throw new Error(errorData.message || "Invalid credentials");
         }
+
         data = await response.json();
-        isAdmin = false;
       }
 
-      // Debug: Log the full response data
-      console.log("Full response data:", data);
-      console.log("isAdmin flag:", isAdmin);
-
-      // Save token and user info to context
+      // 🔹 Save login info to context
       if (isAdmin) {
         login({ admin: data.admin, token: data.token });
-        console.log("Admin data on login:", data.admin);
+        toast.success("Admin login successful");
       } else {
         login({ judge: data.judge, token: data.token });
-        console.log("Judge data on login:", data.judge);
+        toast.success("Judge login successful");
       }
 
+      // Clear form
       setEmail("");
       setPassword("");
-      navigate("/", { replace: true });
+
+      // Redirect to event page
+      navigate("/event", { replace: true });
     } catch (error) {
       console.error("Error:", error);
-      setErrors({ general: error.message });
+      toast.error(error.message || "Login failed");
     }
   };
 
@@ -169,9 +163,6 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-            )}
           </div>
 
           <div className="mb-2 password-field">
@@ -194,20 +185,11 @@ const Login = () => {
             >
               <FontAwesomeIcon icon={visible ? faEyeSlash : faEye} />
             </button>
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-            )}
           </div>
 
           <div className="flex justify-end mb-4">
             <a href="#">Forgot Password?</a>
           </div>
-
-          {errors.general && (
-            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-              {errors.general}
-            </div>
-          )}
 
           <button className="font-bold" type="submit">
             Sign In

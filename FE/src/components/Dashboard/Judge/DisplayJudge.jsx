@@ -77,11 +77,6 @@ const DisplayJudge = () => {
         <h2 className="text-2xl font-bold">My Events</h2>
       </div>
 
-      {error && (
-        <div className="mb-4 rounded border border-red-300 bg-red-50 text-red-800 px-4 py-2">
-          {error}
-        </div>
-      )}
 
       {events.length === 0 ? (
         <p className="text-gray-600">No events assigned.</p>
@@ -168,6 +163,7 @@ const DisplayJudge = () => {
               </div>
             );
           })}
+      
         </div>
       )}
     </div>

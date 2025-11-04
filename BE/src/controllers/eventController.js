@@ -1,12 +1,20 @@
 import Event from "../models/eventModel.js";
 import { configDotenv } from "dotenv";
+import { uploadToS3 } from "../utils/s3Uploader.js";
 
 // Create Event
 export const createEvent = async (req, res) => {
   try {
     const { name, image, created_by } = req.body;
+    const file= req.file;
 
-    const event = new Event({ name, image, created_by });
+     if (!file) {
+      return res.status(400).json({ error: "Image file is required" });
+    }
+
+    const imageUrl= await uploadToS3(file);
+
+    const event = new Event({ name, image:imageUrl, created_by });
     await event.save();
 
     const { id, createdAt } = event;
@@ -15,7 +23,7 @@ export const createEvent = async (req, res) => {
       .status(201)
       .json({
         message: "Event registered successfully",
-        event: { id, name, created_by, createdAt },
+        event: { id, name, created_by,image:imageUrl, createdAt },
       });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -53,13 +61,28 @@ export const editEvent = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { name, image, created_by } = req.body;
+    const { name, created_by } = req.body;
+    const file = req.file;
+
+
+      //find existing event 
+          const existingEvent = await Event.findById(id);
+    if (!existingEvent) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    //upload new image if provided
+    let imageUrl= existingEvent.image;
+    if(file){
+      imageUrl = await uploadToS3(file);
+    }
 
     const updatedEvent = await Event.findByIdAndUpdate(
       id,
-      { name, image, created_by },
+      { name, image:imageUrl, created_by },
       { new: true }
     );
+
 
     if (!updatedEvent) {
       return res.status(404).json({ message: "Event not found" });

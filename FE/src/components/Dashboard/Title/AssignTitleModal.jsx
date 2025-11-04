@@ -90,7 +90,7 @@ const AssignTitleModal = ({ titleId, eventId, onClose, onAssignSuccess }) => {
           ✕
         </button>
 
-        <h2 className="text-2xl font-bold mb-4 text-center">
+        <h2 className="text-xl font-bold mb-4 text-center">
           Assign Title to Contestant
         </h2>
 
@@ -111,9 +111,9 @@ const AssignTitleModal = ({ titleId, eventId, onClose, onAssignSuccess }) => {
                 <img
                   src={c.photo || "https://via.placeholder.com/100"}
                   alt={c.name}
-                  className="w-24 h-24 rounded-full object-cover mb-2 border-2 border-gray-200"
+                  className="w-24 h-24 text-md rounded-full object-cover mb-2 border-2 border-gray-200"
                 />
-                <h3 className="font-semibold text-gray-800">{c.name}</h3>
+                <h3 className="font-semibold  text-sm  text-gray-800">{c.name}</h3>
                 <p className="text-sm text-gray-500 mb-2">
                   #{c.contestant_number}
                 </p>

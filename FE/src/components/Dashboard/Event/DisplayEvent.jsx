@@ -14,6 +14,14 @@ const DisplayEvent = ({ eventId }) => {
   const toastShownRef = useRef(false);
   const [successMessage, setSuccessMessage] = useState("");
 
+  // 🧠 Truncate function (by letters)
+  const truncateByLetters = (text, maxLength) => {
+    if (!text) return "";
+    return text.length > maxLength
+      ? text.slice(0, maxLength) + "..."
+      : text;
+  };
+
   const handleCreateClick = () => {
     navigate("/");
   };
@@ -72,11 +80,22 @@ const DisplayEvent = ({ eventId }) => {
         });
 
         const data = await res.json();
-        setEvents(Array.isArray(data.events) ? data.events : []);
+        if (Array.isArray(data.events)) {
+        // Apply truncation here
+        const updatedEvents = data.events.map((event) => {
+          const truncatedOrganizer = truncateByLetters(event.created_by, 25);
+          return {
+            ...event,
+            created_by: truncatedOrganizer,
+          };
+        });
+        setEvents(updatedEvents);
+      } else {
+        setEvents([]);
+      }
       } catch (err) {
         console.error("Error fetching events:", err);
-        toast.error('Failed to load events. Please try again.');
-
+        toast.error("Failed to load events. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -94,12 +113,12 @@ const DisplayEvent = ({ eventId }) => {
     }
   }, []);
 
-  if (loading) return <p className="p-6">Loading events...</p>;
+  if (loading) return <p className="p-6 text-sm">Loading events...</p>;
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold ">Ongoing Events</h2>
+        <h2 className="text-xl font-bold">Ongoing Events</h2>
         <button
           onClick={handleCreateClick}
           className="bg-green-600 text-white px-4 py-2 rounded-md shadow hover:bg-green-700 transition duration-200"
@@ -122,14 +141,16 @@ const DisplayEvent = ({ eventId }) => {
               />
             )}
             <div className="p-4">
-              <h3 className="text-xl font-semibold text-gray-800 mb-1">
+              <h3 className="text-md font-semibold text-gray-800 mb-1">
                 {event.name}
               </h3>
+
               {event.created_by && (
                 <p className="text-sm text-gray-500 mb-2">
                   Organized by <strong>{event.created_by}</strong>
                 </p>
               )}
+
               <div className="mb-2">
                 {event.createdAt && (
                   <span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-3 py-1 rounded-full mr-2">
@@ -137,6 +158,7 @@ const DisplayEvent = ({ eventId }) => {
                   </span>
                 )}
               </div>
+
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <button
                   onClick={() => handleEdit(event)}
@@ -145,6 +167,7 @@ const DisplayEvent = ({ eventId }) => {
                   <FontAwesomeIcon icon={faEdit} />
                   Edit
                 </button>
+
                 <button
                   onClick={() => handleDelete(event)}
                   className="w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-md text-white bg-red-600 hover:bg-red-700 transition-colors text-sm shadow"
@@ -153,6 +176,7 @@ const DisplayEvent = ({ eventId }) => {
                   Delete
                 </button>
               </div>
+
               <button
                 onClick={() => handleContestant(event)}
                 className="w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 mt-2 rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors text-sm shadow"

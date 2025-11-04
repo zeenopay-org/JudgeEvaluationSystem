@@ -1,4 +1,5 @@
 import express, { Router } from "express";
+import { upload } from "../middlewares/multer.js";
 import {
   createContestant,
   deleteContestants,
@@ -13,7 +14,7 @@ import {
 } from "../middlewares/authMiddleware.js";
 1;
 const router = express.Router();
-router.post("/create", authMiddleware, adminOnlyMiddleware, createContestant);
+router.post("/create", upload.single("image"), authMiddleware, adminOnlyMiddleware, createContestant);
 router.get("/", authMiddleware, adminOnlyMiddleware, getContestant);
 router.get("/:id", authMiddleware, adminOnlyMiddleware, getSingleContestant);
 router.get(
@@ -22,7 +23,7 @@ router.get(
   adminOnlyMiddleware,
     getEventContestants
 );
-router.put("/edit/:id", authMiddleware, adminOnlyMiddleware, editContestant);
+router.put("/edit/:id", upload.single("image"),authMiddleware, adminOnlyMiddleware, editContestant);
 router.delete(
   "/delete/:id",
   authMiddleware,

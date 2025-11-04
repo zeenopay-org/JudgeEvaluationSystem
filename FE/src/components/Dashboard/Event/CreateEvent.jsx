@@ -5,83 +5,56 @@ import { toast } from "react-toastify";
 
 const CreateEvent = () => {
   const [eventName, setEventName] = useState("");
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState(null);
   const [organizer, setOrganizer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { token } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    //image validation
-    const isValidImageUrl = (url) => {
-      const imageExtensions = [".jpg", ".jpeg", ".png", ".svg"];
-      try {
-        const parsedUrl = new URL(url);
-        return imageExtensions.some((ext) =>
-          parsedUrl.pathname.toLowerCase().endsWith(ext)
-        );
-      } catch {
-        return false;
-      }
-    };
+  if (!eventName || !organizer || !image) {
+    toast.error("Please fill out all fields.");
+    return;
+  }
 
-    // Basic validation
-    if (!eventName || !organizer || !image || !image.trim()) {
-      toast.error("Please fill out all fields.");
-      return;
+  setIsLoading(true);
+
+  const formData = new FormData();
+  formData.append("name", eventName);
+  formData.append("created_by", organizer);
+  formData.append("image", image); 
+
+  try {
+    const res = await fetch("http://localhost:5000/api/v1/events/create", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+           },
+      body: formData,
+    });
+
+    const data = await res.json();
+    console.log("Response:", data);
+
+    if (res.ok) {
+      localStorage.setItem("eventCreated", "true");
+      navigate("/event");
+    } else {
+      toast.error(data.message || data.error || "Failed to create event");
     }
-
-    if (!isValidImageUrl(image.trim())) {
-      toast.error("Please enter a valid image URL (jpg, png, jpeg, etc).");
-      return;
-    }
-
-    setIsLoading(true);
-
-    //send data
-    const payload = {
-      name: eventName,
-      created_by: organizer,
-      image: image.trim(),
-    };
-
-    // form submission
-    console.log({ eventName, image, organizer });
-    try {
-      const res = await fetch("http://localhost:5000/api/v1/events/create", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-      console.log("Response:", data);
-
-      if (res.status === 200 || res.status === 201) {
-        try {
-          localStorage.setItem("eventCreated", "true");
-           navigate("/event");
-        } catch {}
-       
-      } else {
-        toast.error(data.message || data.error || "Failed to create event");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("Network error. Please check if the server is running.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  } catch (error) {
+    console.error("Error:", error);
+    toast.error("Network error. Please check if the server is running.");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Create New Event</h2>
+      <h2 className="text-xl font-bold mb-4">Create New Event</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label
@@ -97,7 +70,7 @@ const CreateEvent = () => {
             placeholder="enter the name of the event"
             value={eventName}
             onChange={(e) => setEventName(e.target.value)}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+            className="mt-1 text-sm block w-full border border-gray-300 rounded-md p-2"
             required
           />
         </div>
@@ -110,11 +83,12 @@ const CreateEvent = () => {
             Image
           </label>
           <input
-            type="text"
+            type="file"
             id="image"
             name="image"
-            onChange={(e) => setImage(e.target.value)}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              accept="image/*"
+            onChange={(e) => setImage(e.target.files[0])}
+            className="mt-1 text-sm block w-full border border-gray-300 rounded-md p-2"
             required
           />
         </div>
@@ -133,7 +107,7 @@ const CreateEvent = () => {
             placeholder="enter the name of organizer "
             value={organizer}
             onChange={(e) => setOrganizer(e.target.value)}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+            className="mt-1 text-sm block w-full border border-gray-300 rounded-md p-2"
             required
           />
         </div>

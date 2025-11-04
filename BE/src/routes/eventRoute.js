@@ -1,4 +1,5 @@
 import express, { Router } from "express";
+import { upload } from "../middlewares/multer.js";
 import {
   createEvent,
   getEvent,
@@ -12,10 +13,10 @@ import {
 } from "../middlewares/authMiddleware.js";
 const router = express.Router();
 
-router.post("/create", authMiddleware, adminOnlyMiddleware, createEvent);
+router.post("/create",  upload.single("image"),authMiddleware, adminOnlyMiddleware, createEvent);
 router.get("/", authMiddleware, adminOnlyMiddleware, getEvent);
 router.get("/:id", authMiddleware, adminOnlyMiddleware, getSingleEvent);
-router.put("/edit/:id", authMiddleware, adminOnlyMiddleware, editEvent);
+router.put("/edit/:id", upload.single("image"),authMiddleware, adminOnlyMiddleware, editEvent);
 router.delete("/delete/:id", authMiddleware, adminOnlyMiddleware, deleteEvent);
 
 export default router;

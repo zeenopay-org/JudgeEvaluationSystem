@@ -3,85 +3,96 @@ import { AuthContext } from '../../../context/AuthContext';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-
 const CreateContestant = () => {
   const [contestantName, setContestantName] = useState('');
   const [contestant_number, setContestantNumber] = useState('');
-   const [isLoading, setIsLoading] = useState(false);
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
   const { token } = useContext(AuthContext);
   const location = useLocation();
   const navigate = useNavigate();
   const { eventId: eventIdFromParams } = useParams();
-  const eventId = eventIdFromParams || location.state?.eventId || (typeof window !== 'undefined' ? localStorage.getItem('selectedEventId') : '');
+
+  const eventId =
+    eventIdFromParams ||
+    location.state?.eventId ||
+    (typeof window !== 'undefined' ? localStorage.getItem('selectedEventId') : '');
+
+  // Preview selected image
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setImage(file);
+    if (file) {
+      setPreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-
-    // Ensure we have an event id
     if (!eventId) {
       toast.error('Missing event context. Please start from the Events page.');
       return;
     }
-    
-    // Basic validation
+
     if (!contestantName || !contestant_number) {
       toast.error('Please fill out all fields.');
       return;
     }
 
-     setIsLoading(true);
+    setIsLoading(true);
 
-    //send data
-    const payload = {
-      name: contestantName,
-      contestant_number: Number(contestant_number),
-      eventId: eventId,
-    };
-    
-    // form submission 
-    console.log({ contestantName, contestant_number, eventId });
     try {
-      const res = await fetch('http://localhost:5000/api/v1/contestants/create',
-        {
-          method:'POST',
-          headers:{
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload)
-        });
+      // Prepare FormData
+      const formData = new FormData();
+      formData.append('name', contestantName);
+      formData.append('contestant_number', Number(contestant_number));
+      formData.append('eventId', eventId);
+      if (image) formData.append('image', image);
 
-        const data = await res.json();
-        console.log('Response:', data);
-       
-        if (res.status === 200 || res.status === 201) {
-            setContestantName('');
-          setContestantNumber('');
-          try { localStorage.removeItem('selectedEventId'); } catch {}
-          
-        // return to event page with banner
-        localStorage.setItem('contestantCreated', 'true');
+      const res = await fetch('http://localhost:5000/api/v1/contestants/create', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
-          navigate('/contestant');
-        } else {
-          toast.error('Failed to create contestant');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        toast.error('Network error. Please check if the server is running.');
-      } finally {
-        setIsLoading(false);
+      const data = await res.json();
+      console.log('Response:', data);
+
+      if (res.ok) {
+        toast.success('Contestant created successfully!');
+        setContestantName('');
+        setContestantNumber('');
+        setImage(null);
+        setPreview(null);
+        localStorage.removeItem('selectedEventId');
+        navigate('/contestant');
+      } else {
+        toast.error(data.error || 'Failed to create contestant');
       }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Network error. Please check if the server is running.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Add new Contestant </h2>
-      {eventId && (
-        <p className="mb-2 text-sm text-gray-600">For Event: <span className="font-medium">{eventId}</span></p>
-      )}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <h2 className="text-xl font-bold mb-4">Add New Contestant</h2>
+
+      {/* {eventId && (
+        <p className="mb-2 text-sm text-gray-600">
+          For Event: <span className="font-medium">{eventId}</span>
+        </p>
+      )} */}
+
+      <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
         <div>
           <label htmlFor="contestant-name" className="block text-sm font-medium text-gray-700">
             Contestant Name
@@ -89,11 +100,10 @@ const CreateContestant = () => {
           <input
             type="text"
             id="contestant-name"
-            name="contestant-name"
-            placeholder='enter the name of the contestant'
             value={contestantName}
             onChange={(e) => setContestantName(e.target.value)}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+            placeholder="Enter the name of the contestant"
+            className="mt-1 text-sm block w-full border border-gray-300 rounded-md p-2"
             required
           />
         </div>
@@ -105,29 +115,46 @@ const CreateContestant = () => {
           <input
             type="number"
             id="contestant_number"
-            name="contestant_number"
-            placeholder='enter the number of contestant '
             value={contestant_number}
             onChange={(e) => setContestantNumber(e.target.value)}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+            placeholder="Enter the contestant number"
+            className="mt-1 text-sm block w-full border border-gray-300 rounded-md p-2"
             required
           />
         </div>
 
+        {/* Image Upload Field */}
         <div>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={`w-full py-2 px-4 rounded-md transition ${
-              isLoading 
-                ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-green-600 hover:bg-green-700'
-            } text-white`}
-          >
-            {isLoading ? 'Creating contestant' : 'Create Contestant'}
-          </button>
-          
-                  </div>
+          <label htmlFor="image" className="block text-sm font-medium text-gray-700">
+            Contestant Image
+          </label>
+          <input
+            type="file"
+            id="image"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="mt-1  text-sm block w-full border border-gray-300 rounded-md p-2"
+          />
+          {preview && (
+            <img
+              src={preview}
+              alt="Preview"
+              className="mt-3 w-32 h-32 object-cover rounded-md border"
+            />
+          )}
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className={`w-full py-2 px-4 rounded-md transition ${
+            isLoading
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-green-600 hover:bg-green-700'
+          } text-white`}
+        >
+          {isLoading ? 'Creating Contestant...' : 'Create Contestant'}
+        </button>
       </form>
     </div>
   );

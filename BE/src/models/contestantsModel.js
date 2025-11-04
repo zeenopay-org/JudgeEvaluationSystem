@@ -8,8 +8,11 @@ const contestantSchema = new mongoose.Schema(
     },
     contestant_number: {
       type: Number,
-      required: true,
-      unique: true,
+      required: true
+    },
+    image:{
+      type:String,
+      required:true
     },
     event: {
       type: mongoose.Schema.Types.ObjectId,

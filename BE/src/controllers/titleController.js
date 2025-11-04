@@ -1,16 +1,23 @@
 import Title from "../models/titleModel.js";
 import { configDotenv } from "dotenv";
 import jwt from "jsonwebtoken";
+import { uploadToS3 } from "../utils/s3Uploader.js";
 
 export const createTitle = async (req, res) => {
   try {
     const { name, eventId, image } = req.body;
+    const file= req.file;
+
+    if(!file){
+      return res.status(400).json({error: "Image file is required"})
+    };
     if (!name || !eventId) {
       return res
         .status(400)
         .json({ message: "Name and event ID are required." });
     }
 
+     const imageUrl = await uploadToS3(file);
     const existingTitle = await Title.findOne({ name: name.trim() ,  event: eventId,
 });
     if (existingTitle) {
@@ -20,14 +27,14 @@ export const createTitle = async (req, res) => {
     }
     const title = new Title({
       name: name.trim(),
-      image,
+      image:imageUrl,
       event: eventId,
     });
     const { id } = title;
     await title.save();
     res.status(201).json({
       message: "Title created Successfylly",
-      title: { id, name, image, eventId },
+      title: { id, name, image:imageUrl, eventId },
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

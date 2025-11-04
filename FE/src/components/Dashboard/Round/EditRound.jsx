@@ -128,7 +128,7 @@ const EditRound = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold mb-4">Edit Round</h1>
+        <h1 className="text-xl font-bold mb-4">Edit Round</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Round Name */}
@@ -140,7 +140,7 @@ const EditRound = () => {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+              className="w-full text-sm  px-4 py-3 border border-gray-300 rounded-lg"
               required
             />
           </div>
@@ -153,7 +153,7 @@ const EditRound = () => {
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white"
+              className="w-full text-sm  px-4 py-3 border border-gray-300 rounded-lg bg-white"
               required
             >
               <option value="">Select round type</option>
@@ -174,7 +174,7 @@ const EditRound = () => {
                     type="text"
                     value={q}
                     onChange={(e) => handleQuestionChange(i, e.target.value)}
-                    className="flex-grow px-4 py-2 border border-gray-300 rounded-lg"
+                    className="flex-grow  text-sm  px-4 py-2 border border-gray-300 rounded-lg"
                     required
                   />
                   <button
@@ -189,7 +189,7 @@ const EditRound = () => {
               <button
                 type="button"
                 onClick={addQuestion}
-                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="mt-2 px-4 py-1  bg-blue-500 text-white rounded hover:bg-blue-600"
               >
                 Add Question
               </button>
@@ -205,7 +205,7 @@ const EditRound = () => {
               type="number"
               value={maxScore}
               onChange={(e) => setMaxScore(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+              className="w-full  text-sm  px-4 py-3 border border-gray-300 rounded-lg"
               required
             />
           </div>
@@ -218,7 +218,7 @@ const EditRound = () => {
             <select
               value={eventId}
               onChange={(e) => setEventId(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white"
+              className="w-full  text-sm  px-4 py-3 border border-gray-300 rounded-lg bg-white"
               required
               disabled={isLoadingEvents}
             >

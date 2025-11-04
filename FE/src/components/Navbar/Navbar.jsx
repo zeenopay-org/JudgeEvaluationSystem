@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const Navbar = ({ onOpenSidebar, showHamburger, sidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { admin, logout } = useContext(AuthContext);
+  const { admin, judge, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -14,13 +14,13 @@ const Navbar = ({ onOpenSidebar, showHamburger, sidebarOpen }) => {
 
   return (
     <nav
-      className={`bg-green-900 shadow-md px-4 md:px-6 h-16 flex justify-between items-center fixed top-0 right-0 z-40 ${
-        sidebarOpen ? "md:left-64 left-0" : "left-0"
-      }`}
+      className={`bg-green-900 shadow-md px-4 md:px-6 h-16 flex justify-between items-center fixed top-0 right-0 z-40 
+      ${judge ? "left-0 w-full" : sidebarOpen ? "md:left-64 left-0" : "left-0"}`}
     >
       {/* Left: Logo + Links */}
       <div className="flex items-center space-x-3 md:space-x-6">
-        {showHamburger && (
+        {/* Show hamburger only if not judge */}
+        {!judge && showHamburger && (
           <button
             className="inline-flex items-center justify-center h-10 w-10 rounded hover:bg-blue-700/40 focus:outline-none"
             aria-label="Open sidebar"
@@ -42,7 +42,13 @@ const Navbar = ({ onOpenSidebar, showHamburger, sidebarOpen }) => {
             </svg>
           </button>
         )}
-       
+
+        {/* If judge, show a centered title */}
+        {judge && (
+          <h1 className="text-white text-lg font-semibold">
+            Judge Panel
+          </h1>
+        )}
       </div>
 
       {/* Right: Welcome + Profile Dropdown */}
@@ -51,7 +57,9 @@ const Navbar = ({ onOpenSidebar, showHamburger, sidebarOpen }) => {
           onClick={() => setDropdownOpen(!dropdownOpen)}
           className="flex items-center space-x-2 bg-gray-100 px-4 py-2 rounded-md hover:bg-gray-200"
         >
-          <span className="text-gray-700">Welcome {admin?.email}</span>
+          <span className="text-gray-700">
+            Welcome {admin?.email || judge?.email}
+          </span>
           <svg
             className="w-4 h-4 text-gray-600"
             fill="none"

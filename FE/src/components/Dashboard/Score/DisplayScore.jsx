@@ -15,8 +15,7 @@ import {
 
 const DisplayScore = () => {
   const { token } = useContext(AuthContext);
-  // const [error, setError] = useState("");
-  const [scores, setScores] = useState([]);
+   const [scores, setScores] = useState([]);
   const [analytics, setAnalytics] = useState([]);
   const [perRound, setPerRound] = useState([]);
   const [judgeBreakdown, setJudgeBreakdown] = useState([]);
@@ -95,7 +94,7 @@ const DisplayScore = () => {
       <div className="min-h-screen bg-gray-100 p-6">
         {/* header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-extrabold text-gray-800">Score Panel</h1>
+          <h1 className="text-xl font-extrabold text-gray-800">Score Panel</h1>
           <div className="flex flex-wrap gap-2">
             {[
               { key: "scores", label: "Scores" },
@@ -107,7 +106,7 @@ const DisplayScore = () => {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-2 rounded-xl font-semibold transition-all ${
+                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
                   activeTab === tab.key
                     ? "bg-blue-600 text-white shadow-md"
                     : "bg-white text-gray-600 hover:bg-gray-200"
@@ -123,7 +122,7 @@ const DisplayScore = () => {
         {/* === Scores Tab === */}
         {activeTab === "scores" && (
           <div className="bg-white rounded-2xl shadow-lg p-6 overflow-auto border border-gray-200">
-            <h2 className="text-xl font-bold mb-4">All Scores</h2>
+            <h2 className="text-md font-bold mb-4">All Scores</h2>
             <table className="w-full border-collapse">
               <thead className="bg-gray-50">
                 <tr>
@@ -169,7 +168,7 @@ const DisplayScore = () => {
         {/* === Analytics Tab === */}
         {activeTab === "analytics" && (
           <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h2 className="text-xl font-bold mb-4">Contestant Analytics</h2>
+            <h2 className="text-md font-bold mb-4">Contestant Analytics</h2>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={analytics}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -225,7 +224,7 @@ const DisplayScore = () => {
         {/* === Contestant per Round === */}
         {activeTab === "round" && (
           <div className="bg-white rounded-2xl shadow-lg p-6 overflow-auto border border-gray-200">
-            <h2 className="text-xl font-bold mb-4">Contestant per Round</h2>
+            <h2 className="text-md font-bold mb-4">Contestant per Round</h2>
             <table className="w-full border-collapse">
               <thead className="bg-gray-50">
                 <tr>
@@ -265,7 +264,7 @@ const DisplayScore = () => {
         {/* === Judge Breakdown === */}
         {activeTab === "judge" && (
           <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h2 className="text-xl font-bold mb-4"> Judge Breakdown</h2>
+            <h2 className="text-md font-bold mb-4"> Judge Breakdown</h2>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={judgeBreakdown}>
                 <CartesianGrid strokeDasharray={3} />
@@ -287,7 +286,7 @@ const DisplayScore = () => {
           {/* === Leaderboard === */}
       {activeTab === "leaderboard" && (
         <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h2 className="text-xl font-bold mb-4">Final Leaderboard</h2>
+          <h2 className="text-md font-bold mb-4">Final Leaderboard</h2>
           <table className="w-full border-collapse">
             <thead className="bg-gray-50">
               <tr>

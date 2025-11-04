@@ -1,14 +1,33 @@
 import Contestant from "../models/contestantsModel.js";
 import { configDotenv } from "dotenv";
+import { uploadToS3 } from "../utils/s3Uploader.js";
 
 //create contestants
 export const createContestant = async (req, res) => {
   try {
-    const { name, contestant_number, eventId } = req.body;
+    const { name, contestant_number, image, eventId } = req.body;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ error: "Image file is required" });
+    }
+
+    const imageUrl = await uploadToS3(file);
+    const existing = await Contestant.findOne({
+      contestant_number,
+      event: eventId,
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        error: "Contestant number already exists for this event",
+      });
+    }
 
     const contestant = new Contestant({
       name,
       contestant_number,
+      image: imageUrl,
       event: eventId,
     });
     await contestant.save();
@@ -17,7 +36,7 @@ export const createContestant = async (req, res) => {
 
     res.status(201).json({
       message: "contestant created successfully",
-      contestant: { id, name, contestant_number, eventId },
+      contestant: { id, name, contestant_number, image: imageUrl, eventId },
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -54,20 +73,55 @@ export const editContestant = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, contestant_number, eventId } = req.body;
+    const file = req.file;
 
+    //  check if contestant exists
+    const existingContestant = await Contestant.findById(id);
+    if (!existingContestant) {
+      return res.status(404).json({ error: "Contestant not found" });
+    }
+
+    //  prevent duplicate contestant_number in same event
+    const duplicate = await Contestant.findOne({
+      contestant_number,
+      event: eventId,
+      _id: { $ne: id },
+    });
+
+    if (duplicate) {
+      return res
+        .status(400)
+        .json({ error: "Contestant number already exists for this event" });
+    }
+
+    //  upload new image if provided
+    let imageUrl = existingContestant.image; // keep old image if no new file
+    if (file) {
+      imageUrl = await uploadToS3(file);
+    }
+
+    // Step 4: update contestant
     const updatedContestant = await Contestant.findByIdAndUpdate(
       id,
-      { name, contestant_number, eventId },
+      {
+        name,
+        contestant_number,
+        image: imageUrl,
+        event: eventId,
+      },
       { new: true }
     );
-    if (!updatedContestant) {
-      res.status(404).json({ message: "contestant not found" });
-    }
-    res.status(200).json({ message: "contestant edited successfully" });
+
+    return res.status(200).json({
+      message: "Contestant edited successfully",
+      contestant: updatedContestant,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    return res.status(500).json({ error: err.message });
   }
 };
+
 
 //delete contestatnts
 export const deleteContestants = async (req, res) => {

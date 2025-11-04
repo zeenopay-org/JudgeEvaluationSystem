@@ -10,10 +10,10 @@ const eventPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   return (
     <>
-      <Layout>
-        {admin && <DisplayEvent />}
-        {judge && <DisplayJudge />}
-      </Layout>
+      <Layout
+      >{admin && <DisplayEvent />}
+      {judge && <DisplayJudge />}</Layout>
+      
     </>
   );
 };

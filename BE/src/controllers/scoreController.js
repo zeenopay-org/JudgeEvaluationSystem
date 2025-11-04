@@ -131,7 +131,6 @@ export const getContestantAnalytics = async (req, res) => {
   }
 };
 
-
 export const getScoresPerContestantPerRound = async (req, res) => {
   try {
     const result = await Score.aggregate([
@@ -247,13 +246,33 @@ export const getJudgeWiseBreakdown = async (req, res) => {
         },
       },
       {
-        $sort: { contestantNumber: 1, judgeName: 1 } // sort for neatness
-      }
+        $sort: { contestantNumber: 1, judgeName: 1 }, // sort for neatness
+      },
     ]);
 
     res.status(200).json(result);
   } catch (err) {
     console.error("Error fetching judge breakdown:", err);
     res.status(500).json({ error: err.message });
+  }
+};
+
+export const getJudgeScoresDetailed = async (req, res) => {
+  try {
+   const judgeId = req.judge?.judgeId || req.user?.id;
+
+    if (!judgeId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const scores = await Score.find({ judge: judgeId })
+      .populate("contestant", "name contestant_number")
+      .populate("round", "name type max_score")
+      .sort({ "contestant.contestant_number": 1, "round.name": 1 });
+
+    res.status(200).json(scores);
+  } catch (error) {
+    console.error("Error fetching judge's scores:", error);
+    res.status(500).json({ error: error.message });
   }
 };
