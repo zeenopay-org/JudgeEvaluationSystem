@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/AuthContext";
 import { toast } from "react-toastify";
 
+const BACKEND_URL = "http://localhost:5000/api/v1"; 
+
 const EditRound = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -24,7 +26,7 @@ const EditRound = () => {
     const fetchRound = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(`http://localhost:5000/api/v1/rounds/${id}`, {
+        const res = await fetch(`${BACKEND_URL}/rounds/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -55,7 +57,7 @@ const EditRound = () => {
     const fetchEvents = async () => {
       setIsLoadingEvents(true);
       try {
-        const res = await fetch("http://localhost:5000/api/v1/events/", {
+        const res = await fetch(`${BACKEND_URL}/events/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("Failed to fetch events");
@@ -98,7 +100,7 @@ const EditRound = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/v1/rounds/edit/${id}`,
+        `${BACKEND_URL}/rounds/edit/${id}`,
         {
           method: "PUT",
           headers: {

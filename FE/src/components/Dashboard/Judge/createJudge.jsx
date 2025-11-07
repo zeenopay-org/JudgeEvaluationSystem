@@ -3,6 +3,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
+const BACKEND_URL = "http://localhost:5000/api/v1"; 
+
 const CreateJudge = () => {
   const [username, setUserName] = useState("");
   const [email, setEmail] = useState("");
@@ -22,7 +24,7 @@ const CreateJudge = () => {
   const fetchEvents = async () => {
     setIsLoadingEvents(true);
     try {
-      const response = await fetch("http://localhost:5000/api/v1/events", {
+      const response = await fetch(`${BACKEND_URL}/events`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -57,7 +59,7 @@ const CreateJudge = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/v1/judges/create",
+        `${BACKEND_URL}/judges/create`,
         {
           method: "POST",
           headers: {

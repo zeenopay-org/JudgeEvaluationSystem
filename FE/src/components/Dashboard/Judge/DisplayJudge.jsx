@@ -5,6 +5,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
+  const BACKEND_URL = "http://localhost:5000/api/v1"; 
+
 const DisplayJudge = () => {
   const { token, judge } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -14,13 +16,14 @@ const DisplayJudge = () => {
   const [loading, setLoading] = useState(true);
 
 
+
   if (!token || !judge) return <Navigate to="/login" replace />;
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const res = await fetch(
-          "http://localhost:5000/api/v1/judges/events/me",
+          `${BACKEND_URL}/judges/events/me`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -36,7 +39,7 @@ const DisplayJudge = () => {
     const fetchRounds = async () => {
       try {
         const res = await fetch(
-          "http://localhost:5000/api/v1/judges/rounds/me",
+          `${BACKEND_URL}/judges/rounds/me`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -72,7 +75,7 @@ const DisplayJudge = () => {
   if (loading) return <p className="p-6">Loading events...</p>;
 
   return (
-    <div className="p-6">
+    <div className="p-6 w-full max-w-full">
       <div className="flex items-center mb-6">
         <h2 className="text-2xl font-bold">My Events</h2>
       </div>

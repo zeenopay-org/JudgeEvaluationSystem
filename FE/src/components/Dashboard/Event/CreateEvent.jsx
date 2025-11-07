@@ -3,6 +3,8 @@ import { AuthContext } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
+const BACKEND_URL = "http://localhost:5000/api/v1"; 
+
 const CreateEvent = () => {
   const [eventName, setEventName] = useState("");
   const [image, setImage] = useState(null);
@@ -27,7 +29,7 @@ const CreateEvent = () => {
   formData.append("image", image); 
 
   try {
-    const res = await fetch("http://localhost:5000/api/v1/events/create", {
+    const res = await fetch(`${BACKEND_URL}/events/create`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

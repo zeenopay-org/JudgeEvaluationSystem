@@ -13,6 +13,8 @@ import {
   Legend,
 } from "recharts";
 
+const BACKEND_URL = "http://localhost:5000/api/v1"; 
+
 const DisplayScore = () => {
   const { token } = useContext(AuthContext);
    const [scores, setScores] = useState([]);
@@ -29,7 +31,7 @@ const DisplayScore = () => {
       try {
         setLoading(true);
         //fetch overall scores
-        const scoreRes = await fetch("http://localhost:5000/api/v1/scores/", {
+        const scoreRes = await fetch(`${BACKEND_URL}/scores/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -42,7 +44,7 @@ const DisplayScore = () => {
 
         //fetch analysis
         const analyticRes = await fetch(
-          "http://localhost:5000/api/v1/scores/getanalytics",
+          `${BACKEND_URL}/scores/getanalytics`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -55,7 +57,7 @@ const DisplayScore = () => {
 
         //per contestant per round
         const perContestantRes = await fetch(
-          "http://localhost:5000/api/v1/scores/per-contestant-round",
+          `${BACKEND_URL}/scores/per-contestant-round`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (!perContestantRes.ok)
@@ -67,7 +69,7 @@ const DisplayScore = () => {
 
         //judge Breakdown
         const judgeBreakdownRes = await fetch(
-          "http://localhost:5000/api/v1/scores/judge-breakdown",
+          `${BACKEND_URL}/scores/judge-breakdown`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (!judgeBreakdownRes.ok)

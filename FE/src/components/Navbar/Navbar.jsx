@@ -1,38 +1,57 @@
-import { useState, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-const Navbar = ({ onOpenSidebar, showHamburger, sidebarOpen }) => {
+const Navbar = ({ onOpenSidebar, sidebarOpen, sidebarCollapsed }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { admin, judge, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [time, setTime] = useState(new Date());
 
   const handleLogout = () => {
     logout();
     navigate("/login", { replace: true });
   };
 
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formattedTime = time.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
+  // Compute left offset for main navbar
+  // If judge is logged in, navbar should span full width
+  const leftOffset = judge ? 0 : !sidebarOpen ? 0 : sidebarCollapsed ? 80 : 256;
+
   return (
     <nav
-      className={`bg-green-900 shadow-md px-4 md:px-6 h-16 flex justify-between items-center fixed top-0 right-0 z-40 
-      ${judge ? "left-0 w-full" : sidebarOpen ? "md:left-64 left-0" : "left-0"}`}
+      className="bg-green-900 shadow-md fixed top-0 right-0 h-16 flex items-center justify-between px-4 md:px-6 z-[60] transition-all duration-300 ease-in-out"
+      style={{
+        left: `${leftOffset}px`,
+        marginLeft: 0,
+        width: judge ? "100%" : `calc(100% - ${leftOffset}px)`,
+      }}
     >
-      {/* Left: Logo + Links */}
-      <div className="flex items-center space-x-3 md:space-x-6">
-        {/* Show hamburger only if not judge */}
-        {!judge && showHamburger && (
+      {/* Left side: Hamburger or Title */}
+      <div className="flex items-center space-x-3 md:space-x-6 transition-all duration-300">
+        {/* Hamburger Button — only visible on mobile when sidebar is collapsed */}
+        {!judge && !sidebarOpen && (
           <button
-            className="inline-flex items-center justify-center h-10 w-10 rounded hover:bg-blue-700/40 focus:outline-none"
+            onClick={onOpenSidebar} // Open the sidebar when clicked
+            className="text-white focus:outline-none md:hidden"
             aria-label="Open sidebar"
-            onClick={onOpenSidebar}
           >
             <svg
-              xmlns="http://www.w3.org/2000/svg"
+              className="w-6 h-6"
               fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="2"
               stroke="currentColor"
-              className="w-6 h-6 text-white"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
             >
               <path
                 strokeLinecap="round"
@@ -43,25 +62,27 @@ const Navbar = ({ onOpenSidebar, showHamburger, sidebarOpen }) => {
           </button>
         )}
 
-        {/* If judge, show a centered title */}
-        {judge && (
-          <h1 className="text-white text-lg font-semibold">
-            Judge Panel
-          </h1>
-        )}
+        {/* Time Display */}
+        <span className="text-white font-mono text-sm">{formattedTime}</span>
       </div>
 
-      {/* Right: Welcome + Profile Dropdown */}
+      {/* Right side: Profile */}
       <div className="relative">
         <button
           onClick={() => setDropdownOpen(!dropdownOpen)}
-          className="flex items-center space-x-2 bg-gray-100 px-4 py-2 rounded-md hover:bg-gray-200"
+          className="flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-green-800 transition"
         >
-          <span className="text-gray-700">
-            Welcome {admin?.email || judge?.email}
+          <span className="text-white text-sm md:text-base">
+            Welcome,&nbsp;
+            <span className="text-white font-semibold">
+              {(admin?.email || judge?.email)?.split("@")[0]}
+            </span>
           </span>
           <svg
-            className="w-4 h-4 text-gray-600"
+            className="w-4 h-4 text-gray-600 transition-transform duration-200"
+            style={{
+              transform: dropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
+            }}
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
@@ -71,9 +92,9 @@ const Navbar = ({ onOpenSidebar, showHamburger, sidebarOpen }) => {
           </svg>
         </button>
 
-        {/* Dropdown Menu */}
+        {/* Dropdown */}
         {dropdownOpen && (
-          <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg z-10">
+          <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg z-50">
             <a
               href="/profile"
               className="block px-4 py-2 text-gray-700 hover:bg-gray-100"

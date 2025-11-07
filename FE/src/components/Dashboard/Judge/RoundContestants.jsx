@@ -3,6 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { AuthContext } from "../../../context/AuthContext";
 import { toast } from "react-toastify";
 
+const BACKEND_URL = "http://localhost:5000/api/v1"; 
+
 const RoundScoring = () => {
   const { token, judge } = useContext(AuthContext);
   const { roundId } = useParams();
@@ -17,7 +19,7 @@ const RoundScoring = () => {
     const fetchRoundData = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/v1/judges/rounds/${roundId}/contestants`,
+          `${BACKEND_URL}/judges/rounds/${roundId}/contestants`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -67,7 +69,7 @@ const RoundScoring = () => {
         return;
       }
 
-      const res = await fetch("http://localhost:5000/api/v1/scores/create", {
+      const res = await fetch(`${BACKEND_URL}/scores/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

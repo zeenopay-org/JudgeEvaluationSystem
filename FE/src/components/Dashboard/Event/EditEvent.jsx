@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../../context/AuthContext';
 import { toast } from 'react-toastify';
 
+const BACKEND_URL = "http://localhost:5000/api/v1"; 
+
 const EditEvent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -20,7 +22,7 @@ const EditEvent = () => {
       if (!id || !token) return;
       setIsLoading(true);
       try {
-        const res = await fetch(`http://localhost:5000/api/v1/events/${id}`, {
+        const res = await fetch(`${BACKEND_URL}/events/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -59,7 +61,7 @@ const EditEvent = () => {
     }
 
     try {
-      const res = await fetch(`http://localhost:5000/api/v1/events/edit/${id}`, {
+      const res = await fetch(`${BACKEND_URL}/events/edit/${id}`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,

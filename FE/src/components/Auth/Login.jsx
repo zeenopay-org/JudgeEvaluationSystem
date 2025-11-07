@@ -4,17 +4,19 @@ import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { toast } from "react-toastify";
+import banner from "../../assets/peagent.jpg";
+import DOMPURIFY from "dompurify";
 
-import "./login.css";
+const BACKEND_URL = "http://localhost:5000/api/v1";
 
 const Login = () => {
   const [visible, setVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [agree, setAgree] = useState(false);
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
 
-  // 🔹 Redirect if already logged in
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
@@ -22,49 +24,61 @@ const Login = () => {
     }
   }, [navigate]);
 
-  // 🔹 Validate form fields
-  const validateForm = () => {
-    let isValid = true;
-
-    if (!email) {
-      toast.error("Email is required");
-      isValid = false;
-    }
-
-    // password validation
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
-
-    if (!password) {
-      toast.error("Password is required");
-      isValid = false;
-    } else if (password.length < 8) {
-      toast.error("Password must be at least 8 characters long");
-      isValid = false;
-    } else if (!passwordRegex.test(password)) {
-      toast.error(
-        "Password must include 1 lowercase letter, 1 number, and 1 special character"
-      );
-      isValid = false;
-    }
-
-    return isValid;
+  const sanitizeInput = (value) => {
+    return DOMPURIFY.sanitize(value, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
   };
 
-  // 🔹 Handle login
+  const validateForm = () => {
+    const cleanEmail = sanitizeInput(email).trim();
+
+    if (!cleanEmail || !password) {
+      toast.error("Fields are required");
+      return false;
+    }
+
+    // if (password.length < 8) {
+    //   toast.error("Password must be at least 8 characters long");
+    //   return false;
+    // }
+
+    // const passwordRegex =
+    //   /^(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+
+    // if (!passwordRegex.test(password)) {
+    //   toast.error(
+    //     "Password must include 1 lowercase letter, 1 number, and 1 special character"
+    //   );
+    //   return false;
+    // }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      toast.error("Please enter a valid email address");
+      return false;
+    }
+
+    return cleanEmail;
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
+    const cleanEmail = validateForm();
+    
+    if (!cleanEmail) return;
+    if (!agree) {
+      toast.error("You must agree to the terms of service before signing in");
+      return;
+    }
 
     try {
-      let response = await fetch("http://localhost:5000/api/v1/users/signin", {
+      let response = await fetch(`${BACKEND_URL}/users/signin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: cleanEmail, password }),
       });
 
       let data;
+
       let isAdmin = false;
 
       if (response.ok) {
@@ -73,11 +87,10 @@ const Login = () => {
           data = possibleAdmin;
           isAdmin = true;
         } else {
-          // Try judge login if not admin
-          response = await fetch("http://localhost:5000/api/v1/judges/signin", {
+          response = await fetch(`${BACKEND_URL}/judges/signin`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
+            body: JSON.stringify({ email: cleanEmail, password }),
           });
 
           if (!response.ok) {
@@ -88,11 +101,10 @@ const Login = () => {
           data = await response.json();
         }
       } else {
-        // Try judge login directly if admin fails
-        response = await fetch("http://localhost:5000/api/v1/judges/signin", {
+        response = await fetch(`${BACKEND_URL}/judges/signin`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ email: cleanEmail, password }),
         });
 
         if (!response.ok) {
@@ -103,7 +115,6 @@ const Login = () => {
         data = await response.json();
       }
 
-      // 🔹 Save login info to context
       if (isAdmin) {
         login({ admin: data.admin, token: data.token });
         toast.success("Admin login successful");
@@ -112,62 +123,65 @@ const Login = () => {
         toast.success("Judge login successful");
       }
 
-      // Clear form
       setEmail("");
       setPassword("");
-
-      // Redirect to event page
       navigate("/event", { replace: true });
     } catch (error) {
-      console.error("Error:", error);
-      toast.error(error.message || "Login failed");
+      const safeMessage = DOMPURIFY.sanitize(error.message || "login failed", {
+        ALLOWED_TAGS: [],
+        ALLOWED_ATTR: [],
+      });
+      toast.error(safeMessage);
     }
   };
 
   return (
-    <div className="login-container">
-      {/* Left Column */}
-      <div className="left-panel">
-        <h1 className="text-4xl font-bold mb-4">Welcome Back</h1>
-        <p className="mb-6 text-lg">
-          Access your real-time merchant dashboard with lightning-fast updates
-        </p>
-        <ul className="space-y-4 list-disc pl-5">
-          <li>0.25s Real-Time Updates</li>
-          <li>Complete Transparency</li>
-          <li>99.99% Uptime Guarantee</li>
-          <li>AI-Enhanced Management</li>
-        </ul>
-        <div className="mt-10 text-sm space-y-1">
-          <p>Access Anywhere, Anytime</p>
-          <p>
-            Download our mobile app for real-time event management on the go
-          </p>
-        </div>
+    <div className="flex flex-col lg:flex-row min-h-[100dvh] bg-green-700 overflow-hidden">
+      {/* Left: Banner Image (Top on Mobile) */}
+      <div className="w-full lg:w-2/3 h-56 sm:h-72 md:h-96 lg:h-auto relative">
+        <img
+          src={banner}
+          alt="Judging Banner"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
       </div>
 
-      {/* Right Column */}
-      <div className="right-panel">
-        <form className="login-form" onSubmit={handleSubmit}>
-          <h2 className="text-2xl font-bold mb-2 text-center">Welcome Back</h2>
-          <p className="text-center mb-6 text-gray-600">
-            Sign in to your real-time merchant dashboard
-          </p>
+      {/* Right: Login Form */}
+      <div className="flex flex-col justify-center items-center w-full lg:w-1/3 bg-white px-6 sm:px-10 lg:px-16 py-10 lg:py-0">
+        <form
+          onSubmit={handleSubmit}
+          className="w-full max-w-md space-y-6 flex flex-col justify-center"
+        >
+          <div>
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">Sign In</h2>
+            <p className="text-gray-500 text-sm">
+              Smart, swift, and transparent judging — redefined. Login to
+              elevate your judging experience.
+            </p>
+          </div>
 
-          <div className="mb-4">
-            <label htmlFor="email">Email Address</label>
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              E-mail Address:
+            </label>
             <input
-              id="email"
               type="text"
-              placeholder="Enter your emailaddress"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-xl px-4 py-3 bg-gradient-to-b from-gray-50 to-gray-100 
+              text-gray-800 shadow-sm border border-gray-200 
+              focus:outline-none focus:ring-2 focus:ring-green-300 
+              transition duration-200 placeholder-gray-500"
             />
           </div>
 
-          <div className="mb-2 password-field">
-            <label htmlFor="password" className="block mb-1 font-medium">
-              Password
+          <div className="relative">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-600 mb-1"
+            >
+              Password:
             </label>
             <input
               id="password"
@@ -175,27 +189,44 @@ const Login = () => {
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-xl px-4 py-3 pr-10 bg-gradient-to-b from-gray-50 to-gray-100
+              text-gray-800 shadow-sm border border-gray-200
+              focus:outline-none focus:ring-2 focus:ring-green-300
+              transition duration-200 placeholder-gray-500"
             />
             <button
               type="button"
-              onClick={() => setVisible((v) => !v)}
-              className="toggle-visibility text-gray-500"
-              aria-label={visible ? "Hide password" : "Show password"}
+              onClick={() => setVisible(!visible)}
+              className="absolute right-3 top-9 text-gray-500 hover:text-gray-700 transition"
             >
               <FontAwesomeIcon icon={visible ? faEyeSlash : faEye} />
             </button>
           </div>
 
-          <div className="flex justify-end mb-4">
-            <a href="#">Forgot Password?</a>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="terms"
+              className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+              checked={agree}
+              onChange={(e) => setAgree(e.target.checked)}
+            />
+            <label htmlFor="terms" className="ml-2 text-sm text-gray-500">
+              I agree to the terms of service
+            </label>
           </div>
 
-          <button className="font-bold" type="submit">
+          <button
+            type="submit"
+            className="w-full bg-green-700 text-white font-semibold py-2.5 rounded-lg 
+            hover:bg-green-800 transition duration-200"
+          >
             Sign In
           </button>
-          <div className="form-divider"></div>
-          <p className="copyright">© 2025 ZeenoPay. All rights reserved.</p>
+
+          <p className="text-center text-green-900 text-xs mt-6">
+            © 2025 ZeenoPay. All rights reserved.
+          </p>
         </form>
       </div>
     </div>

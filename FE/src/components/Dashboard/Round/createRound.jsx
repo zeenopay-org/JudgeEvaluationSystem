@@ -12,6 +12,8 @@ const createRound = () => {
   const [visible, setVisible] = useState(false);
   const [questions, setQuestions] = useState([""]);
 
+  const BACKEND_URL = "http://localhost:5000/api/v1"; 
+
   // Fetch events on component mount
   useEffect(() => {
     fetchEvents();
@@ -20,7 +22,7 @@ const createRound = () => {
   const fetchEvents = async () => {
     setIsLoadingEvents(true);
     try {
-      const response = await fetch("http://localhost:5000/api/v1/events", {
+      const response = await fetch(`${BACKEND_URL}/events`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -62,7 +64,7 @@ const createRound = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/v1/rounds/create",
+        `${BACKEND_URL}/rounds/create`,
         {
           method: "POST",
           headers: {

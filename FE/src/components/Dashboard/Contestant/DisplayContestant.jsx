@@ -5,6 +5,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 
+const BACKEND_URL = "http://localhost:5000/api/v1"; 
+
 const DisplayContestant = () => {
   const { token, admin, judge } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -33,7 +35,7 @@ const DisplayContestant = () => {
     if (confirm(`Are you sure you want to delete ${contestant.name}?`)) {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/v1/contestants/delete/${contestant._id}`,
+          `${BACKEND_URL}/contestants/delete/${contestant._id}`,
           {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` },
@@ -62,7 +64,7 @@ const DisplayContestant = () => {
 
       try {
         if (role === 'judge') {
-          const res = await fetch('http://localhost:5000/api/v1/judges/contestants/me', {
+          const res = await fetch(`${BACKEND_URL}/judges/contestants/me`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           const data = await res.json();
@@ -70,7 +72,7 @@ const DisplayContestant = () => {
           setContestants(fetchedContestants);
           if (typeof data.event === 'string') setJudgeEventName(data.event);
         } else {
-          const contestantsRes = await fetch('http://localhost:5000/api/v1/contestants', {
+          const contestantsRes = await fetch(`${BACKEND_URL}/contestants`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           const contestantsData = await contestantsRes.json();
@@ -80,7 +82,7 @@ const DisplayContestant = () => {
           setContestants(fetchedContestants);
 
           // Fetch events only for admin
-          const eventsRes = await fetch('http://localhost:5000/api/v1/events', {
+          const eventsRes = await fetch(`${BACKEND_URL}/events`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           const eventsData = await eventsRes.json();

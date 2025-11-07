@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
+
+const BACKEND_URL = "http://localhost:5000/api/v1"; 
+
 const displayRound = () => {
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -21,7 +24,7 @@ const displayRound = () => {
     if (confirm(`Are you sure you want to delete ${round.name}?`)) {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/v1/rounds/delete/${round._id}`,
+          `${BACKEND_URL}/rounds/delete/${round._id}`,
           {
             method: "DELETE",
             headers: {
@@ -55,7 +58,7 @@ const displayRound = () => {
 
     const fetchRounds = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/v1/rounds", {
+        const res = await fetch(`${BACKEND_URL}/rounds`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",

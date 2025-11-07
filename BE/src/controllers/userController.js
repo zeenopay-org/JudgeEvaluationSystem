@@ -10,12 +10,14 @@ const JWT_SECRET = process.env.JWT_SECRET || "hfdhgshdgghd";
 export const registerAdmin = async (req, res) => {
   try {
     const { email, password } = req.body;
+    
 
     const existingAdmin = await Admin.findOne({ email });
     if (existingAdmin)
       return res.status(400).json({ message: "email already exists" });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     const admin = new Admin({ email, password: hashedPassword });
     await admin.save();

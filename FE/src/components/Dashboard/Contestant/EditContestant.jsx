@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/AuthContext";
 import { toast } from "react-toastify";
 
+const BACKEND_URL = "http://localhost:5000/api/v1"; 
+
 const EditContestant = () => {
   const { id } = useParams(); // contestant id from URL
   const { token } = useContext(AuthContext);
@@ -19,7 +21,7 @@ const EditContestant = () => {
   useEffect(() => {
     const fetchContestant = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/v1/contestants/${id}`, {
+        const res = await fetch(`${BACKEND_URL}/contestants/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -72,7 +74,7 @@ const EditContestant = () => {
     }
 
     try {
-      const res = await fetch(`http://localhost:5000/api/v1/contestants/edit/${id}`, {
+      const res = await fetch(`${BACKEND_URL}/contestants/edit/${id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,

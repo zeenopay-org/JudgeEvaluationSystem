@@ -1,43 +1,75 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Navbar from "../Navbar/Navbar";
 import Sidebar from "../Dashboard/sidebar/Sidebar";
 import { AuthContext } from "../../context/AuthContext";
+import { useLocation } from "react-router-dom";
 
 const Layout = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { admin, judge } = useContext(AuthContext);
+  const [sidebarOpen, setSidebarOpen] = useState(false);  // Sidebar visibility (for mobile)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);  // Sidebar collapse state
+  const { judge } = useContext(AuthContext);
+  const location = useLocation();
+
+  const sidebarWidth = sidebarCollapsed ? 80 : 256;
+
+  // Auto-open sidebar for small screens when navigating (if mobile)
+  useEffect(() => {
+    if (window.innerWidth < 540) {
+      setSidebarOpen(true);  // Automatically open the sidebar on mobile
+    }
+  }, [location]);
+
+  // Handle screen resizing
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 540) {
+        setSidebarOpen(true);  // Automatically open sidebar on larger screens
+      } else {
+        setSidebarOpen(false); // Collapse sidebar on small screens
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize();  // Run on mount
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
-    <div className="bg-gray-50 flex min-h-screen">
-      {/* ✅ Sidebar only for admin */}
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Sidebar for admin */}
       {!judge && (
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <Sidebar
+          isOpen={sidebarOpen} // Sidebar visibility
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
       )}
 
-      {/* ✅ Main section (Navbar + Content) */}
+      {/* Main content */}
       <div
-        className={`flex-1 min-w-0 pt-16 transition-all duration-300 ${
-          !judge && sidebarOpen ? "md:ml-64" : ""
-        }`}
+        className="flex-1 min-w-0 pt-16 transition-all duration-300"
+        style={{
+          marginLeft: !judge && sidebarOpen ? `${sidebarWidth}px` : 0,  // Set content margin based on sidebar visibility
+        }}
       >
-        {/* Navbar (always visible for both admin and judge) */}
         <Navbar
-          onOpenSidebar={() => setSidebarOpen(true)}
-          showHamburger={!judge && !sidebarOpen} // hide hamburger for judge
           sidebarOpen={sidebarOpen}
+          sidebarCollapsed={sidebarCollapsed}
+          onOpenSidebar={() => setSidebarOpen(true)}  // Open the sidebar when clicking hamburger
         />
 
-        {/* Mobile overlay for sidebar (admin only) */}
+        {/* Overlay for mobile */}
         {!judge && sidebarOpen && (
           <div
             className="fixed inset-0 bg-black/40 z-30 md:hidden"
-            onClick={() => setSidebarOpen(false)}
+            onClick={() => setSidebarOpen(false)}  // Close sidebar on overlay click
           />
         )}
 
-        {/* Main content area */}
-        <main className="p-2 md:p-4">
-          <div className="max-w-6xl mx-auto">{children}</div>
+        {/* Page content */}
+        <main className="p-4 md:p-6 transition-all duration-300">
+          <div className="mx-auto">{children}</div>
         </main>
       </div>
     </div>
