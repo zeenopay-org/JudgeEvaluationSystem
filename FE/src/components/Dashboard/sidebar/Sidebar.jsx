@@ -10,7 +10,7 @@ import {
   FaTrophy,
   FaSignOutAlt,
   FaUserCircle,
-  FaCog,
+  // FaCog,
 } from "react-icons/fa";
 
 const navItems = [
@@ -36,14 +36,13 @@ const Sidebar = ({ isOpen, collapsed, onToggleCollapse }) => {
   if (judge) return null;
 
   return (
-    <aside
-      className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-gray-100 shadow-lg transform transition-all duration-500 ease-in-out ${
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      }`}
-      style={{
-        width: collapsed ? "80px" : "256px", // Set sidebar width (collapsed vs expanded)
-      }}
-    >
+   <aside
+  className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-gray-100 shadow-lg transition-all duration-300 ease-in-out`}
+  style={{
+    width: collapsed ? "80px" : "256px", 
+  }}
+>
+
       {/* Header */}
       <div className="flex items-center justify-between h-16 px-3 bg-green-900 relative">
         <div className="flex items-center gap-2">

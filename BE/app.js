@@ -20,11 +20,11 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors({
-  origin: 'http://localhost:5173'
+  origin:[ 'http://localhost:5173', 'https://judgeevaluation.netlify.app']
 }));
 
 app.get('/', (req, res) => {
-  res.send('Hello from Render!');
+  res.send('Hello from Render!I am live now');
 });
 
 app.use('/api/v1/users', userRoute); 

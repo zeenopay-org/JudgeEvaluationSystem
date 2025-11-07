@@ -5,65 +5,55 @@ import { AuthContext } from "../../context/AuthContext";
 import { useLocation } from "react-router-dom";
 
 const Layout = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);  // Sidebar visibility (for mobile)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);  // Sidebar collapse state
+  const [sidebarOpen, setSidebarOpen] = useState(true); // default open on desktop
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 540);
   const { judge } = useContext(AuthContext);
   const location = useLocation();
 
   const sidebarWidth = sidebarCollapsed ? 80 : 256;
 
-  // Auto-open sidebar for small screens when navigating (if mobile)
-  useEffect(() => {
-    if (window.innerWidth < 540) {
-      setSidebarOpen(true);  // Automatically open the sidebar on mobile
-    }
-  }, [location]);
-
-  // Handle screen resizing
+  // Track screen size
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 540) {
-        setSidebarOpen(true);  // Automatically open sidebar on larger screens
-      } else {
-        setSidebarOpen(false); // Collapse sidebar on small screens
-      }
+      setIsMobile(window.innerWidth < 540);
     };
-
     window.addEventListener("resize", handleResize);
-    handleResize();  // Run on mount
-
     return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Set initial sidebar state once
+  useEffect(() => {
+    setSidebarOpen(window.innerWidth >= 540);
   }, []);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar for admin */}
-      {!judge && (
-        <Sidebar
-          isOpen={sidebarOpen} // Sidebar visibility
-          collapsed={sidebarCollapsed}
-          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-        />
-      )}
+      {/* Sidebar */}
+      <Sidebar
+        isOpen={!judge && sidebarOpen}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+      />
 
       {/* Main content */}
       <div
         className="flex-1 min-w-0 pt-16 transition-all duration-300"
         style={{
-          marginLeft: !judge && sidebarOpen ? `${sidebarWidth}px` : 0,  // Set content margin based on sidebar visibility
+          marginLeft: !judge && sidebarOpen ? `${sidebarWidth}px` : 0,
         }}
       >
         <Navbar
           sidebarOpen={sidebarOpen}
           sidebarCollapsed={sidebarCollapsed}
-          onOpenSidebar={() => setSidebarOpen(true)}  // Open the sidebar when clicking hamburger
+          onOpenSidebar={() => setSidebarOpen(true)}
         />
 
         {/* Overlay for mobile */}
-        {!judge && sidebarOpen && (
+        {!judge && isMobile && sidebarOpen && (
           <div
             className="fixed inset-0 bg-black/40 z-30 md:hidden"
-            onClick={() => setSidebarOpen(false)}  // Close sidebar on overlay click
+            onClick={() => setSidebarOpen(false)}
           />
         )}
 
