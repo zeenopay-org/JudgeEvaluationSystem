@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import AssignTitleModal from "./AssignTitleModal";
+import DeleteModal from "../../DeleteModal";
 import { toast } from "react-toastify";
 
 const DisplayTitle = () => {
@@ -12,6 +13,8 @@ const DisplayTitle = () => {
   const [groupedTitles, setGroupedTitles] = useState({});
   const [loading, setLoading] = useState(false);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [showModal,setShowModal]= useState(false);
+  const[selectedTitle, setSelectedTitle]=useState(null);
   const [currentTitle, setCurrentTitle] = useState(null);
   const [assignedContestants, setAssignedContestants] = useState({});
 
@@ -19,11 +22,14 @@ const DisplayTitle = () => {
     navigate("/title/create");
   };
 
+  const promptDelete= (title) =>{
+    setSelectedTitle(title);
+    setShowModal(true);
+  }
   const handleDelete = async (title) => {
-    if (window.confirm(`Are you sure you want to delete ${title.name}?`)) {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/v1/titles/delete/${title._id}`,
+          `http://localhost:5000/api/v1/titles/delete/${selectedTitle._id}`,
           {
             method: "DELETE",
             headers: {
@@ -33,17 +39,21 @@ const DisplayTitle = () => {
         );
 
         if (res.ok) {
-          const updatedTitles = titles.filter((t) => t._id !== title._id);
+          const updatedTitles = titles.filter((t) => t._id !== selectedTitle._id);
           setTitles(updatedTitles);
           groupTitlesByEvent(updatedTitles);
-          toast.success(`${title.name} deleted successfully!`);
+          toast.success(`${selectedTitle.name} deleted successfully!`);
         } else {
           toast.error("Failed to delete title.");
         }
       } catch (err) {
         toast.error("Something went wrong. Please try again.");
       }
-    }
+      finally{
+        setShowModal(false);
+        setSelectedTitle(null);
+      }
+    
   };
 
   const groupTitlesByEvent = (titlesArray) => {
@@ -126,102 +136,102 @@ const DisplayTitle = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-gray-800">All Event Titles</h2>
-        <button
-          onClick={handleCreateClick}
-          className="bg-green-600 text-white px-4 py-2 rounded-md shadow hover:bg-green-700 transition"
-        >
-          + Create Title
-        </button>
-      </div>
+   <div className="p-4 sm:p-6">
+  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+    <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">All Event Titles</h2>
+    <button
+      onClick={handleCreateClick}
+      className="bg-green-600 text-white px-3 py-1.5 rounded-md shadow hover:bg-green-700 text-sm"
+    >
+      + Create Title
+    </button>
+  </div>
 
-      {loading ? (
-        <p className="text-gray-600">Loading titles...</p>
-      ) : Object.keys(groupedTitles).length === 0 ? (
-        <p className="text-gray-500 italic">No titles found.</p>
-      ) : (
-        Object.entries(groupedTitles).map(([eventName, eventTitles]) => (
-          <div key={eventName} className="mb-8 ">
-            <h3 className="text-md font-bold text-gray-900 mb-3 border-b pb-2 flex items-center gap-3">
-              <span className="text-blue-600">🏆</span>
-              {eventName}
-            </h3>
+  {loading ? (
+    <p className="text-sm text-gray-600">Loading titles...</p>
+  ) : Object.keys(groupedTitles).length === 0 ? (
+    <p className="text-sm text-gray-500 italic">No titles found.</p>
+  ) : (
+    Object.entries(groupedTitles).map(([eventName, eventTitles]) => (
+      <div key={eventName} className="mb-6">
+        <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 border-b pb-1 flex items-center gap-2">
+          <span className="text-blue-600">🏆</span>
+          {eventName}
+        </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {eventTitles.map((title) => (
-                <div
-                  key={title._id}
-                  className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 hover:shadow-lg transition"
-                >
-                  {title.image && (
-                    <img
-                      src={title.image}
-                      alt={title.name}
-                      className="w-full h-48 object-cover"
-                    />
-                  )}
-                  <div className="p-4">
-                    <h4 className="text-sm font-semibold text-gray-800 mb-2">
-                      {title.name}
-                    </h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {eventTitles.map((title) => (
+            <div
+              key={title._id}
+              className="bg-white rounded-md shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition"
+            >
+              {title.image && (
+                <img
+                  src={title.image}
+                  alt={title.name}
+                  className="w-full h-40 object-cover"
+                />
+              )}
+              <div className="p-3">
+                <h4 className="text-sm font-semibold text-gray-800 mb-1">{title.name}</h4>
 
-                    {/*  Assigned Contestants */}
-                    {assignedContestants[title._id]?.length > 0 ? (
-                      <div className="mb-2">
-                        <p className="text-sm font-medium text-gray-600">
-                          Assigned Contestants:
-                        </p>
-                        <ul className="list-disc list-inside text-sm text-gray-700">
-                          {assignedContestants[title._id].map((c) => (
-                            <li key={c._id}>
-                              {c.name} (#{c.contestant_number})
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-gray-500 italic">
-                        No contestants assigned yet.
-                      </p>
-                    )}
-
-                    <div className="flex justify-between items-center mt-3 gap-4">
-                      <button
-                        onClick={() => openAssignModal(title)}
-                        className="basis-2/3 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm text-center"
-                      >
-                        Assign to Contestant
-                      </button>
-                      <button
-                        onClick={() => handleDelete(title)}
-                        className="basis-1/3 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 text-sm text-center"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                {assignedContestants[title._id]?.length > 0 ? (
+                  <div className="mb-2">
+                    <p className="text-xs font-medium text-gray-600">Assigned Contestants:</p>
+                    <ul className="list-disc list-inside text-xs text-gray-700">
+                      {assignedContestants[title._id].map((c) => (
+                        <li key={c._id}>
+                          {c.name} (#{c.contestant_number})
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))
-      )}
+                ) : (
+                  <p className="text-xs text-gray-500 italic">No contestants assigned yet.</p>
+                )}
 
-      {assignModalOpen && currentTitle && (
-        <AssignTitleModal
-          key={currentTitle._id}
-          titleId={currentTitle._id}
-          eventId={currentTitle.event?._id}
-          onClose={() => setAssignModalOpen(false)}
-          onAssignSuccess={() => {
-            setAssignModalOpen(false);
-            fetchAssignments(titles);
-          }}
-        />
-      )}
-    </div>
+                <div className="flex justify-between items-center mt-3 gap-2">
+                  <button
+                    onClick={() => openAssignModal(title)}
+                    className="flex-1 bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 text-xs text-center"
+                  >
+                    Assign
+                  </button>
+                  <button
+                    onClick={() => promptDelete(title)}
+                    className="flex-1 bg-red-600 text-white px-3 py-1.5 rounded-md hover:bg-red-700 text-xs text-center"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))
+  )}
+
+  {assignModalOpen && currentTitle && (
+    <AssignTitleModal
+      key={currentTitle._id}
+      titleId={currentTitle._id}
+      eventId={currentTitle.event?._id}
+      onClose={() => setAssignModalOpen(false)}
+      onAssignSuccess={() => {
+        setAssignModalOpen(false);
+        fetchAssignments(titles);
+      }}
+    />
+  )}
+
+  <DeleteModal
+    show={showModal}
+    itemName={selectedTitle?.name}
+    onConfirm={handleDelete}
+    onCancel={() => setShowModal(false)}
+  />
+</div>
   );
 };
 

@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-const Navbar = ({ onOpenSidebar, sidebarOpen, sidebarCollapsed }) => {
+const Navbar = ({ onOpenSidebar, sidebarOpen, sidebarCollapsed, isMobile }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { admin, judge, logout } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -32,19 +32,24 @@ const Navbar = ({ onOpenSidebar, sidebarOpen, sidebarCollapsed }) => {
     <nav
       className="bg-green-900 shadow-md fixed top-0 right-0 h-16 flex items-center justify-between px-4 md:px-6 z-[60] transition-all duration-300 ease-in-out"
       style={{
-        left: `${leftOffset}px`,
+        left: isMobile ? 0 : `${leftOffset}px`,
+        width: isMobile
+          ? "100%"
+          : judge
+          ? "100%"
+          : `calc(100% - ${leftOffset}px)`,
         marginLeft: 0,
-        width: judge ? "100%" : `calc(100% - ${leftOffset}px)`,
       }}
     >
       {/* Left side: Hamburger or Title */}
+      {/* Left side: Hamburger or Title */}
       <div className="flex items-center space-x-3 md:space-x-6 transition-all duration-300">
-        {/* Hamburger Button — only visible on mobile when sidebar is collapsed */}
-        {!judge && !sidebarOpen && (
+        {/* Hamburger Toggle — always visible on mobile */}
+        {!judge && (
           <button
-            onClick={onOpenSidebar} // Open the sidebar when clicked
+            onClick={onOpenSidebar}
             className="text-white focus:outline-none md:hidden"
-            aria-label="Open sidebar"
+            aria-label="Toggle sidebar"
           >
             <svg
               className="w-6 h-6"

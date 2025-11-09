@@ -1,4 +1,3 @@
-
 import { useContext, useEffect } from "react";
 import { AuthContext } from "./context/AuthContext";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -25,17 +24,17 @@ import EditRound from "./components/Dashboard/Round/EditRound";
 import EditContestant from "./components/Dashboard/Contestant/EditContestant";
 
 function App() {
-const { admin, judge } = useContext(AuthContext);
-useEffect(() => {
-  if (admin) {
-    document.title = "JudgeEvaluationSystem - Admin";
-  } else if (judge) {
-    document.title = "JudgeEvaluationSystem - Judge";
-  } else {
-    document.title = "JudgeEvaluationSystem";
-  }
-}, [admin, judge]);
-    return (
+  const { admin, judge } = useContext(AuthContext);
+  useEffect(() => {
+    if (admin) {
+      document.title = "JudgeEvaluationSystem - Admin";
+    } else if (judge) {
+      document.title = "JudgeEvaluationSystem - Judge";
+    } else {
+      document.title = "JudgeEvaluationSystem";
+    }
+  }, [admin, judge]);
+  return (
     <>
       <Routes>
         <Route path="/" element={<HomePage />}></Route>
@@ -105,7 +104,11 @@ useEffect(() => {
           }
         />
       </Routes>
-      <ToastContainer position="top-center" autoClose={3000} />
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        style={{ zIndex: 10050 }}
+      />
     </>
   );
 }

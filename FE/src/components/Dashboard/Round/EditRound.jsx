@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/AuthContext";
 import { toast } from "react-toastify";
 
-const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1"; 
+const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1";
 
 const EditRound = () => {
   const { id } = useParams();
@@ -99,17 +99,14 @@ const EditRound = () => {
     };
 
     try {
-      const res = await fetch(
-        `${BACKEND_URL}/rounds/edit/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const res = await fetch(`${BACKEND_URL}/rounds/edit/${id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
       const data = await res.json();
       if (res.ok) {
@@ -128,9 +125,11 @@ const EditRound = () => {
 
   // Render
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-        <h1 className="text-xl font-bold mb-4">Edit Round</h1>
+        <h1 className="text-xl sm:text-2xl font-bold mb-4 text-gray-800">
+          Edit Round
+        </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Round Name */}
@@ -142,7 +141,7 @@ const EditRound = () => {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full text-sm  px-4 py-3 border border-gray-300 rounded-lg"
+              className="w-full text-xs sm:text-sm px-4 py-3 border border-gray-300 rounded-lg"
               required
             />
           </div>
@@ -155,7 +154,7 @@ const EditRound = () => {
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className="w-full text-sm  px-4 py-3 border border-gray-300 rounded-lg bg-white"
+              className="w-full text-xs sm:text-sm px-4 py-3 border border-gray-300 rounded-lg bg-white"
               required
             >
               <option value="">Select round type</option>
@@ -171,18 +170,21 @@ const EditRound = () => {
                 Questions
               </label>
               {questions.map((q, i) => (
-                <div key={i} className="flex items-center mb-2">
+                <div
+                  key={i}
+                  className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-2"
+                >
                   <input
                     type="text"
                     value={q}
                     onChange={(e) => handleQuestionChange(i, e.target.value)}
-                    className="flex-grow  text-sm  px-4 py-2 border border-gray-300 rounded-lg"
+                    className="w-full text-xs sm:text-sm px-4 py-2 border border-gray-300 rounded-lg"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => removeQuestion(i)}
-                    className="ml-2 text-red-500 hover:text-red-700"
+                    className="text-red-500 hover:text-red-700 text-sm"
                   >
                     ✕
                   </button>
@@ -191,7 +193,7 @@ const EditRound = () => {
               <button
                 type="button"
                 onClick={addQuestion}
-                className="mt-2 px-4 py-1  bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs sm:text-sm"
               >
                 Add Question
               </button>
@@ -207,7 +209,7 @@ const EditRound = () => {
               type="number"
               value={maxScore}
               onChange={(e) => setMaxScore(e.target.value)}
-              className="w-full  text-sm  px-4 py-3 border border-gray-300 rounded-lg"
+              className="w-full text-xs sm:text-sm px-4 py-3 border border-gray-300 rounded-lg"
               required
             />
           </div>
@@ -220,7 +222,7 @@ const EditRound = () => {
             <select
               value={eventId}
               onChange={(e) => setEventId(e.target.value)}
-              className="w-full  text-sm  px-4 py-3 border border-gray-300 rounded-lg bg-white"
+              className="w-full text-xs sm:text-sm px-4 py-3 border border-gray-300 rounded-lg bg-white"
               required
               disabled={isLoadingEvents}
             >
@@ -235,10 +237,11 @@ const EditRound = () => {
             </select>
           </div>
 
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full py-3 px-6 rounded-lg text-white ${
+            className={`w-full py-3 px-6 rounded-lg text-white text-sm ${
               isLoading ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"
             }`}
           >

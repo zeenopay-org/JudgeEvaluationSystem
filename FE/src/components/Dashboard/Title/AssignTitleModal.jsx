@@ -8,13 +8,9 @@ const AssignTitleModal = ({ titleId, eventId, onClose, onAssignSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // ✅ Fetch contestants for the given event
   useEffect(() => {
     const fetchContestants = async () => {
-      if (!eventId) {
-        console.error("❌ Missing eventId");
-        return;
-      }
+      if (!eventId) return;
 
       setLoading(true);
       try {
@@ -24,15 +20,8 @@ const AssignTitleModal = ({ titleId, eventId, onClose, onAssignSuccess }) => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-
         const data = await res.json();
-
-        if (res.ok && Array.isArray(data.contestants)) {
-          setContestants(data.contestants);
-        } else {
-          console.error("Unexpected response:", data);
-          setContestants([]);
-        }
+        setContestants(Array.isArray(data.contestants) ? data.contestants : []);
       } catch (err) {
         console.error("Failed to fetch contestants:", err);
         setContestants([]);
@@ -43,8 +32,6 @@ const AssignTitleModal = ({ titleId, eventId, onClose, onAssignSuccess }) => {
 
     fetchContestants();
   }, [eventId, token]);
-
-  //  Assign title to a contestant
 
   const handleAssign = async (contestantId) => {
     try {
@@ -74,14 +61,13 @@ const AssignTitleModal = ({ titleId, eventId, onClose, onAssignSuccess }) => {
       toast.success("Title Assigned Successfully!");
       onAssignSuccess && onAssignSuccess();
     } catch (err) {
-      console.error("Assignment error:", err);
       toast.error(err.message || "Error assigning title");
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-opacity-40 flex justify-center items-start pt-16 z-50">
-      <div className="mt-24 bg-white rounded-lg shadow-lg w-11/12 max-w-3xl p-6 relative">
+    <div className="fixed inset-0 bg-opacity-40 bg-grey-200 flex justify-center items-start pt-10 z-50 px-4">
+      <div className="mt-24 bg-white rounded-lg shadow-lg w-full max-w-3xl max-h-[80vh] p-6 relative overflow-hidden">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -98,28 +84,25 @@ const AssignTitleModal = ({ titleId, eventId, onClose, onAssignSuccess }) => {
           <p className="mb-4 text-center text-green-600">{message}</p>
         )}
 
-        {/* ✅ Show loading or contestant grid */}
         {loading ? (
-          <p className="text-center">Loading contestants...</p>
+          <p className="text-center text-sm text-gray-600">Loading contestants...</p>
         ) : Array.isArray(contestants) && contestants.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-[60vh] overflow-y-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto max-h-[60vh] pr-1">
             {contestants.map((c) => (
               <div
                 key={c._id}
                 className="bg-gray-50 rounded-lg shadow hover:shadow-md p-4 flex flex-col items-center text-center transition"
               >
                 <img
-                  src={c.photo || "https://via.placeholder.com/100"}
+                  src={c.image || "https://via.placeholder.com/100"}
                   alt={c.name}
-                  className="w-24 h-24 text-md rounded-full object-cover mb-2 border-2 border-gray-200"
+                  className="w-24 h-24 rounded-full object-cover mb-2 border-2 border-gray-200"
                 />
-                <h3 className="font-semibold  text-sm  text-gray-800">{c.name}</h3>
-                <p className="text-sm text-gray-500 mb-2">
-                  #{c.contestant_number}
-                </p>
+                <h3 className="font-semibold text-sm text-gray-800">{c.name}</h3>
+                <p className="text-sm text-gray-500 mb-2">#{c.contestant_number}</p>
                 <button
                   onClick={() => handleAssign(c._id)}
-                  className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition"
+                  className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition text-sm"
                 >
                   Assign
                 </button>
@@ -127,7 +110,7 @@ const AssignTitleModal = ({ titleId, eventId, onClose, onAssignSuccess }) => {
             ))}
           </div>
         ) : (
-          <p className="text-center text-gray-500 italic">
+          <p className="text-center text-sm text-gray-500 italic">
             No contestants found for this event.
           </p>
         )}

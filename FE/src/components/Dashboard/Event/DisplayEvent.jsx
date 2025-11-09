@@ -1,28 +1,34 @@
 import React, { useEffect, useState, useContext, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import DeleteModal from "../../DeleteModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faPerson, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faEdit, faUser, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { AuthContext } from "../../../context/AuthContext";
 import { toast } from "react-toastify";
 
 const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1";
 
-const DisplayEvent = ({ eventId }) => {
+const DisplayEvent = () => {
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
+
   const [events, setEvents] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const toastShownRef = useRef(false);
 
-  // truncate long text for mobile
+  // 🔹 Truncate long organizer names (mobile-friendly)
   const truncateByLetters = (text, maxLength) =>
     text && text.length > maxLength
       ? text.slice(0, maxLength) + "..."
       : text || "";
 
+  // 🔹 Navigation handlers
   const handleCreateClick = () => navigate("/");
   const handleEdit = (event) => navigate(`/event/edit/${event._id}`);
+  
   const handleContestant = (event) => {
     localStorage.setItem("selectedEventId", event._id);
     navigate(`/contestant/create/${event._id}`, {
@@ -30,26 +36,40 @@ const DisplayEvent = ({ eventId }) => {
     });
   };
 
-  const handleDelete = async (event) => {
-    if (confirm(`Are you sure you want to delete ${event.name}?`)) {
-      try {
-        const res = await fetch(
-          `${BACKEND_URL}/events/delete/${event._id}`,
-          {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        if (res.ok) {
-          setEvents((prev) => prev.filter((e) => e._id !== event._id));
-          toast.success(`${event.name} deleted successfully!`);
-        } else toast.error("Failed to delete event");
-      } catch (err) {
-        toast.error(`Error deleting event: ${err.message || err}`);
+  // 🔹 Show delete confirmation
+  const promptDelete = (event) => {
+    setSelectedEvent(event);
+    setShowModal(true);
+  };
+
+  // 🔹 Handle delete confirmed
+  const handleDelete = async () => {
+    if (!selectedEvent) return;
+
+    try {
+      const res = await fetch(
+        `${BACKEND_URL}/events/delete/${selectedEvent._id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.ok) {
+        setEvents((prev) => prev.filter((e) => e._id !== selectedEvent._id));
+        toast.success(`${selectedEvent.name} deleted successfully!`);
+      } else {
+        toast.error("Failed to delete event");
       }
+    } catch (err) {
+      toast.error(`Error deleting event: ${err.message || err}`);
+    } finally {
+      setShowModal(false);
+      setSelectedEvent(null);
     }
   };
 
+  // 🔹 Fetch all events
   useEffect(() => {
     const fetchEvents = async () => {
       if (!token) return setLoading(false);
@@ -75,6 +95,7 @@ const DisplayEvent = ({ eventId }) => {
     fetchEvents();
   }, [token]);
 
+  // 🔹 Show toast once after event creation
   useEffect(() => {
     const created = localStorage.getItem("eventCreated");
     if (created === "true" && !toastShownRef.current) {
@@ -93,7 +114,7 @@ const DisplayEvent = ({ eventId }) => {
 
   return (
     <div className="p-4 sm:p-6 md:p-8">
-      {/* Header */}
+      {/* 🔹 Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
           Ongoing Events
@@ -106,7 +127,7 @@ const DisplayEvent = ({ eventId }) => {
         </button>
       </div>
 
-      {/* Events Grid */}
+      {/* 🔹 Events Grid */}
       <div
         className="grid gap-6 sm:gap-7 md:gap-8 
         grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
@@ -118,7 +139,7 @@ const DisplayEvent = ({ eventId }) => {
         ) : (
           events.map((event) => (
             <div
-              key={event._id || event.id}
+              key={event._id}
               className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex flex-col"
             >
               {event.image && (
@@ -130,7 +151,7 @@ const DisplayEvent = ({ eventId }) => {
               )}
 
               <div className="p-4 sm:p-5 flex flex-col flex-grow">
-                {/* Title + Organizer */}
+                {/* 🔹 Title + Organizer */}
                 <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-1">
                   {event.name}
                 </h3>
@@ -150,7 +171,7 @@ const DisplayEvent = ({ eventId }) => {
                   </span>
                 )}
 
-                {/* Action Buttons */}
+                {/* 🔹 Action Buttons */}
                 <div className="mt-auto space-y-2">
                   <div className="grid grid-cols-2 gap-3">
                     <button
@@ -165,7 +186,7 @@ const DisplayEvent = ({ eventId }) => {
                     </button>
 
                     <button
-                      onClick={() => handleDelete(event)}
+                      onClick={() => promptDelete(event)}
                       className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 rounded-md text-white bg-red-600 hover:bg-red-700 text-xs sm:text-sm font-medium shadow transition"
                     >
                       <FontAwesomeIcon
@@ -181,7 +202,7 @@ const DisplayEvent = ({ eventId }) => {
                     className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md text-white bg-green-600 hover:bg-green-700 transition text-xs sm:text-sm font-medium shadow"
                   >
                     <FontAwesomeIcon
-                      icon={faPerson}
+                      icon={faUser}
                       className="text-[10px] sm:text-xs"
                     />
                     Add Contestant
@@ -191,6 +212,14 @@ const DisplayEvent = ({ eventId }) => {
             </div>
           ))
         )}
+
+        {/* 🔹 Delete Confirmation Modal */}
+        <DeleteModal
+          show={showModal}
+          itemName={selectedEvent?.name}
+          onConfirm={handleDelete}
+          onCancel={() => setShowModal(false)}
+        />
       </div>
     </div>
   );
