@@ -1,6 +1,7 @@
 import Contestant from "../models/contestantsModel.js";
 import { configDotenv } from "dotenv";
 import { uploadToS3 } from "../utils/s3Uploader.js";
+import XLSX from "xlsx";
 
 //create contestants
 export const createContestant = async (req, res) => {
@@ -122,7 +123,6 @@ export const editContestant = async (req, res) => {
   }
 };
 
-
 //delete contestatnts
 export const deleteContestants = async (req, res) => {
   try {
@@ -154,5 +154,67 @@ export const getEventContestants = async (req, res) => {
     res.status(200).json({ contestants });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const bulkUploadContestants = async (req, res) => {
+  try {
+    const { eventId } = req.body;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ error: "Excel file is required" });
+    }
+
+    if (!eventId) {
+      return res.status(400).json({ error: "Event ID is required" });
+    }
+
+    const workbook = XLSX.read(file.buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    if (!sheet.length) {
+      return res.status(400).json({ error: "Excel SHeet is empty" });
+    }
+
+    const missingFields = [];
+    const contestantsToInsert = [];
+
+    for (const row of sheet) {
+      const { name, contestant_number, image } = row;
+
+      if (!name || !contestant_number || !image) {
+        missingFields.push(row);
+        continue;
+      }
+
+      //check for duplicates within the same event
+      const existing = await Contestant.findOne({
+        contestant_number,
+        event: eventId,
+      });
+
+      if (existing) continue; //skip duplicates
+
+      contestantsToInsert.push({
+        name,
+        contestant_number,
+        image,
+        event: eventId,
+      });
+    }
+    if (contestantsToInsert.length > 0) {
+      await Contestant.insertMany(contestantsToInsert);
+    }
+
+    res.status(201).json({
+      message: "Bulk upload Completed",
+      inserted: contestantsToInsert.length,
+      skipped: sheet.length - contestantsToInsert.length,
+      missingFields,
+    });
+  } catch (error) {
+    res.status(500).json({ error: err.message });
   }
 };
