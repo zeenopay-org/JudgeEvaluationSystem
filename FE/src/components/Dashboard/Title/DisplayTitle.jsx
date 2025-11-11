@@ -138,15 +138,17 @@ const DisplayTitle = () => {
   };
 
   return (
-   <div className="p-4 sm:p-6">
-  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+   <div className="p-4  sm:px-4 lg:px-6 relative">
+  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
     <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">All Event Titles</h2>
-    <button
-      onClick={handleCreateClick}
-      className="bg-green-600 text-white px-3 py-1.5 rounded-md shadow hover:bg-green-700 text-sm"
-    >
-      + Create Title
-    </button>
+  <button
+          onClick={handleCreateClick}
+          className="bg-green-600 text-white px-3 sm:px-3 py-1 sm:py-2 rounded-md shadow hover:bg-green-700 transition duration-200 text-xs sm:text-base w-auto flex items-center gap-1.5 sm:gap-2
+                 sm:static absolute top-3 right-3"
+        >
+          <span className="text-base sm:text-lg font-bold">+</span>
+          <span className="text-xs sm:text-base"> Create Title</span>
+        </button>
   </div>
 {loading ? (
   <p className="text-sm text-gray-600">Loading titles...</p>
@@ -155,7 +157,7 @@ const DisplayTitle = () => {
 ) : (
   Object.entries(groupedTitles).map(([eventName, eventTitles]) => (
     <div key={eventName || "unknown-event"} className="mb-6">
-      <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 border-b pb-1 flex items-center gap-2">
+      <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 border-b border-gray-500 pb-1 flex items-center gap-2">
         <span className="text-blue-600">🏆</span>
         {eventName || "Unknown Event"}
       </h3>

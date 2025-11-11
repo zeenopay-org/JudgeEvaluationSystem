@@ -43,26 +43,31 @@ const Navbar = ({ onOpenSidebar, sidebarOpen, sidebarCollapsed, isMobile }) => {
     >
       {/* Left side: Hamburger or Title */}
       {/* Left side: Hamburger or Title */}
-      <div className="flex items-center space-x-3 md:space-x-6 transition-all duration-300">
+      <div className="flex items-center space-x-3 md:space-x-6 transition-all duration-300 ">
         {/* Hamburger Toggle — always visible on mobile */}
         {!judge && (
           <button
             onClick={onOpenSidebar}
-            className="text-white focus:outline-none md:hidden"
             aria-label="Toggle sidebar"
+            className="md:hidden flex items-center justify-center w-10 h-10 rounded-md bg-white shadow-sm border border-gray-400 hover:bg-gray-100 focus:outline-none"
           >
             <svg
-              className="w-6 h-6"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              viewBox="0 0 24 24"
+              strokeLinecap="round"
+              className="w-6 h-6 text-gray-800 "
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
+              {/* Top line — short & right aligned */}
+              <line x1="10" y1="6" x2="20" y2="6" />
+
+              {/* Middle line — full length centered */}
+              <line x1="4" y1="12" x2="20" y2="12" />
+
+              {/* Bottom line — short & left aligned */}
+              <line x1="4" y1="18" x2="14" y2="18" />
             </svg>
           </button>
         )}
@@ -84,7 +89,7 @@ const Navbar = ({ onOpenSidebar, sidebarOpen, sidebarCollapsed, isMobile }) => {
             </span>
           </span>
           <svg
-            className="w-4 h-4 text-gray-600 transition-transform duration-200"
+            className="w-4 h-4 text-white transition-transform duration-200"
             style={{
               transform: dropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
             }}

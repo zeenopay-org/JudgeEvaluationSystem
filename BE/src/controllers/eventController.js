@@ -8,12 +8,7 @@ export const createEvent = async (req, res) => {
     const { name, image, created_by } = req.body;
     const file= req.file;
 
-    const existingEvent = await Event.findOne();
-    if(existingEvent){
-      return res.status(403).json({error: "Only one event is allowed at a time "})
-    }
-
-     if (!file) {
+        if (!file) {
       return res.status(400).json({ error: "Image file is required" });
     }
 

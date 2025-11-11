@@ -88,6 +88,12 @@ const displayRound = () => {
     fetchRounds();
   }, [token, navigate]);
 
+  const sortedRounds = [...rounds].sort((a, b) => {
+    if (a.type === "qna" && b.type !== "qna") return 1; // move a (qna) to end
+    if (a.type !== "qna" && b.type === "qna") return -1; // keep non-qna first
+    return 0; // keep original order otherwise
+  });
+
   return (
     <div className="px-2 py-6 sm:px-4 lg:px-6 relative">
       {/* Header */}
@@ -106,8 +112,8 @@ const displayRound = () => {
       </div>
 
       {/* Grid of rounds */}
-     <div className="grid gap-6 sm:gap-7 md:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-        {rounds.map((round) => (
+      <div className="grid gap-6 sm:gap-7 md:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+        {sortedRounds.map((round) => (
           <div
             key={round._id || round.id}
             className="bg-white rounded-lg shadow-md overflow-hidden"

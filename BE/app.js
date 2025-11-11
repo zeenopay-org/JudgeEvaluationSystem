@@ -17,11 +17,15 @@ import uploadRoute from './src/routes/uploadRoute.js';
 dotenv.config();
 
 const app = express();
+app.use(cors({
+  origin:[ 'http://localhost:5173', 'https://judgeevaluation.netlify.app'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials:true
+
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors({
-  origin:[ 'http://localhost:5173', 'https://judgeevaluation.netlify.app']
-}));
+
 
 app.get('/', (req, res) => {
   res.send('Hello from Render!I am live now');

@@ -214,52 +214,62 @@ export const getJudgeWiseBreakdown = async (req, res) => {
       },
       { $unwind: "$contestantDetails" },
       {
-        $project: {
-          judgeId: "$judgeDetails._id",
-          judgeName: "$userDetails.username",
-          contestantId: "$contestantDetails._id",
-          contestantName: "$contestantDetails.name",
-          contestantNumber: "$contestantDetails.contestant_number",
-          score: "$score",
-          roundName: "$round",
-        },
-      },
-      {
         $lookup: {
           from: "rounds",
-          localField: "roundName",
+          localField: "round",
           foreignField: "_id",
           as: "roundDetails",
         },
       },
       { $unwind: "$roundDetails" },
       {
-        $project: {
-          judgeId: 1,
-          judgeName: 1,
-          contestantId: 1,
-          contestantName: 1,
-          contestantNumber: 1,
-          score: 1,
-          roundName: "$roundDetails.name",
-          maxScore: "$roundDetails.max_score",
+        $group: {
+          _id: {
+            contestantId: "$contestantDetails._id",
+            roundId: "$roundDetails._id",
+          },
+          contestantName: { $first: "$contestantDetails.name" },
+          contestantNumber: { $first: "$contestantDetails.contestant_number" },
+          roundName: { $first: "$roundDetails.name" },
+          maxScorePerJudge: { $first: "$roundDetails.max_score" },
+          totalScore: { $sum: "$score" },
+          judgeCount: { $sum: 1 },
+          judges: {
+            $push: {
+              judgeId: "$judgeDetails._id",
+              judgeName: "$userDetails.username",
+              score: "$score",
+            },
+          },
         },
       },
       {
-        $sort: { contestantNumber: 1, judgeName: 1 }, // sort for neatness
+        $addFields: {
+           totalPossibleScore: { $multiply: ["$maxScorePerJudge", "$judgeCount"] },
+        averageScore: {
+            $cond: [
+              { $gt: ["$judgeCount", 0] },
+              { $divide: ["$totalScore", "$judgeCount"] },
+              0,
+            ],
+          },
+        },
+      },
+      {
+        $sort: { contestantNumber: 1, roundName: 1 },
       },
     ]);
 
     res.status(200).json(result);
   } catch (err) {
-    console.error("Error fetching judge breakdown:", err);
+    console.error("Error generating report:", err);
     res.status(500).json({ error: err.message });
   }
 };
 
 export const getJudgeScoresDetailed = async (req, res) => {
   try {
-   const judgeId = req.judge?.judgeId || req.user?.id;
+    const judgeId = req.judge?.judgeId || req.user?.id;
 
     if (!judgeId) {
       return res.status(401).json({ message: "Unauthorized" });

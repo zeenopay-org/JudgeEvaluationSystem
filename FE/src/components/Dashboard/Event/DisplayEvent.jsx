@@ -19,7 +19,9 @@ const DisplayEvent = () => {
   const toastShownRef = useRef(false);
 
   const truncateByLetters = (text, maxLength) =>
-    text && text.length > maxLength ? text.slice(0, maxLength) + "..." : text || "";
+    text && text.length > maxLength
+      ? text.slice(0, maxLength) + "..."
+      : text || "";
 
   const handleCreateClick = () => navigate("/");
   const handleEdit = (event) => navigate(`/event/edit/${event._id}`);
@@ -38,10 +40,13 @@ const DisplayEvent = () => {
   const handleDelete = async () => {
     if (!selectedEvent) return;
     try {
-      const res = await fetch(`${BACKEND_URL}/events/delete/${selectedEvent._id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `${BACKEND_URL}/events/delete/${selectedEvent._id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       if (res.ok) {
         setEvents((prev) => prev.filter((e) => e._id !== selectedEvent._id));
         toast.success(`${selectedEvent.name} deleted successfully!`);
@@ -116,11 +121,11 @@ const DisplayEvent = () => {
           </button>
         </div>
       ) : (
-        <div className="max-w-screen-md mx-auto">
-          {events.slice(0, 1).map((event) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-start">
+          {events.map((event) => (
             <div
               key={event._id}
-              className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex flex-col relative"
+              className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col relative w-full max-w-sm"
             >
               {event.image && (
                 <img
@@ -138,7 +143,9 @@ const DisplayEvent = () => {
                 {event.created_by && (
                   <p className="text-sm text-gray-500 mb-2">
                     Organized by{" "}
-                    <strong className="text-gray-700">{event.created_by}</strong>
+                    <strong className="text-gray-700">
+                      {event.created_by}
+                    </strong>
                   </p>
                 )}
 
@@ -155,7 +162,7 @@ const DisplayEvent = () => {
                   <FontAwesomeIcon icon={faTrash} className="text-base" />
                 </button>
 
-                <div className="flex items-center justify-between gap-3 mt-auto">
+                 <div className="flex items-center justify-between gap-3 mt-auto">
                   <button
                     onClick={() => handleEdit(event)}
                     className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white font-medium text-sm shadow hover:bg-green-700 transition"
