@@ -89,7 +89,7 @@ const displayRound = () => {
   }, [token, navigate]);
 
   return (
-    <div className="px-4 py-6 sm:px-6 lg:px-8">
+    <div className="px-2 py-6 sm:px-4 lg:px-6 relative">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
@@ -97,14 +97,16 @@ const displayRound = () => {
         </h2>
         <button
           onClick={handleCreateClick}
-          className="bg-green-600 text-white px-4 py-2 rounded-md shadow hover:bg-green-700 transition duration-200 text-sm sm:text-base"
+          className="bg-green-600 text-white px-3 sm:px-3 py-1 sm:py-2 rounded-md shadow hover:bg-green-700 transition duration-200 text-xs sm:text-base w-auto flex items-center gap-1.5 sm:gap-2
+                 sm:static absolute top-3 right-3"
         >
-          Create Round
+          <span className="text-base sm:text-lg font-bold">+</span>
+          <span className="text-xs sm:text-base">Create Round</span>
         </button>
       </div>
 
       {/* Grid of rounds */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+     <div className="grid gap-6 sm:gap-7 md:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
         {rounds.map((round) => (
           <div
             key={round._id || round.id}

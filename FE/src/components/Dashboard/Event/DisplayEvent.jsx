@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import DeleteModal from "../../DeleteModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faUser, faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -11,7 +11,6 @@ const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1";
 const DisplayEvent = () => {
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
-  const location = useLocation();
 
   const [events, setEvents] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -19,16 +18,11 @@ const DisplayEvent = () => {
   const [loading, setLoading] = useState(true);
   const toastShownRef = useRef(false);
 
-  // 🔹 Truncate long organizer names (mobile-friendly)
   const truncateByLetters = (text, maxLength) =>
-    text && text.length > maxLength
-      ? text.slice(0, maxLength) + "..."
-      : text || "";
+    text && text.length > maxLength ? text.slice(0, maxLength) + "..." : text || "";
 
-  // 🔹 Navigation handlers
   const handleCreateClick = () => navigate("/");
   const handleEdit = (event) => navigate(`/event/edit/${event._id}`);
-  
   const handleContestant = (event) => {
     localStorage.setItem("selectedEventId", event._id);
     navigate(`/contestant/create/${event._id}`, {
@@ -36,25 +30,18 @@ const DisplayEvent = () => {
     });
   };
 
-  // 🔹 Show delete confirmation
   const promptDelete = (event) => {
     setSelectedEvent(event);
     setShowModal(true);
   };
 
-  // 🔹 Handle delete confirmed
   const handleDelete = async () => {
     if (!selectedEvent) return;
-
     try {
-      const res = await fetch(
-        `${BACKEND_URL}/events/delete/${selectedEvent._id}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
+      const res = await fetch(`${BACKEND_URL}/events/delete/${selectedEvent._id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (res.ok) {
         setEvents((prev) => prev.filter((e) => e._id !== selectedEvent._id));
         toast.success(`${selectedEvent.name} deleted successfully!`);
@@ -69,7 +56,6 @@ const DisplayEvent = () => {
     }
   };
 
-  // 🔹 Fetch all events
   useEffect(() => {
     const fetchEvents = async () => {
       if (!token) return setLoading(false);
@@ -95,7 +81,6 @@ const DisplayEvent = () => {
     fetchEvents();
   }, [token]);
 
-  // 🔹 Show toast once after event creation
   useEffect(() => {
     const created = localStorage.getItem("eventCreated");
     if (created === "true" && !toastShownRef.current) {
@@ -113,114 +98,92 @@ const DisplayEvent = () => {
     );
 
   return (
-    <div className="p-4 sm:p-6 md:p-8">
-      {/* 🔹 Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
+    <div className="p-4 sm:p-6 md:p-8 relative">
+      <div className="mb-6">
+        <h2 className="text-base sm:text-xl md:text-2xl font-semibold text-gray-800">
           Ongoing Events
         </h2>
-        <button
-          onClick={handleCreateClick}
-          className="bg-green-600 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-md shadow hover:bg-green-700 transition duration-200 text-sm sm:text-base w-full sm:w-auto"
-        >
-          Create Event
-        </button>
       </div>
 
-      {/* 🔹 Events Grid */}
-      <div
-        className="grid gap-6 sm:gap-7 md:gap-8 
-        grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
-      >
-        {events.length === 0 ? (
-          <p className="text-gray-500 text-center col-span-full text-sm sm:text-base">
-            No events found.
-          </p>
-        ) : (
-          events.map((event) => (
+      {events.length === 0 ? (
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <button
+            onClick={handleCreateClick}
+            className="bg-green-600 text-white px-5 py-3 rounded-md shadow hover:bg-green-700 transition text-base flex items-center gap-2"
+          >
+            <span className="text-lg font-bold">+</span>
+            <span>Create Event</span>
+          </button>
+        </div>
+      ) : (
+        <div className="max-w-screen-md mx-auto">
+          {events.slice(0, 1).map((event) => (
             <div
               key={event._id}
-              className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex flex-col"
+              className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex flex-col relative"
             >
               {event.image && (
                 <img
                   src={event.image}
                   alt={event.name}
-                  className="w-full h-44 sm:h-48 md:h-52 object-cover rounded-t-xl"
+                  className="w-full h-48 sm:h-56 md:h-64 object-cover rounded-t-xl"
                 />
               )}
 
-              <div className="p-4 sm:p-5 flex flex-col flex-grow">
-                {/* 🔹 Title + Organizer */}
-                <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-1">
+              <div className="p-4 sm:p-6 flex flex-col flex-grow">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1">
                   {event.name}
                 </h3>
 
                 {event.created_by && (
-                  <p className="text-xs sm:text-sm text-gray-500 mb-2">
+                  <p className="text-sm text-gray-500 mb-2">
                     Organized by{" "}
-                    <strong className="text-gray-700">
-                      {event.created_by}
-                    </strong>
+                    <strong className="text-gray-700">{event.created_by}</strong>
                   </p>
                 )}
 
                 {event.createdAt && (
-                  <span className="inline-block bg-green-100 text-green-800 text-[10px] sm:text-xs font-medium px-3 py-1 rounded-full mb-3 w-fit">
+                  <span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-3 py-1 rounded-full mb-3 w-fit">
                     {new Date(event.createdAt).toLocaleDateString()}
                   </span>
                 )}
 
-                {/* 🔹 Action Buttons */}
-                <div className="mt-auto space-y-2">
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      onClick={() => handleEdit(event)}
-                      className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 rounded-md text-white bg-green-600 hover:bg-green-700 text-xs sm:text-sm font-medium shadow transition"
-                    >
-                      <FontAwesomeIcon
-                        icon={faEdit}
-                        className="text-[10px] sm:text-xs"
-                      />
-                      Edit
-                    </button>
+                <button
+                  onClick={() => promptDelete(event)}
+                  className="absolute top-3 right-3 bg-white rounded-lg text-red-600 hover:text-red-700 transition"
+                >
+                  <FontAwesomeIcon icon={faTrash} className="text-base" />
+                </button>
 
-                    <button
-                      onClick={() => promptDelete(event)}
-                      className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 rounded-md text-white bg-red-600 hover:bg-red-700 text-xs sm:text-sm font-medium shadow transition"
-                    >
-                      <FontAwesomeIcon
-                        icon={faTrash}
-                        className="text-[10px] sm:text-xs"
-                      />
-                      Delete
-                    </button>
-                  </div>
+                <div className="flex items-center justify-between gap-3 mt-auto">
+                  <button
+                    onClick={() => handleEdit(event)}
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white font-medium text-sm shadow hover:bg-green-700 transition"
+                  >
+                    <FontAwesomeIcon icon={faEdit} className="text-xs" />
+                    Edit
+                  </button>
 
                   <button
                     onClick={() => handleContestant(event)}
-                    className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md text-white bg-green-600 hover:bg-green-700 transition text-xs sm:text-sm font-medium shadow"
+                    className="flex-[1.5] inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-red-600 text-white font-medium text-sm shadow hover:bg-red-700 transition"
                   >
-                    <FontAwesomeIcon
-                      icon={faUser}
-                      className="text-[10px] sm:text-xs"
-                    />
+                    <FontAwesomeIcon icon={faUser} className="text-xs" />
                     Add Contestant
                   </button>
                 </div>
               </div>
             </div>
-          ))
-        )}
+          ))}
+        </div>
+      )}
 
-        {/* 🔹 Delete Confirmation Modal */}
-        <DeleteModal
-          show={showModal}
-          itemName={selectedEvent?.name}
-          onConfirm={handleDelete}
-          onCancel={() => setShowModal(false)}
-        />
-      </div>
+      <DeleteModal
+        show={showModal}
+        itemName={selectedEvent?.name}
+        onConfirm={handleDelete}
+        onCancel={() => setShowModal(false)}
+      />
     </div>
   );
 };

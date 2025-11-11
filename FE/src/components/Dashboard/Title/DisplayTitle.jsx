@@ -5,6 +5,8 @@ import AssignTitleModal from "./AssignTitleModal";
 import DeleteModal from "../../DeleteModal";
 import { toast } from "react-toastify";
 
+const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1";
+
 const DisplayTitle = () => {
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -29,7 +31,7 @@ const DisplayTitle = () => {
   const handleDelete = async (title) => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/v1/titles/delete/${selectedTitle._id}`,
+          `${BACKEND_URL}/titles/delete/${selectedTitle._id}`,
           {
             method: "DELETE",
             headers: {
@@ -75,7 +77,7 @@ const DisplayTitle = () => {
     const fetchTitles = async () => {
       setLoading(true);
       try {
-        const res = await fetch("http://localhost:5000/api/v1/titles", {
+        const res = await fetch(`${BACKEND_URL}/titles`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -128,7 +130,7 @@ const DisplayTitle = () => {
 
   const openAssignModal = (title) => {
     if (!title?.event?._id) {
-      alert("This title is not linked to any event.");
+      toast.error("This title is not linked to any event.");
       return;
     }
     setCurrentTitle(title);
@@ -146,48 +148,74 @@ const DisplayTitle = () => {
       + Create Title
     </button>
   </div>
+{loading ? (
+  <p className="text-sm text-gray-600">Loading titles...</p>
+) : Object.keys(groupedTitles).length === 0 ? (
+  <p className="text-sm text-gray-500 italic">No titles found.</p>
+) : (
+  Object.entries(groupedTitles).map(([eventName, eventTitles]) => (
+    <div key={eventName || "unknown-event"} className="mb-6">
+      <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 border-b pb-1 flex items-center gap-2">
+        <span className="text-blue-600">🏆</span>
+        {eventName || "Unknown Event"}
+      </h3>
 
-  {loading ? (
-    <p className="text-sm text-gray-600">Loading titles...</p>
-  ) : Object.keys(groupedTitles).length === 0 ? (
-    <p className="text-sm text-gray-500 italic">No titles found.</p>
-  ) : (
-    Object.entries(groupedTitles).map(([eventName, eventTitles]) => (
-      <div key={eventName} className="mb-6">
-        <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 border-b pb-1 flex items-center gap-2">
-          <span className="text-blue-600">🏆</span>
-          {eventName}
-        </h3>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {eventTitles.map((title) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {eventTitles.map((title) => {
+          const safeTitleName = title?.name || "Untitled";
+          const assigned = assignedContestants?.[title._id] || [];
+             return (
             <div
-              key={title._id}
+              key={title?._id || Math.random()}
               className="bg-white rounded-md shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition"
             >
-              {title.image && (
+              {title?.image ? (
                 <img
                   src={title.image}
-                  alt={title.name}
+                  alt={safeTitleName}
                   className="w-full h-40 object-cover"
                 />
+              ) : (
+                <div className="w-full h-40 bg-gray-100 flex items-center justify-center text-gray-400 text-xs">
+                  No Image
+                </div>
               )}
-              <div className="p-3">
-                <h4 className="text-sm font-semibold text-gray-800 mb-1">{title.name}</h4>
 
-                {assignedContestants[title._id]?.length > 0 ? (
+              <div className="p-3">
+                <h4 className="text-sm font-semibold text-gray-800 mb-1">
+                  {safeTitleName}
+                </h4>
+
+                {assigned.length > 0 ? (
                   <div className="mb-2">
-                    <p className="text-xs font-medium text-gray-600">Assigned Contestants:</p>
+                    <p className="text-xs font-medium text-gray-600">
+                      Assigned Contestants:
+                    </p>
                     <ul className="list-disc list-inside text-xs text-gray-700">
-                      {assignedContestants[title._id].map((c) => (
-                        <li key={c._id}>
-                          {c.name} (#{c.contestant_number})
-                        </li>
-                      ))}
+                      {assigned.map((c, idx) => {
+                        if (!c) {
+                             return (
+                            <li
+                              key={idx}
+                              className="italic text-gray-400"
+                            >
+                              [Deleted Contestant]
+                            </li>
+                          );
+                        }
+                        return (
+                          <li key={c._id}>
+                            {c.name || "Unnamed"} (#
+                            {c.contestant_number || "N/A"})
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 ) : (
-                  <p className="text-xs text-gray-500 italic">No contestants assigned yet.</p>
+                  <p className="text-xs text-gray-500 italic">
+                    No contestants assigned yet.
+                  </p>
                 )}
 
                 <div className="flex justify-between items-center mt-3 gap-2">
@@ -206,11 +234,13 @@ const DisplayTitle = () => {
                 </div>
               </div>
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
-    ))
-  )}
+    </div>
+  ))
+)}
+
 
   {assignModalOpen && currentTitle && (
     <AssignTitleModal

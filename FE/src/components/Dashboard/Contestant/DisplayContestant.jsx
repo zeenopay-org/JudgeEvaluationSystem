@@ -15,6 +15,10 @@ const DisplayContestant = () => {
   const [events, setEvents] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedContestant, setSelectedContestant] = useState(null);
+  const [file, setFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [showUpload, setShowUpload] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState("");
   const [loading, setLoading] = useState(true);
   const [judgeEventName, setJudgeEventName] = useState("");
 
@@ -65,7 +69,55 @@ const DisplayContestant = () => {
       toast.error(`Error deleting contestant: ${err.message || err}`);
     } finally {
       setShowModal(false);
-      setSelectedRound(null);
+      setSelectedContestant(null);
+    }
+  };
+
+  const handleBulkUpload = async () => {
+    if (!file) {
+      toast.error("Please select an Excel file first!");
+      return;
+    }
+    if (!selectedEvent) {
+      toast.error("Please select an event first!");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("eventId", selectedEvent);
+
+    try {
+      setUploading(true);
+      const res = await fetch(`${BACKEND_URL}/contestants/bulk-upload`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success(
+          `Bulk upload completed successfully! Inserted: ${data.inserted || 0}`
+        );
+        setShowUpload(false);
+        setFile(null);
+        setSelectedEvent("");
+
+        // Refresh contestants
+        const refreshed = await fetch(`${BACKEND_URL}/contestants`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const refreshedData = await refreshed.json();
+        setContestants(refreshedData.contestants || []);
+      } else {
+        toast.error(data.error || "Bulk upload failed.");
+      }
+    } catch (error) {
+      toast.error(`Error: ${error.message}`);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -135,12 +187,66 @@ const DisplayContestant = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">Available Contestants</h2>
-        <div className="text-sm text-gray-500">
-          {contestants.length} contestant{contestants.length !== 1 ? "s" : ""}{" "}
-          found
+        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
+          Available Contestants
+        </h2>
+
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 text-xs sm:text-sm">
+          <button
+            onClick={() => setShowUpload(!showUpload)}
+            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition w-full sm:w-auto"
+          >
+            {showUpload ? "Close Upload" : "Bulk Upload"}
+          </button>
+
+          <div className="text-gray-500 text-center sm:text-left">
+            {contestants.length} contestant{contestants.length !== 1 ? "s" : ""}{" "}
+            found
+          </div>
         </div>
       </div>
+
+      {/* 🧾 Bulk Upload Section */}
+      {showUpload && (
+        <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            {/* Event Selector */}
+            <select
+              value={selectedEvent || ""}
+              onChange={(e) => setSelectedEvent(e.target.value)}
+              className="w-full sm:w-1/3 text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value="">Select Event</option>
+              {events.map((event) => (
+                <option key={event._id} value={event._id}>
+                  {event.name}
+                </option>
+              ))}
+            </select>
+
+            {/* File Input */}
+            <input
+              type="file"
+              accept=".csv, .xlsx"
+              onChange={(e) => setFile(e.target.files[0])}
+              className="w-full text-sm border border-gray-300 rounded-md cursor-pointer file:mr-3 file:py-2 file:px-3 file:border-0 file:bg-green-600 file:text-white hover:file:bg-green-700"
+            />
+
+            {/* Upload Button */}
+            <button
+              onClick={handleBulkUpload}
+              disabled={!file || !selectedEvent || uploading}
+              className={`px-4 py-2 rounded-md text-white ${
+                uploading || !selectedEvent
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-green-600 hover:bg-green-700"
+              }`}
+            >
+              {uploading ? "Uploading..." : "Upload"}
+            </button>
+          </div>
+        </div>
+      )}
 
       {contestants.length === 0 ? (
         <div className="text-center py-12 text-gray-500 text-lg">
@@ -196,10 +302,7 @@ const DisplayContestant = () => {
                 )}
 
                 {role === "admin" && (
-
-                  
                   <div className="mt-4 grid grid-cols-2 gap-3">
-                    
                     <button
                       onClick={() =>
                         navigate(`/contestant/edit/${c._id}`, {
