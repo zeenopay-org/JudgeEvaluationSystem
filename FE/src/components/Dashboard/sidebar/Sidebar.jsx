@@ -10,7 +10,6 @@ import {
   FaTrophy,
   FaSignOutAlt,
   FaUserCircle,
-  // FaCog,
 } from "react-icons/fa";
 
 const navItems = [
@@ -36,17 +35,16 @@ const Sidebar = ({ isOpen, collapsed, onToggleCollapse }) => {
   if (judge) return null;
 
   return (
-   <aside
-  className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-gray-100 shadow-lg transition-all duration-300 ease-in-out`}
-  style={{
-    width: collapsed ? "80px" : "256px", 
-  }}
->
-
+    <aside
+      className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-gray-100 shadow-lg transition-all duration-300 ease-in-out`}
+      style={{
+        width: collapsed ? "80px" : "256px",
+      }}
+    >
       {/* Header */}
       <div className="flex items-center justify-between h-16 px-3 bg-green-900 relative">
         <div className="flex items-center gap-2">
-          <div className="h-9 w-9 rounded bg-green-200 flex items-center justify-center text-green-900 font-bold text-lg">
+          <div className="h-9 w-9 rounded bg-green-200 flex items-center justify-center text-green-900 font-bold text-lg transform transition-all duration-300 hover:scale-110 hover:rotate-6 hover:shadow-lg">
             Z
           </div>
 
@@ -64,7 +62,7 @@ const Sidebar = ({ isOpen, collapsed, onToggleCollapse }) => {
         {/* Toggle Button */}
         <button
           onClick={onToggleCollapse}
-          className="absolute -right-2 top-1/2 transform -translate-y-1/2 bg-green-700 hover:bg-green-800 text-white rounded-full p-1.5 transition duration-300 shadow-lg border-2 border-gray-100"
+          className="absolute -right-2 top-1/2 transform -translate-y-1/2 bg-green-700 hover:bg-green-800 text-white rounded-full p-1.5 transition-all duration-300 shadow-lg border-2 border-gray-100 hover:scale-110 hover:shadow-xl active:scale-95"
           aria-label="Toggle sidebar"
         >
           <svg
@@ -101,7 +99,7 @@ const Sidebar = ({ isOpen, collapsed, onToggleCollapse }) => {
               <li key={item.to} className="w-full">
                 <Link
                   to={item.to}
-                  className={`group relative flex items-center transition-all duration-250 rounded-md
+                  className={`group relative flex items-center transition-all duration-300 rounded-md transform hover:scale-105 active:scale-95
                    ${
                      collapsed
                        ? "w-full h-12 flex items-center justify-start pl-5"
@@ -109,8 +107,8 @@ const Sidebar = ({ isOpen, collapsed, onToggleCollapse }) => {
                    }
                     ${
                       active
-                        ? "text-green-800 bg-green-100 shadow-sm"
-                        : "text-gray-600 hover:bg-green-50 hover:text-green-700"
+                        ? "text-green-800 bg-green-100 shadow-md"
+                        : "text-gray-600 hover:bg-green-50 hover:text-green-700 hover:shadow-sm"
                     }
                   `}
                 >
@@ -118,14 +116,14 @@ const Sidebar = ({ isOpen, collapsed, onToggleCollapse }) => {
                     className={`absolute left-0 top-0 h-full w-[3px] rounded-r-full bg-green-700 transition-all duration-300 ${
                       active
                         ? "opacity-100 scale-y-100"
-                        : "opacity-0 scale-y-0 group-hover:opacity-60"
+                        : "opacity-0 scale-y-0 group-hover:opacity-60 group-hover:scale-y-75"
                     }`}
                   />
                   <span
-                    className={`flex items-center justify-center text-[18px] w-6 h-6 mr-0.5 transition-transform duration-200 ${
+                    className={`flex items-center justify-center text-[18px] w-6 h-6 mr-0.5 transition-all duration-300 ${
                       active
                         ? "text-green-800 scale-110"
-                        : "group-hover:text-green-700"
+                        : "group-hover:text-green-700 group-hover:scale-110"
                     }`}
                   >
                     {item.icon}
@@ -150,7 +148,7 @@ const Sidebar = ({ isOpen, collapsed, onToggleCollapse }) => {
       <div className="mt-auto border-t border-gray-200">
         {/* User Profile */}
         <div
-          className={`p-3 border-b border-gray-200 ${
+          className={`p-3 border-b border-gray-200 transition-all duration-300 hover:bg-gray-50 ${
             collapsed ? "px-2" : "px-3"
           }`}
         >
@@ -160,7 +158,7 @@ const Sidebar = ({ isOpen, collapsed, onToggleCollapse }) => {
             }`}
           >
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white text-sm font-semibold">
+              <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white text-sm font-semibold shadow-md transition-all duration-300 hover:scale-110 hover:shadow-lg hover:ring-2 hover:ring-green-300">
                 {user?.name?.charAt(0) || <FaUserCircle className="text-lg" />}
               </div>
             </div>
@@ -179,12 +177,11 @@ const Sidebar = ({ isOpen, collapsed, onToggleCollapse }) => {
           </div>
         </div>
 
-        {/*  Logout */}
+        {/* Logout */}
         <div className="p-2 space-y-1">
-          {/* Logout Button */}
           <button
             onClick={handleLogout}
-            className={`group w-full flex items-center rounded-md transition-all duration-300
+            className={`group w-full flex items-center rounded-md transition-all duration-300 transform hover:scale-105 active:scale-95 hover:shadow-md
               ${
                 collapsed
                   ? "justify-center h-10"
@@ -192,7 +189,7 @@ const Sidebar = ({ isOpen, collapsed, onToggleCollapse }) => {
               }
               text-sm text-red-600 hover:text-red-700 hover:bg-red-50 border border-transparent hover:border-red-100`}
           >
-            <span className="flex items-center justify-center text-[16px] w-5 h-5 transition-transform duration-200 group-hover:scale-110">
+            <span className="flex items-center justify-center text-[16px] w-5 h-5 transition-all duration-300 group-hover:scale-110 group-hover:-rotate-12">
               <FaSignOutAlt />
             </span>
             <span
@@ -214,10 +211,12 @@ const Sidebar = ({ isOpen, collapsed, onToggleCollapse }) => {
                 : "opacity-100 h-auto"
             }`}
           >
-            <p className="text-xs text-gray-500 mb-1">
+            <p className="text-xs text-gray-500 mb-1 transition-colors duration-300 hover:text-gray-700">
               © {new Date().getFullYear()} ZeenoPay
             </p>
-            <p className="text-[10px] text-gray-400">v{"1.0.0"}</p>
+            <p className="text-[10px] text-gray-400 transition-colors duration-300 hover:text-gray-600">
+              v{"1.0.0"}
+            </p>
           </div>
           <div
             className={`text-center transition-all duration-300 ${
@@ -228,6 +227,8 @@ const Sidebar = ({ isOpen, collapsed, onToggleCollapse }) => {
           </div>
         </div>
       </div>
+
+      
     </aside>
   );
 };

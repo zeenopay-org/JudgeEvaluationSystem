@@ -3,7 +3,15 @@ import { AuthContext } from "../../../context/AuthContext";
 import { useNavigate, Navigate } from "react-router-dom";
 import DeleteModal from "../../DeleteModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEdit,
+  faTrash,
+  faUpload,
+  faUser,
+  faCalendar,
+  faEnvelope,
+  faPhone,
+} from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
 const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1";
@@ -105,7 +113,6 @@ const DisplayContestant = () => {
         setFile(null);
         setSelectedEvent("");
 
-        // Refresh contestants
         const refreshed = await fetch(`${BACKEND_URL}/contestants`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -150,7 +157,6 @@ const DisplayContestant = () => {
             : [];
           setContestants(fetchedContestants);
 
-          // Fetch events only for admin
           const eventsRes = await fetch(`${BACKEND_URL}/events`, {
             headers: { Authorization: `Bearer ${token}` },
           });
@@ -178,68 +184,86 @@ const DisplayContestant = () => {
 
   if (loading) {
     return (
-      <div className="p-6 flex justify-center items-center h-64 text-sm text-gray-600">
+      <div className="p-6 flex justify-center items-center h-64 text-sm text-gray-600 animate-pulse">
         Loading contestants...
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
-          Available Contestants
-        </h2>
-
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 text-xs sm:text-sm">
-          <button
-            onClick={() => setShowUpload(!showUpload)}
-            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition w-full sm:w-auto"
-          >
-            {showUpload ? "Close Upload" : "Bulk Upload"}
-          </button>
-
-          <div className="text-gray-500 text-center sm:text-left">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="mb-8 relative">
+        <div className="pr-14 sm:pr-0">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 flex items-center gap-3">
+            <span className="w-1 h-8 bg-gradient-to-b from-green-500 to-green-700 rounded-full"></span>
+            Available Contestants
+          </h2>
+          <p className="text-sm text-gray-500 mt-2 ml-4">
             {contestants.length} contestant{contestants.length !== 1 ? "s" : ""}{" "}
             found
-          </div>
+          </p>
         </div>
+
+        <button
+          onClick={() => setShowUpload(!showUpload)}
+          className="absolute top-0 right-0 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl shadow-lg hover:shadow-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2 font-semibold
+          w-12 h-12 sm:w-auto sm:h-auto sm:px-6 sm:py-2.5 justify-center"
+        >
+          <FontAwesomeIcon icon={faUpload} className="sm:text-base" />
+          <span className="hidden sm:inline">
+            {showUpload ? "Close Upload" : "Bulk Upload"}
+          </span>
+        </button>
       </div>
 
-      {/* 🧾 Bulk Upload Section */}
+      {/* Bulk Upload Section */}
       {showUpload && (
-        <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            {/* Event Selector */}
-            <select
-              value={selectedEvent || ""}
-              onChange={(e) => setSelectedEvent(e.target.value)}
-              className="w-full sm:w-1/3 text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-            >
-              <option value="">Select Event</option>
-              {events.map((event) => (
-                <option key={event._id} value={event._id}>
-                  {event.name}
-                </option>
-              ))}
-            </select>
+        <div className="mb-8 p-6 border-2 border-green-200 rounded-2xl bg-gradient-to-br from-green-50 to-white shadow-lg">
+          <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <span>
+              <FontAwesomeIcon icon={faUpload} className="sm:text-base" />
+            </span>
+            Bulk Upload Contestants
+          </h3>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-4">
+            <div className="flex-1">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Select Event
+              </label>
+              <select
+                value={selectedEvent || ""}
+                onChange={(e) => setSelectedEvent(e.target.value)}
+                className="w-full border-2 border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+              >
+                <option value="">Choose an event...</option>
+                {events.map((event) => (
+                  <option key={event._id} value={event._id}>
+                    {event.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            {/* File Input */}
-            <input
-              type="file"
-              accept=".csv, .xlsx"
-              onChange={(e) => setFile(e.target.files[0])}
-              className="w-full text-sm border border-gray-300 rounded-md cursor-pointer file:mr-3 file:py-2 file:px-3 file:border-0 file:bg-green-600 file:text-white hover:file:bg-green-700"
-            />
+            <div className="flex-1">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Upload File
+              </label>
+              <input
+                type="file"
+                accept=".csv, .xlsx"
+                onChange={(e) => setFile(e.target.files[0])}
+                className="w-full border-2 border-gray-300 rounded-lg cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-green-600 file:text-white file:font-semibold hover:file:bg-green-700 transition-all"
+              />
+            </div>
 
-            {/* Upload Button */}
             <button
               onClick={handleBulkUpload}
               disabled={!file || !selectedEvent || uploading}
-              className={`px-4 py-2 rounded-md text-white ${
-                uploading || !selectedEvent
+              className={`px-6 py-2.5 rounded-lg text-white font-semibold shadow-md transition-all duration-200 ${
+                uploading || !selectedEvent || !file
                   ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-green-600 hover:bg-green-700"
+                  : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 hover:shadow-lg transform hover:-translate-y-0.5"
               }`}
             >
               {uploading ? "Uploading..." : "Upload"}
@@ -248,75 +272,90 @@ const DisplayContestant = () => {
         </div>
       )}
 
+      {/* Contestants Grid */}
       {contestants.length === 0 ? (
-        <div className="text-center py-12 text-gray-500 text-lg">
-          No contestants found
+        <div className="text-center py-20">
+          <div className="text-7xl mb-4">
+            {" "}
+            <FontAwesomeIcon icon={faUser} />
+            );
+          </div>
+          <p className="text-gray-500 text-lg">No contestants found</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {contestants.map((c) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {contestants.map((c, index) => (
             <div
               key={c._id}
-              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+              className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group hover:-translate-y-2"
+              style={{ animationDelay: `${index * 0.05}s` }}
             >
               {/* Contestant Image */}
-              <div className="w-full h-60 bg-gray-100 flex items-center justify-center overflow-hidden">
+              <div className="relative w-full h-56 bg-gradient-to-br from-green-100 to-green-200 overflow-hidden">
                 {c.image ? (
                   <img
                     src={c.image}
                     alt={c.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                 ) : (
-                  <div className="text-gray-400 text-sm">No Image</div>
+                  <div className="w-full h-full flex items-center justify-center">
+                    <FontAwesomeIcon
+                      icon={faUser}
+                      className="text-6xl opacity-50"
+                    />
+                    );
+                  </div>
                 )}
+
+                {/* Number Badge */}
+                <div className="absolute top-3 left-3 h-12 w-12 rounded-full bg-gradient-to-br from-green-500 to-green-600 text-white flex items-center justify-center font-bold text-lg shadow-lg">
+                  {c.contestant_number || c.number || "?"}
+                </div>
               </div>
 
               {/* Contestant Info */}
-              <div className="p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="h-10 w-10 rounded-full bg-green-100 text-green-800 flex items-center justify-center font-semibold">
-                    {c.contestant_number || c.number || "N/A"}
-                  </div>
-                  <div>
-                    <h3 className="text-md font-semibold text-gray-800">
-                      {c.name || "Unknown"}
-                    </h3>
-                    <p className="text-xs text-gray-500">
-                      Event: {getEventName(c.event)}
-                    </p>
-                  </div>
-                </div>
+              <div className="p-5">
+                <h3 className="text-lg font-bold text-gray-800 mb-1 group-hover:text-green-600 transition-colors">
+                  {c.name || "Unknown"}
+                </h3>
 
-                <div className="mt-2">
-                  <span className="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full">
-                    Contestant #{c.contestant_number || "N/A"}
-                  </span>
-                </div>
+                <p className="text-sm text-gray-600 mb-3 flex items-center gap-1">
+                  {getEventName(c.event)}
+                </p>
 
                 {c.email && (
-                  <div className="mt-2 text-xs text-gray-600">{c.email}</div>
+                  <p className="text-xs text-gray-600 mb-1 flex items-center gap-1 truncate">
+                    <FontAwesomeIcon
+                      icon={faEnvelope}
+                      className="sm:text-base"
+                    />{" "}
+                    {c.email}
+                  </p>
                 )}
                 {c.phone && (
-                  <div className="mt-1 text-xs text-gray-600">{c.phone}</div>
+                  <p className="text-xs text-gray-600 mb-3 flex items-center gap-1">
+                    <FontAwesomeIcon icon={faPhone} className=" text-sm" />
+                    {c.phone}
+                  </p>
                 )}
 
                 {role === "admin" && (
-                  <div className="mt-4 grid grid-cols-2 gap-3">
+                  <div className="mt-4 flex gap-2">
                     <button
                       onClick={() =>
                         navigate(`/contestant/edit/${c._id}`, {
                           state: { contestant: c },
                         })
                       }
-                      className="w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors text-sm shadow"
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all duration-200 text-sm font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                     >
                       <FontAwesomeIcon icon={faEdit} />
                       Edit
                     </button>
                     <button
                       onClick={() => promptDelete(c)}
-                      className="w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-md text-white bg-red-600 hover:bg-red-700 transition-colors text-sm shadow"
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition-all duration-200 text-sm font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                     >
                       <FontAwesomeIcon icon={faTrash} />
                       Delete
@@ -326,14 +365,15 @@ const DisplayContestant = () => {
               </div>
             </div>
           ))}
-          <DeleteModal
-            show={showModal}
-            itemName={selectedContestant?.name}
-            onConfirm={handleDelete}
-            onCancel={() => setShowModal(false)}
-          />
         </div>
       )}
+
+      <DeleteModal
+        show={showModal}
+        itemName={selectedContestant?.name}
+        onConfirm={handleDelete}
+        onCancel={() => setShowModal(false)}
+      />
     </div>
   );
 };

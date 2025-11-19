@@ -70,7 +70,7 @@ export const submitScore = async (req, res) => {
   }
 };
 
-export const getScores = async (req, res) => {
+export const getJudgeWiseBreakdown= async (req, res) => {
   try {
     const scores = await Score.find()
       .populate("round", "name type max_score")
@@ -141,7 +141,7 @@ export const getScoresPerContestantPerRound = async (req, res) => {
             round: "$round",
           },
           totalScore: { $sum: "$score" },
-          averageScore: { $avg: "$score" },
+          averageScore: { $avg: "$score", },
           scoreCount: { $sum: 1 },
         },
       },
@@ -183,7 +183,7 @@ export const getScoresPerContestantPerRound = async (req, res) => {
   }
 };
 
-export const getJudgeWiseBreakdown = async (req, res) => {
+export const getScores = async (req, res) => {
   try {
     const result = await Score.aggregate([
       {

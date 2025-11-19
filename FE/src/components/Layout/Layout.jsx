@@ -117,8 +117,8 @@ const Layout = ({ children }) => {
           />
         </div>
 
-        <main className="p-4 md:p-6 transition-all duration-300">
-          <div className="mx-auto">{children}</div>
+        <main className="p-2 transition-all duration-300">
+          <div className=" mx-auto">{children}</div>
         </main>
       </div>
     </div>

@@ -2,18 +2,26 @@ import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEdit,
+  faTrash,
+  faStar,
+  faTag,
+  faCalendarDays,
+  faQuestion,
+} from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import DeleteModal from "../../DeleteModal.jsx";
 
 const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1";
 
-const displayRound = () => {
+const DisplayRound = () => {
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
   const [rounds, setRounds] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedRound, setSelectedRound] = useState(null);
+
   const handleCreateClick = () => {
     navigate("/round/create");
   };
@@ -58,6 +66,7 @@ const displayRound = () => {
     if (!text) return "";
     return text.length > length ? text.slice(0, length) + "..." : text;
   };
+
   useEffect(() => {
     if (!token) {
       navigate("/login");
@@ -89,55 +98,73 @@ const displayRound = () => {
   }, [token, navigate]);
 
   const sortedRounds = [...rounds].sort((a, b) => {
-    if (a.type === "qna" && b.type !== "qna") return 1; // move a (qna) to end
-    if (a.type !== "qna" && b.type === "qna") return -1; // keep non-qna first
-    return 0; // keep original order otherwise
+    if (a.type === "qna" && b.type !== "qna") return 1;
+    if (a.type !== "qna" && b.type === "qna") return -1;
+    return 0;
   });
 
   return (
-    <div className="px-2 py-6 sm:px-4 lg:px-6 relative">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
+      <div className="mb-8 relative">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 flex items-center gap-3 pr-14 sm:pr-0">
+          <span className="w-1 h-8 bg-gradient-to-b from-green-500 to-green-700 rounded-full"></span>
           Available Rounds
         </h2>
         <button
           onClick={handleCreateClick}
-          className="bg-green-600 text-white px-3 sm:px-3 py-1 sm:py-2 rounded-md shadow hover:bg-green-700 transition duration-200 text-xs sm:text-base w-auto flex items-center gap-1.5 sm:gap-2
-                 sm:static absolute top-3 right-3"
+          className="absolute top-0 right-0 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl shadow-lg hover:shadow-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2 font-semibold
+          w-12 h-12 sm:w-auto sm:h-auto sm:px-6 sm:py-2.5 justify-center"
         >
-          <span className="text-base sm:text-lg font-bold">+</span>
-          <span className="text-xs sm:text-base">Create Round</span>
+          <span className="text-xl font-bold">+</span>
+          <span className="hidden sm:inline">Create Round</span>
         </button>
       </div>
 
       {/* Grid of rounds */}
-      <div className="grid gap-6 sm:gap-7 md:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-        {sortedRounds.map((round) => (
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+        {sortedRounds.map((round, index) => (
           <div
             key={round._id || round.id}
-            className="bg-white rounded-lg shadow-md overflow-hidden"
+            className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group hover:-translate-y-2"
+            style={{ animationDelay: `${index * 0.1}s` }}
           >
-            <div className="p-4">
-              <h3 className="text-sm sm:text-md font-semibold text-gray-800 mb-2">
+            {/* Card Header with gradient */}
+            <div className="h-2 bg-gradient-to-r from-green-400 to-green-600"></div>
+
+            <div className="p-5">
+              <h3 className="text-lg font-bold text-gray-800 mb-3 group-hover:text-green-600 transition-colors">
                 {round.name}
               </h3>
 
               {/* Tags */}
-              <div className="flex flex-wrap gap-2 mb-3">
+              <div className="flex flex-wrap gap-2 mb-4">
                 {round.type && (
-                  <span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-3 py-1 rounded-full">
-                    Type: {round.type}
+                  <span className="inline-flex items-center bg-gradient-to-r from-green-50 to-green-100 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm">
+                    <FontAwesomeIcon
+                      icon={faTag}
+                      className="mr-1 text-yellow-500 text-xl"
+                    />
+
+                    {round.type}
                   </span>
                 )}
                 {typeof round.max_score !== "undefined" && (
-                  <span className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">
-                    Max Score: {round.max_score}
+                  <span className="inline-flex items-center bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm">
+                    <FontAwesomeIcon
+                      icon={faStar}
+                      className="mr-1 text-yellow-500 text-xl"
+                    />
+                    {round.max_score} pts
                   </span>
                 )}
                 {round.event && (
-                  <span className="inline-block bg-gray-100 text-gray-800 text-xs font-medium px-3 py-1 rounded-full">
-                    Event:{" "}
+                  <span className="inline-flex items-center bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm">
+                    <FontAwesomeIcon
+                      icon={faCalendarDays}
+                      className="mr-1 text-blue-500 text-sm"
+                    />
+
                     {typeof round.event === "object"
                       ? round.event.name || round.event._id
                       : round.event}
@@ -147,15 +174,19 @@ const displayRound = () => {
 
               {/* Questions */}
               {Array.isArray(round.questions) && round.questions.length > 0 && (
-                <div className="mt-4 bg-gray-50 p-3 rounded-md border border-gray-200">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2">
-                    Questions
+                <div className="mt-4 bg-gradient-to-br from-gray-50 to-green-50 p-4 rounded-xl border-2 border-green-100">
+                  <h4 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <FontAwesomeIcon
+                      icon={faQuestion}
+                      className="text-red-500 text-sm"
+                    />
+                    Questions ({round.questions.length})
                   </h4>
-                  <ul className="space-y-2">
+                  <ul className="space-y-2 max-h-32 overflow-y-auto">
                     {round.questions.map((q) => (
                       <li
                         key={q._id}
-                        className="text-xs sm:text-sm text-gray-600 bg-white border border-gray-100 rounded-md px-3 py-2 shadow-sm"
+                        className="text-sm text-gray-700 bg-white border border-green-100 rounded-lg px-3 py-2 shadow-sm hover:shadow-md transition-shadow"
                       >
                         {truncateByLetters(q.question_text, 30)}
                       </li>
@@ -165,17 +196,17 @@ const displayRound = () => {
               )}
 
               {/* Action buttons */}
-              <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="mt-5 flex gap-3">
                 <button
                   onClick={() => handleEdit(round)}
-                  className="w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors text-xs sm:text-sm shadow"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all duration-200 text-sm font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                 >
                   <FontAwesomeIcon icon={faEdit} />
                   Edit
                 </button>
                 <button
                   onClick={() => promptDelete(round)}
-                  className="w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-md text-white bg-red-600 hover:bg-red-700 transition-colors text-xs sm:text-sm shadow"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition-all duration-200 text-sm font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                 >
                   <FontAwesomeIcon icon={faTrash} />
                   Delete
@@ -184,15 +215,16 @@ const displayRound = () => {
             </div>
           </div>
         ))}
-        <DeleteModal
-          show={showModal}
-          itemName={selectedRound?.name}
-          onConfirm={handleDelete}
-          onCancel={() => setShowModal(false)}
-        />
       </div>
+
+      <DeleteModal
+        show={showModal}
+        itemName={selectedRound?.name}
+        onConfirm={handleDelete}
+        onCancel={() => setShowModal(false)}
+      />
     </div>
   );
 };
 
-export default displayRound;
+export default DisplayRound;

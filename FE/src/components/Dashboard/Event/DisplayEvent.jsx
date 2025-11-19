@@ -2,7 +2,13 @@ import React, { useEffect, useState, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import DeleteModal from "../../DeleteModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faUser, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEdit,
+  faUser,
+  faTrash,
+  faCalendar,
+  // faPartyHorn,
+} from "@fortawesome/free-solid-svg-icons";
 import { AuthContext } from "../../../context/AuthContext";
 import { toast } from "react-toastify";
 
@@ -97,85 +103,103 @@ const DisplayEvent = () => {
 
   if (loading)
     return (
-      <div className="flex items-center justify-center min-h-[40vh] text-gray-500 text-sm">
+      <div className="flex items-center justify-center min-h-[40vh] text-gray-500 text-sm animate-pulse">
         Loading events...
       </div>
     );
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 relative">
-      <div className="mb-6">
-        <h2 className="text-base sm:text-xl md:text-2xl font-semibold text-gray-800">
+    <div className="p-2 sm:p-4 lg:p-2 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 flex items-center gap-3">
+          <span className="w-1 h-8 bg-gradient-to-b from-green-500 to-green-700 rounded-full"></span>
           Ongoing Events
         </h2>
       </div>
 
+      {/* If no events */}
       {events.length === 0 ? (
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
+          <FontAwesomeIcon icon={faCalendar} />
+          <p className="text-gray-500 text-lg">No events yet</p>
           <button
             onClick={handleCreateClick}
-            className="bg-green-600 text-white px-5 py-3 rounded-md shadow hover:bg-green-700 transition text-base flex items-center gap-2"
+            className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-xl shadow-lg hover:shadow-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-3 text-lg font-semibold"
           >
-            <span className="text-lg font-bold">+</span>
+            <span className="text-2xl font-bold">+</span>
             <span>Create Event</span>
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-start">
-          {events.map((event) => (
+        // Responsive Grid - Optimized width
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {events.map((event, index) => (
             <div
               key={event._id}
-              className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col relative w-full max-w-sm"
+              className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group hover:-translate-y-2 animate-fadeIn"
+              style={{ animationDelay: `${index * 0.1}s` }}
             >
-              {event.image && (
-                <img
-                  src={event.image}
-                  alt={event.name}
-                  className="w-full h-48 sm:h-56 md:h-64 object-cover rounded-t-xl"
-                />
-              )}
+              {/* Event Image */}
+              <div className="relative">
+                {event.image ? (
+                  <img
+                    src={event.image}
+                    alt={event.name}
+                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <div className="w-full h-48 bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
+                    {/* <FontAwesomeIcon icon={faPartyHorn} /> */}
+                  </div>
+                )}
 
-              <div className="p-4 sm:p-6 flex flex-col flex-grow">
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1">
+                {/* Delete Button */}
+                <button
+                  onClick={() => promptDelete(event)}
+                  className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm p-2.5 rounded-lg shadow-md text-red-600 hover:text-white hover:bg-red-600 transition-all duration-200 transform hover:scale-110"
+                >
+                  <FontAwesomeIcon icon={faTrash} className="text-sm" />
+                </button>
+              </div>
+
+              {/* Event Info */}
+              <div className="p-5 flex flex-col flex-grow">
+                <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-green-600 transition-colors">
                   {event.name}
                 </h3>
 
                 {event.created_by && (
-                  <p className="text-sm text-gray-500 mb-2">
+                  <p className="text-sm text-gray-600 mb-3">
                     Organized by{" "}
-                    <strong className="text-gray-700">
+                    <strong className="text-green-600 font-semibold">
                       {event.created_by}
                     </strong>
                   </p>
                 )}
 
                 {event.createdAt && (
-                  <span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-3 py-1 rounded-full mb-3 w-fit">
+                  <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-green-50 to-green-100 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4 w-fit shadow-sm">
+                    <FontAwesomeIcon icon={faCalendar} />
                     {new Date(event.createdAt).toLocaleDateString()}
                   </span>
                 )}
 
-                <button
-                  onClick={() => promptDelete(event)}
-                  className="absolute top-3 right-3 bg-white rounded-lg text-red-600 hover:text-red-700 transition"
-                >
-                  <FontAwesomeIcon icon={faTrash} className="text-base" />
-                </button>
-
-                 <div className="flex items-center justify-between gap-3 mt-auto">
+                {/* Action Buttons */}
+                <div className="flex flex-col gap-2.5 mt-auto">
                   <button
                     onClick={() => handleEdit(event)}
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white font-medium text-sm shadow hover:bg-green-700 transition"
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold text-sm shadow-md hover:shadow-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 transform hover:-translate-y-0.5"
                   >
-                    <FontAwesomeIcon icon={faEdit} className="text-xs" />
-                    Edit
+                    <FontAwesomeIcon icon={faEdit} />
+                    Edit Event
                   </button>
 
                   <button
                     onClick={() => handleContestant(event)}
-                    className="flex-[1.5] inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-red-600 text-white font-medium text-sm shadow hover:bg-red-700 transition"
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white border-2 border-green-500 text-green-600 font-semibold text-sm hover:bg-green-50 transition-all duration-200 transform hover:-translate-y-0.5"
                   >
-                    <FontAwesomeIcon icon={faUser} className="text-xs" />
+                    <FontAwesomeIcon icon={faUser} />
                     Add Contestant
                   </button>
                 </div>
@@ -185,12 +209,15 @@ const DisplayEvent = () => {
         </div>
       )}
 
+      {/* Delete Modal */}
       <DeleteModal
         show={showModal}
         itemName={selectedEvent?.name}
         onConfirm={handleDelete}
         onCancel={() => setShowModal(false)}
       />
+
+      {/* Add animation styles */}
     </div>
   );
 };
