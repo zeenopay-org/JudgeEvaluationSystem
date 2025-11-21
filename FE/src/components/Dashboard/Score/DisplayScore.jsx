@@ -15,7 +15,7 @@ import {
   Legend,
 } from "recharts";
 
-import "./displayScore.css";
+import "./displayScore.css"; 
 
 const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1";
 
@@ -71,7 +71,9 @@ const DisplayScore = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (!judgeBreakdownRes.ok)
-          throw new Error(`Failed to breakdown(${judgeBreakdownRes.status})`);
+          throw new Error(
+            `Failed to breakdown(${judgeBreakdownRes.status})`
+          );
         const judgeBreakdownData = await judgeBreakdownRes.json();
         setJudgeBreakdown(judgeBreakdownData);
       } catch (err) {
@@ -83,9 +85,10 @@ const DisplayScore = () => {
     fetchData();
   }, [token]);
 
-  if (loading) return <div className="loading-text">Loading data...</div>;
+  if (loading)
+    return <div className="loading-text">Loading data...</div>;
 
- const handleDownload = async () => {
+const handleDownload = async () => {
   const node = tableRef.current;
   if (!node) return;
 
@@ -113,6 +116,9 @@ const DisplayScore = () => {
   }
 };
 
+
+
+
   return (
     <div className="page-wrapper">
       <div className="header-container">
@@ -134,7 +140,9 @@ const DisplayScore = () => {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={activeTab === tab.key ? "tab tab-active" : "tab"}
+              className={
+                activeTab === tab.key ? "tab tab-active" : "tab"
+              }
             >
               {tab.label}
             </button>
@@ -143,6 +151,7 @@ const DisplayScore = () => {
       </div>
 
       {/* === SCORES TAB === */}
+       {/* === SCORES TAB === */}
       {activeTab === "scores" && (
         <div className="card" ref={tableRef}>
           <h2 className="card-title">Total Score</h2>
@@ -166,13 +175,13 @@ const DisplayScore = () => {
               </thead>
 
               <tbody>
-                {judgeBreakdown.map((jb, index) => (
+                {scores.map((score, index) => (
                   <tr key={index}>
-                    <td>{`${jb.contestantNumber}-${jb.contestantName}`}</td>
-                    <td>{jb.roundName}</td>
+                    <td>{`${score.contestantNumber}-${score.contestantName}`}</td>
+                    <td>{score.roundName}</td>
                     <td>
                       <ul className="judge-list">
-                        {jb.judges.map((j, i) => (
+                        {score.judges.map((j, i) => (
                           <li key={i}>
                             <span className="judge-name">{j.judgeName}</span>-
                             <span className="judge-score">{j.score}</span>
@@ -180,10 +189,10 @@ const DisplayScore = () => {
                         ))}
                       </ul>
                     </td>
-                    <td>{jb.totalScore}</td>
-                    <td>{Number(jb.averageScore).toFixed(2)}</td>
-                    <td>{jb.totalPossibleScore}</td>
-                    <td>{jb.judgeCount}</td>
+                    <td>{score.totalScore}</td>
+                    <td>{Number(score.averageScore).toFixed(2)}</td>
+                    <td>{score.totalPossibleScore}</td>
+                    <td>{score.judgeCount}</td>
                   </tr>
                 ))}
               </tbody>
@@ -288,32 +297,25 @@ const DisplayScore = () => {
             <table className="table">
               <thead>
                 <tr>
-                  {[
-                    "Contestant",
-                    "Round",
-                    "Judge",
-                    "Score",
-                    "Comment",
-                    "Max Score",
-                  ].map((h) => (
+                  {["Contestant", "Round", "Judge", "Score", "Comment", "Max Score"].map((h) => (
                     <th key={h}>{h}</th>
                   ))}
                 </tr>
               </thead>
 
               <tbody>
-                {scores.map((score, index) => (
+                {judgeBreakdown.map((jb, index) => (
                   <tr key={index}>
                     <td>
-                      {score.contestant?.contestant_number
-                        ? `${score.contestant.contestant_number}. ${score.contestant.name}`
-                        : score.contestant?.name || "N/A"}
+                      {jb.contestant?.contestant_number
+                        ? `${jb.contestant.contestant_number}. ${jb.contestant.name}`
+                        : jb.contestant?.name || "N/A"}
                     </td>
-                    <td>{score.round?.name || "N/A"}</td>
-                    <td>{score.judge?.user?.username || "N/A"}</td>
-                    <td>{score.score}</td>
-                    <td>{score.comment || "-"}</td>
-                    <td>{score.round?.max_score}</td>
+                    <td>{jb.round?.name || "N/A"}</td>
+                    <td>{jb.judge?.user?.username || "N/A"}</td>
+                    <td>{jb.score}</td>
+                    <td>{jb.comment || "-"}</td>
+                    <td>{jb.round?.max_score}</td>
                   </tr>
                 ))}
               </tbody>
