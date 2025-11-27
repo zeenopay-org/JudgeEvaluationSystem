@@ -4,6 +4,7 @@ import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
 const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1";
+  // const BACKEND_URL = "http://localhost:5000/api/v1";
 
 const CreateJudge = () => {
   const [username, setUserName] = useState("");
@@ -77,7 +78,7 @@ const CreateJudge = () => {
     <div className="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-xl lg:max-w-2xl mx-auto bg-white rounded-xl shadow-xl p-6 sm:p-8">
         <div className="text-center mb-6 sm:mb-8">
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
+          <h1 className="text-md sm:text-xl  font-bold text-gray-900">
             Create New Judge
           </h1>
           <p className="text-sm sm:text-base text-gray-600 mt-1">

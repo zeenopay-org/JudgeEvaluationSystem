@@ -4,6 +4,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1"; 
+  // const BACKEND_URL = "http://localhost:5000/api/v1";
 
 const CreateContestant = () => {
   const [contestantName, setContestantName] = useState('');

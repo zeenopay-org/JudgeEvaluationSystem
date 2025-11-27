@@ -51,7 +51,7 @@ export const signinAdmin = async (req, res) => {
 
     //payload,secret,options
     const token = jwt.sign({ id: admin._id, role: admin.role }, JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "1d",
     });
 
     res.json({ message: "Login successful", token, admin: { email, role } });

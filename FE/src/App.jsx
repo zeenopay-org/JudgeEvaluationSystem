@@ -15,13 +15,14 @@ import CreateRound from "./components/Dashboard/Round/createRound";
 import RoundPage from "./pages/roundPage";
 import RoundContestants from "./components/Dashboard/Judge/RoundContestants";
 import ScorePage from "./pages/scorePage";
-import DisplayJudge from "./components/Dashboard/Judge/DisplayJudge";
+// import DisplayJudge from "./components/Dashboard/Judge/DisplayJudge";
 import TitlePage from "./pages/titlePage";
 import CreateTitle from "./components/Dashboard/Title/CreateTitle";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import EditRound from "./components/Dashboard/Round/EditRound";
 import EditContestant from "./components/Dashboard/Contestant/EditContestant";
+import ErrorPage from "./pages/ErrorPage";
 
 function App() {
   const { admin, judge } = useContext(AuthContext);
@@ -95,6 +96,7 @@ function App() {
         />
         <Route path="/scores" element={<ScorePage />}></Route>
         <Route path="/title" element={<TitlePage />}></Route>
+         <Route path="/*" element={<ErrorPage />}></Route>
         <Route
           path="/title/create"
           element={

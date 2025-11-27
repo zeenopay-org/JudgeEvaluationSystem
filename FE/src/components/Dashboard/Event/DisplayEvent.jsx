@@ -13,6 +13,7 @@ import { AuthContext } from "../../../context/AuthContext";
 import { toast } from "react-toastify";
 
 const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1";
+  // const BACKEND_URL = "http://localhost:5000/api/v1";
 
 const DisplayEvent = () => {
   const { token } = useContext(AuthContext);
@@ -112,7 +113,7 @@ const DisplayEvent = () => {
     <div className="p-2 sm:p-4 lg:p-2 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 flex items-center gap-3">
+        <h2 className="text-md sm:text-xl font-bold text-gray-800 flex items-center gap-3">
           <span className="w-1 h-8 bg-gradient-to-b from-green-500 to-green-700 rounded-full"></span>
           Ongoing Events
         </h2>
@@ -133,7 +134,7 @@ const DisplayEvent = () => {
         </div>
       ) : (
         // Responsive Grid - Optimized width
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {events.map((event, index) => (
             <div
               key={event._id}

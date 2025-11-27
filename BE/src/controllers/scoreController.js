@@ -1,6 +1,7 @@
 import Score from "../models/scoreModel.js";
 import Round from "../models/roundModel.js";
 import Contestant from "../models/contestantsModel.js";
+import { broadcastScore } from "../utils/socket.js";
 
 export const submitScore = async (req, res) => {
   try {
@@ -63,6 +64,23 @@ export const submitScore = async (req, res) => {
     });
 
     await newScore.save();
+    try {
+      broadcastScore({
+        scoreId: newScore._id,
+        roundId,
+        contestantId,
+        judgeId,
+        score,
+        comment,
+        roundName: round.name,
+        contestantName: contestant.name,
+        contestantNumber: contestant.contestant_number,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (wsError) {
+      console.error("Error in broadcastScore:", wsError);
+    }
+
     res.status(201).json({ message: "Score submitted successfully", newScore });
   } catch (error) {
     console.error("Error submitting score:", error);
@@ -70,7 +88,7 @@ export const submitScore = async (req, res) => {
   }
 };
 
-export const getJudgeWiseBreakdown= async (req, res) => {
+export const getJudgeWiseBreakdown = async (req, res) => {
   try {
     const scores = await Score.find()
       .populate("round", "name type max_score")
@@ -141,7 +159,7 @@ export const getScoresPerContestantPerRound = async (req, res) => {
             round: "$round",
           },
           totalScore: { $sum: "$score" },
-          averageScore: { $avg: "$score", },
+          averageScore: { $avg: "$score" },
           scoreCount: { $sum: 1 },
         },
       },
@@ -245,8 +263,10 @@ export const getScores = async (req, res) => {
       },
       {
         $addFields: {
-           totalPossibleScore: { $multiply: ["$maxScorePerJudge", "$judgeCount"] },
-        averageScore: {
+          totalPossibleScore: {
+            $multiply: ["$maxScorePerJudge", "$judgeCount"],
+          },
+          averageScore: {
             $cond: [
               { $gt: ["$judgeCount", 0] },
               { $divide: ["$totalScore", "$judgeCount"] },

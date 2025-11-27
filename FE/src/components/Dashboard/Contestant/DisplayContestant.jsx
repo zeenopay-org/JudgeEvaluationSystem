@@ -8,13 +8,14 @@ import {
   faTrash,
   faUpload,
   faUser,
-  faCalendar,
   faEnvelope,
   faPhone,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
+import Pagination from "../../../utils/Pagination";
 
 const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1";
+  // const BACKEND_URL = "http://localhost:5000/api/v1";
 
 const DisplayContestant = () => {
   const { token, admin, judge } = useContext(AuthContext);
@@ -30,6 +31,10 @@ const DisplayContestant = () => {
   const [loading, setLoading] = useState(true);
   const [judgeEventName, setJudgeEventName] = useState("");
 
+  // Pagination states
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 8;
+
   const role = admin ? "admin" : judge ? "judge" : null;
 
   if (!role) return <Navigate to="/login" replace />;
@@ -37,6 +42,7 @@ const DisplayContestant = () => {
   const getEventName = (eventRef) => {
     if (role === "judge") return judgeEventName || "Your Event";
     if (!eventRef) return "Unknown Event";
+
     if (typeof eventRef === "object") {
       if (eventRef.name) return eventRef.name;
       const eventObj = events.find(
@@ -44,9 +50,8 @@ const DisplayContestant = () => {
       );
       return eventObj ? eventObj.name : "Unknown Event";
     }
-    const eventObj = events.find(
-      (e) => e._id === eventRef || e.id === eventRef
-    );
+
+    const eventObj = events.find((e) => e._id === eventRef || e.id === eventRef);
     return eventObj ? eventObj.name : "Unknown Event";
   };
 
@@ -55,7 +60,7 @@ const DisplayContestant = () => {
     setShowModal(true);
   };
 
-  const handleDelete = async (contestant) => {
+  const handleDelete = async () => {
     try {
       const res = await fetch(
         `${BACKEND_URL}/contestants/delete/${selectedContestant._id}`,
@@ -82,14 +87,8 @@ const DisplayContestant = () => {
   };
 
   const handleBulkUpload = async () => {
-    if (!file) {
-      toast.error("Please select an Excel file first!");
-      return;
-    }
-    if (!selectedEvent) {
-      toast.error("Please select an event first!");
-      return;
-    }
+    if (!file) return toast.error("Please select an Excel file!");
+    if (!selectedEvent) return toast.error("Please select an event!");
 
     const formData = new FormData();
     formData.append("file", file);
@@ -106,9 +105,7 @@ const DisplayContestant = () => {
       const data = await res.json();
 
       if (res.ok) {
-        toast.success(
-          `Bulk upload completed successfully! Inserted: ${data.inserted || 0}`
-        );
+        toast.success(`Bulk upload completed! Inserted: ${data.inserted || 0}`);
         setShowUpload(false);
         setFile(null);
         setSelectedEvent("");
@@ -128,6 +125,7 @@ const DisplayContestant = () => {
     }
   };
 
+  //FETCH CONTESTANTS
   useEffect(() => {
     const fetchData = async () => {
       if (!token) {
@@ -142,20 +140,19 @@ const DisplayContestant = () => {
             headers: { Authorization: `Bearer ${token}` },
           });
           const data = await res.json();
-          const fetchedContestants = Array.isArray(data.contestants)
-            ? data.contestants
-            : [];
-          setContestants(fetchedContestants);
+
+          setContestants(Array.isArray(data.contestants) ? data.contestants : []);
           if (typeof data.event === "string") setJudgeEventName(data.event);
         } else {
           const contestantsRes = await fetch(`${BACKEND_URL}/contestants`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           const contestantsData = await contestantsRes.json();
-          const fetchedContestants = Array.isArray(contestantsData.contestants)
-            ? contestantsData.contestants
-            : [];
-          setContestants(fetchedContestants);
+          setContestants(
+            Array.isArray(contestantsData.contestants)
+              ? contestantsData.contestants
+              : []
+          );
 
           const eventsRes = await fetch(`${BACKEND_URL}/events`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -182,6 +179,14 @@ const DisplayContestant = () => {
     }
   }, []);
 
+  //  Pagination Logic
+  const pages = Math.ceil(contestants.length / itemsPerPage);
+  const startIndex = (page - 1) * itemsPerPage;
+  const currentContestants = contestants.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+
   if (loading) {
     return (
       <div className="p-6 flex justify-center items-center h-64 text-sm text-gray-600 animate-pulse">
@@ -192,49 +197,45 @@ const DisplayContestant = () => {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
-      {/* Header */}
+      {/* HEADER */}
       <div className="mb-8 relative">
         <div className="pr-14 sm:pr-0">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 flex items-center gap-3">
+          <h2 className="text-md sm:text-xl font-bold text-gray-800 flex items-center gap-3">
             <span className="w-1 h-8 bg-gradient-to-b from-green-500 to-green-700 rounded-full"></span>
             Available Contestants
           </h2>
           <p className="text-sm text-gray-500 mt-2 ml-4">
-            {contestants.length} contestant{contestants.length !== 1 ? "s" : ""}{" "}
-            found
+            {contestants.length} contestant
+            {contestants.length !== 1 ? "s" : ""} found
           </p>
         </div>
 
         <button
           onClick={() => setShowUpload(!showUpload)}
-          className="absolute top-0 right-0 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl shadow-lg hover:shadow-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2 font-semibold
-          w-12 h-12 sm:w-auto sm:h-auto sm:px-6 sm:py-2.5 justify-center"
+          className="absolute top-0 right-0 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl shadow-lg hover:-translate-y-1 transition-all px-6 py-2.5 font-semibold"
         >
-          <FontAwesomeIcon icon={faUpload} className="sm:text-base" />
-          <span className="hidden sm:inline">
+          <FontAwesomeIcon icon={faUpload} />
+          <span className="ml-2 hidden sm:inline">
             {showUpload ? "Close Upload" : "Bulk Upload"}
           </span>
         </button>
       </div>
 
-      {/* Bulk Upload Section */}
+      {/* BULK UPLOAD */}
       {showUpload && (
-        <div className="mb-8 p-6 border-2 border-green-200 rounded-2xl bg-gradient-to-br from-green-50 to-white shadow-lg">
-          <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <span>
-              <FontAwesomeIcon icon={faUpload} className="sm:text-base" />
-            </span>
-            Bulk Upload Contestants
+        <div className="mb-8 p-6 border-2 border-green-200 rounded-2xl bg-white shadow-lg">
+          <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+            <FontAwesomeIcon icon={faUpload} /> Bulk Upload Contestants
           </h3>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold mb-1">
                 Select Event
               </label>
               <select
-                value={selectedEvent || ""}
+                value={selectedEvent}
                 onChange={(e) => setSelectedEvent(e.target.value)}
-                className="w-full border-2 border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                className="w-full border-2 px-3 py-2 rounded-lg"
               >
                 <option value="">Choose an event...</option>
                 {events.map((event) => (
@@ -246,25 +247,21 @@ const DisplayContestant = () => {
             </div>
 
             <div className="flex-1">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold mb-1">
                 Upload File
               </label>
               <input
                 type="file"
                 accept=".csv, .xlsx"
                 onChange={(e) => setFile(e.target.files[0])}
-                className="w-full border-2 border-gray-300 rounded-lg cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-green-600 file:text-white file:font-semibold hover:file:bg-green-700 transition-all"
+                className="w-full border-2 px-3 py-2 rounded-lg"
               />
             </div>
 
             <button
               onClick={handleBulkUpload}
               disabled={!file || !selectedEvent || uploading}
-              className={`px-6 py-2.5 rounded-lg text-white font-semibold shadow-md transition-all duration-200 ${
-                uploading || !selectedEvent || !file
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 hover:shadow-lg transform hover:-translate-y-0.5"
-              }`}
+              className="px-5 py-2 rounded-lg text-white font-semibold bg-green-600 disabled:bg-gray-400"
             >
               {uploading ? "Uploading..." : "Upload"}
             </button>
@@ -272,100 +269,90 @@ const DisplayContestant = () => {
         </div>
       )}
 
-      {/* Contestants Grid */}
-      {contestants.length === 0 ? (
-        <div className="text-center py-20">
-          <div className="text-7xl mb-4">
-            {" "}
-            <FontAwesomeIcon icon={faUser} />
-            );
-          </div>
-          <p className="text-gray-500 text-lg">No contestants found</p>
+      {/* GRID */}
+      {currentContestants.length === 0 ? (
+        <div className="text-center py-20 text-gray-500 text-lg">
+          <FontAwesomeIcon icon={faUser} className="text-6xl mb-3" />
+          <p>No contestants found</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {contestants.map((c, index) => (
-            <div
-              key={c._id}
-              className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group hover:-translate-y-2"
-              style={{ animationDelay: `${index * 0.05}s` }}
-            >
-              {/* Contestant Image */}
-              <div className="relative w-full h-56 bg-gradient-to-br from-green-100 to-green-200 overflow-hidden">
-                {c.image ? (
-                  <img
-                    src={c.image}
-                    alt={c.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <FontAwesomeIcon
-                      icon={faUser}
-                      className="text-6xl opacity-50"
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {currentContestants.map((c, index) => (
+              <div
+                key={c._id}
+                className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all overflow-hidden"
+              >
+                <div className="relative h-56 bg-green-100">
+                  {c.image ? (
+                    <img
+                      src={c.image}
+                      alt={c.name}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
                     />
-                    );
-                  </div>
-                )}
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <FontAwesomeIcon icon={faUser} className="text-6xl" />
+                    </div>
+                  )}
 
-                {/* Number Badge */}
-                <div className="absolute top-3 left-3 h-12 w-12 rounded-full bg-gradient-to-br from-green-500 to-green-600 text-white flex items-center justify-center font-bold text-lg shadow-lg">
-                  {c.contestant_number || c.number || "?"}
+                  <div className="absolute top-3 left-3 h-12 w-12 bg-green-600 text-white rounded-full flex items-center justify-center text-lg font-bold">
+                    {c.contestant_number || c.number || "?"}
+                  </div>
+                </div>
+
+                <div className="p-5">
+                  <h3 className="text-lg font-bold">{c.name}</h3>
+
+                  <p className="text-sm text-gray-600 mb-2">
+                    {getEventName(c.event)}
+                  </p>
+
+                  {c.email && (
+                    <p className="text-xs text-gray-600 flex gap-2">
+                      <FontAwesomeIcon icon={faEnvelope} />
+                      {c.email}
+                    </p>
+                  )}
+                  {c.phone && (
+                    <p className="text-xs text-gray-600 flex gap-2 mb-3">
+                      <FontAwesomeIcon icon={faPhone} />
+                      {c.phone}
+                    </p>
+                  )}
+
+                  {role === "admin" && (
+                    <div className="mt-4 flex gap-2">
+                      <button
+                        onClick={() =>
+                          navigate(`/contestant/edit/${c._id}`, {
+                            state: { contestant: c },
+                          })
+                        }
+                        className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg"
+                      >
+                        <FontAwesomeIcon icon={faEdit} /> Edit
+                      </button>
+
+                      <button
+                        onClick={() => promptDelete(c)}
+                        className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg"
+                      >
+                        <FontAwesomeIcon icon={faTrash} /> Delete
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
+            ))}
+          </div>
 
-              {/* Contestant Info */}
-              <div className="p-5">
-                <h3 className="text-lg font-bold text-gray-800 mb-1 group-hover:text-green-600 transition-colors">
-                  {c.name || "Unknown"}
-                </h3>
-
-                <p className="text-sm text-gray-600 mb-3 flex items-center gap-1">
-                  {getEventName(c.event)}
-                </p>
-
-                {c.email && (
-                  <p className="text-xs text-gray-600 mb-1 flex items-center gap-1 truncate">
-                    <FontAwesomeIcon
-                      icon={faEnvelope}
-                      className="sm:text-base"
-                    />{" "}
-                    {c.email}
-                  </p>
-                )}
-                {c.phone && (
-                  <p className="text-xs text-gray-600 mb-3 flex items-center gap-1">
-                    <FontAwesomeIcon icon={faPhone} className=" text-sm" />
-                    {c.phone}
-                  </p>
-                )}
-
-                {role === "admin" && (
-                  <div className="mt-4 flex gap-2">
-                    <button
-                      onClick={() =>
-                        navigate(`/contestant/edit/${c._id}`, {
-                          state: { contestant: c },
-                        })
-                      }
-                      className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all duration-200 text-sm font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                    >
-                      <FontAwesomeIcon icon={faEdit} />
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => promptDelete(c)}
-                      className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition-all duration-200 text-sm font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                    >
-                      <FontAwesomeIcon icon={faTrash} />
-                      Delete
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+          {/* PAGINATION GRID */}
+          <div className="mt-8 flex justify-center">
+            <Pagination page={page} pages={pages} onPageChange={setPage} />
+          </div>
+        </>
       )}
 
       <DeleteModal

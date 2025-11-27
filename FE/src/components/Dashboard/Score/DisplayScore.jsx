@@ -4,6 +4,9 @@ import { Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FaDownload } from "react-icons/fa";
 import { toJpeg } from "html-to-image";
+import Pagination from "../../../utils/Pagination";
+import usePagination from "../../../hooks/usePagination";
+//  import { initSocket } from "../../../utils/socketClient";
 import {
   BarChart,
   Bar,
@@ -15,9 +18,10 @@ import {
   Legend,
 } from "recharts";
 
-import "./displayScore.css"; 
+import "./displayScore.css";
 
 const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1";
+// const BACKEND_URL = "http://localhost:5000/api/v1";
 
 const DisplayScore = () => {
   const { token } = useContext(AuthContext);
@@ -30,94 +34,156 @@ const DisplayScore = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("scores");
 
+  const [page, setPage] = useState(1);
+  // const scorePerPage = 3;
+
   if (!token) return <Navigate to="/login" replace />;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-
-        const scoreRes = await fetch(`${BACKEND_URL}/scores/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!scoreRes.ok) {
-          toast.error(`Failed to load scores (${scoreRes.status})`);
-          return;
-        }
-        const scoreData = await scoreRes.json();
-        setScores(scoreData || []);
-
-        const analyticRes = await fetch(`${BACKEND_URL}/scores/getanalytics`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!analyticRes.ok)
-          toast.error(`Failed to load analytics (${analyticRes.status})`);
-        const analyticData = await analyticRes.json();
-        setAnalytics(analyticData || []);
-
-        const perContestantRes = await fetch(
-          `${BACKEND_URL}/scores/per-contestant-round`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (!perContestantRes.ok)
-          toast.error(
-            `Failed to score per contestant per round (${perContestantRes.status})`
-          );
-        const perContestantData = await perContestantRes.json();
-        setPerRound(perContestantData);
-
-        const judgeBreakdownRes = await fetch(
-          `${BACKEND_URL}/scores/judge-breakdown`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (!judgeBreakdownRes.ok)
-          throw new Error(
-            `Failed to breakdown(${judgeBreakdownRes.status})`
-          );
-        const judgeBreakdownData = await judgeBreakdownRes.json();
-        setJudgeBreakdown(judgeBreakdownData);
-      } catch (err) {
-        toast.error(err.message || "Error fetching data");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [token]);
-
-  if (loading)
-    return <div className="loading-text">Loading data...</div>;
-
-const handleDownload = async () => {
-  const node = tableRef.current;
-  if (!node) return;
-
+ // SINGLE data loading function - ADD THIS
+const loadAllData = async () => {
   try {
-    node.classList.add('force-desktop');
-    await new Promise((r) => setTimeout(r, 100));
+    setLoading(true);
+    
+    // Make all API calls in parallel
+    const [scoreRes, analyticRes, perContestantRes, judgeBreakdownRes] = 
+      await Promise.all([
+        fetch(`${BACKEND_URL}/scores/`, { 
+          headers: { Authorization: `Bearer ${token}` } 
+        }),
+        fetch(`${BACKEND_URL}/scores/getanalytics`, { 
+          headers: { Authorization: `Bearer ${token}` } 
+        }),
+        fetch(`${BACKEND_URL}/scores/per-contestant-round`, { 
+          headers: { Authorization: `Bearer ${token}` } 
+        }),
+        fetch(`${BACKEND_URL}/scores/judge-breakdown`, { 
+          headers: { Authorization: `Bearer ${token}` } 
+        })
+      ]);
 
-    const dataUrl = await toJpeg(node, {
-      quality: 1.0,
-      cacheBust: true,
-      useCors: true,
-      crossOrigin: 'anonymous',
-    });
+    // Process all responses in parallel
+    const [scoresData, analyticsData, perRoundData, judgeData] = 
+      await Promise.all([
+        scoreRes.ok ? scoreRes.json() : Promise.resolve([]),
+        analyticRes.ok ? analyticRes.json() : Promise.resolve([]),
+        perContestantRes.ok ? perContestantRes.json() : Promise.resolve([]),
+        judgeBreakdownRes.ok ? judgeBreakdownRes.json() : Promise.resolve([])
+      ]);
 
-    const link = document.createElement('a');
-    link.download = 'JudgeWiseReport.jpg';
-    link.href = dataUrl;
-    link.click();
-  } catch (err) {
-    console.error('Error downloading report:', err);
-    toast.error('Failed to download report');
+    // Update all state
+    setScores(scoresData);
+    setAnalytics(analyticsData);
+    setPerRound(perRoundData);
+    setJudgeBreakdown(judgeData);
+    
+  } catch (error) {
+    console.error("Error loading data:", error);
+    toast.error("Failed to load data");
   } finally {
-    node.classList.remove('force-desktop');
     setLoading(false);
   }
 };
 
+useEffect(() => {
+  loadAllData();
+}, [token]);
+
+  useEffect(() => {
+    const wsUrl = 'wss://judgeevaluationsystem.onrender.com/ws';
 
 
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      console.log("websocket CONNECTED in React component!");
+    };
+
+    ws.onmessage = (msg) => {
+      try {
+        const parsed = JSON.parse(msg.data);
+        if (parsed.type === "new_score") {
+          toast.success(
+            `New score submitted: ${parsed.data.contestantName} - ${parsed.data.score}`
+          );
+
+          loadAllData();
+        }
+      } catch (err) {
+        console.error(" Parse error:", err, "Raw data:", msg.data);
+      }
+    };
+
+    ws.onerror = (error) => {
+      console.error(" WebSocket error:", error);
+    };
+
+    ws.onclose = (event) => {
+      console.log("WebSocket closed:", event.code, event.reason);
+    };
+
+    return () => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.close();
+      }
+    };
+  }, [token]);
+
+  const {
+    page: scorePage,
+    pages: scorePages,
+    currentData: currentScores,
+    setPage: setScorePage,
+  } = usePagination(scores, 3);
+  const {
+    page: judgePage,
+    pages: judgePages,
+    currentData: currentJudgeBreakdown,
+    setPage: setJudgePage,
+  } = usePagination(judgeBreakdown, 5);
+  const {
+    page: perRoundPage,
+    pages: perRoundPages,
+    currentData: currentPerRound,
+    setPage: setPerRoundPage,
+  } = usePagination(perRound, 5);
+
+  const {
+    page:analyticsPage,
+    pages:analyticsPages,
+    currentData:currentAnalytics,
+    setPage:setAnalyticsPage,
+  } =usePagination(analytics,5)
+
+
+  if (loading) return <div className="loading-text">Loading data...</div>;
+
+  const handleDownload = async () => {
+    const node = tableRef.current;
+    if (!node) return;
+
+    try {
+      node.classList.add("force-desktop");
+      await new Promise((r) => setTimeout(r, 100));
+
+      const dataUrl = await toJpeg(node, {
+        quality: 1.0,
+        cacheBust: true,
+        useCors: true,
+        crossOrigin: "anonymous",
+      });
+
+      const link = document.createElement("a");
+      link.download = "JudgeWiseReport.jpg";
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error("Error downloading report:", err);
+      toast.error("Failed to download report");
+    } finally {
+      node.classList.remove("force-desktop");
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="page-wrapper">
@@ -140,9 +206,7 @@ const handleDownload = async () => {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={
-                activeTab === tab.key ? "tab tab-active" : "tab"
-              }
+              className={activeTab === tab.key ? "tab tab-active" : "tab"}
             >
               {tab.label}
             </button>
@@ -151,7 +215,6 @@ const handleDownload = async () => {
       </div>
 
       {/* === SCORES TAB === */}
-       {/* === SCORES TAB === */}
       {activeTab === "scores" && (
         <div className="card" ref={tableRef}>
           <h2 className="card-title">Total Score</h2>
@@ -175,7 +238,7 @@ const handleDownload = async () => {
               </thead>
 
               <tbody>
-                {scores.map((score, index) => (
+                {currentScores.map((score, index) => (
                   <tr key={index}>
                     <td>{`${score.contestantNumber}-${score.contestantName}`}</td>
                     <td>{score.roundName}</td>
@@ -197,6 +260,13 @@ const handleDownload = async () => {
                 ))}
               </tbody>
             </table>
+            <div className="mt-8 flex justify-center">
+              <Pagination
+                page={scorePage}
+                pages={scorePages}
+                onPageChange={setScorePage}
+              />
+            </div>
           </div>
         </div>
       )}
@@ -234,7 +304,7 @@ const handleDownload = async () => {
                 </tr>
               </thead>
               <tbody>
-                {analytics.map((a, i) => (
+                {currentAnalytics.map((a, i) => (
                   <tr key={i}>
                     <td>{a.contestant_number}</td>
                     <td>{a.name}</td>
@@ -245,6 +315,11 @@ const handleDownload = async () => {
                 ))}
               </tbody>
             </table>
+             <Pagination
+                page={analyticsPage}
+                pages={analyticsPages}
+                onPageChange={setAnalyticsPage}
+              />
           </div>
         </div>
       )}
@@ -272,7 +347,7 @@ const handleDownload = async () => {
               </thead>
 
               <tbody>
-                {perRound.map((round, i) => (
+                {currentPerRound.map((round, i) => (
                   <tr key={i}>
                     <td>{round.contestantNumber}</td>
                     <td>{round.contestantName}</td>
@@ -284,6 +359,11 @@ const handleDownload = async () => {
                 ))}
               </tbody>
             </table>
+            <Pagination
+              page={perRoundPage}
+              pages={perRoundPages}
+              onPageChange={setPerRoundPage}
+            />
           </div>
         </div>
       )}
@@ -297,14 +377,21 @@ const handleDownload = async () => {
             <table className="table">
               <thead>
                 <tr>
-                  {["Contestant", "Round", "Judge", "Score", "Comment", "Max Score"].map((h) => (
+                  {[
+                    "Contestant",
+                    "Round",
+                    "Judge",
+                    "Score",
+                    "Comment",
+                    "Max Score",
+                  ].map((h) => (
                     <th key={h}>{h}</th>
                   ))}
                 </tr>
               </thead>
 
               <tbody>
-                {judgeBreakdown.map((jb, index) => (
+                {currentJudgeBreakdown.map((jb, index) => (
                   <tr key={index}>
                     <td>
                       {jb.contestant?.contestant_number
@@ -320,6 +407,13 @@ const handleDownload = async () => {
                 ))}
               </tbody>
             </table>
+            <div className="mt-8 flex justify-center">
+              <Pagination
+                page={judgePage}
+                pages={judgePages}
+                onPageChange={setJudgePage}
+              />
+            </div>
           </div>
         </div>
       )}
@@ -342,11 +436,11 @@ const handleDownload = async () => {
               </thead>
 
               <tbody>
-                {[...analytics]
+                {[...currentAnalytics]
                   .sort((a, b) => b.totalScore - a.totalScore)
                   .map((a, i) => (
                     <tr key={i}>
-                      <td className="rank">{i + 1}</td>
+                      <td className="rank">{(analyticsPage - 1) * 5 + i + 1}</td>
                       <td>{a.name}</td>
                       <td>{a.totalScore}</td>
                       <td className="highlight">{a.averageScore}</td>
@@ -354,6 +448,11 @@ const handleDownload = async () => {
                   ))}
               </tbody>
             </table>
+            <Pagination
+                page={analyticsPage}
+                pages={analyticsPages}
+                onPageChange={setAnalyticsPage}
+              />
           </div>
         </div>
       )}

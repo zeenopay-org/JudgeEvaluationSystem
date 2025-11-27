@@ -13,10 +13,13 @@ import scoreRoute from './src/routes/scoreRoute.js'
 import titleRoute from './src/routes/titleRoute.js'
 import titleAssignmentRoute from './src/routes/titleAssignmentRoute.js'; 
 import uploadRoute from './src/routes/uploadRoute.js';
+import http from "http";
+import { initSocket } from './src/utils/socket.js';
 
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
 app.use(cors({
   origin:[ 'http://localhost:5173', 'https://judgeevaluation.netlify.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -41,7 +44,11 @@ app.use('/api/v1/titles',titleRoute)
 app.use('/api/v1/titleassignment',titleAssignmentRoute)
 app.use('/api/v1', uploadRoute);
 
+initSocket(server);
+
 const port = process.env.PORT || 5000;
-app.listen(port, "0.0.0.0", () => {
+server.listen(port, "0.0.0.0", () => {
   console.log(`Server running on port ${port}`);
 });
+
+

@@ -145,7 +145,7 @@ const DisplayTitle = () => {
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8 relative">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-3 pr-14 sm:pr-0">
+        <h2 className="text-md sm:text-xl font-bold text-gray-800 flex items-center gap-3 pr-14 sm:pr-0">
           <span className="w-1 h-8 bg-gradient-to-b from-green-500 to-green-700 rounded-full"></span>
           Event Titles
         </h2>

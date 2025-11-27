@@ -4,6 +4,7 @@ import { AuthContext } from '../../../context/AuthContext';
 import { toast } from 'react-toastify';
 
 const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1"; 
+  // const BACKEND_URL = "http://localhost:5000/api/v1";
 
 const EditEvent = () => {
   const { id } = useParams();
