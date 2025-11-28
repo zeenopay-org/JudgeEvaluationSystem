@@ -15,20 +15,60 @@ export const createJudge = async (req, res) => {
   try {
     const { username, password, email, contact, eventId } = req.body;
 
-    // Check if user already exists
+    // Empty fields
+    if (!username || !password || !email || !contact || !eventId) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // Username validation
+    if (username.length < 5 || username.length > 25) {
+      return res.status(400).json({
+        error: "Username must be between 5–25 characters",
+      });
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      return res.status(400).json({
+        error: "Username can only contain letters, numbers, and underscores",
+      });
+    }
+
+    // STRONG EMAIL VALIDATION
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    // STRONG PASSWORD VALIDATION
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        error:
+          "Password must include uppercase, lowercase, number, special character, and be at least 8 characters",
+      });
+    }
+
+    // Contact validation
+    if (!/^[0-9]{10}$/.test(contact)) {
+      return res
+        .status(400)
+        .json({ error: "Contact must be exactly 10 digits" });
+    }
+
+    // Check if user exists
     const existingUser = await Users.findOne({
       $or: [{ email }, { username }],
     });
     if (existingUser) {
-      return res.status(400).json({
-        error: "User with this email or username already exists",
-      });
+      return res
+        .status(400)
+        .json({ error: "User with this email or username already exists" });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user with judge role
     const user = await Users.create({
       username,
       email,
@@ -36,25 +76,15 @@ export const createJudge = async (req, res) => {
       role: "judge",
     });
 
-    // Create judge record
-    const judge = new Judge({
+    const judge = await Judge.create({
       contact,
       user: user._id,
       event: eventId,
     });
-    await judge.save();
 
     res.status(201).json({
       message: "Judge created successfully",
-      judge: {
-        id: judge._id,
-        username: user.username,
-        email: user.email,
-        contact: judge.contact,
-        role: user.role,
-        userId: user._id,
-        eventId: judge.event,
-      },
+      judge,
     });
   } catch (error) {
     console.error("Error creating judge:", error);

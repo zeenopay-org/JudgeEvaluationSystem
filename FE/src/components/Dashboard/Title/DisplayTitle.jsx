@@ -31,6 +31,9 @@ const DisplayTitle = () => {
   const handleCreateClick = () => {
     navigate("/title/create");
   };
+  const handleViewResultClick = () =>{
+    navigate("/title/winner")
+  }
 
   const promptDelete = (title) => {
     setSelectedTitle(title);
@@ -144,20 +147,32 @@ const DisplayTitle = () => {
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-8 relative">
-        <h2 className="text-md sm:text-xl font-bold text-gray-800 flex items-center gap-3 pr-14 sm:pr-0">
-          <span className="w-1 h-8 bg-gradient-to-b from-green-500 to-green-700 rounded-full"></span>
-          Event Titles
-        </h2>
-        <button
-          onClick={handleCreateClick}
-          className="absolute top-0 right-0 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl shadow-lg hover:shadow-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2 font-semibold
-          w-12 h-12 sm:w-auto sm:h-auto sm:px-6 sm:py-2.5 justify-center"
-        >
-          <span className="text-md font-bold">+</span>
-          <span className="hidden sm:inline">Create Title</span>
-        </button>
-      </div>
+     <div className="mb-8 relative">
+  <h2 className="text-md sm:text-xl font-bold text-gray-800 flex items-center gap-3 pr-14 sm:pr-0">
+    <span className="w-1 h-8 rounded-full"></span>
+    Event Titles
+  </h2>
+
+  {/* Button container */}
+  <div className="absolute top-0 right-0 flex gap-3">
+     <button
+      onClick={handleViewResultClick}
+      className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl shadow-lg hover:shadow-xl hover:from-indigo-600 hover:to-indigo-700 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2 font-semibold w-12 h-12 sm:w-auto sm:h-auto sm:px-6 sm:py-2.5 justify-center"
+    >
+      <span className="text-md font-bold">👁️</span>
+      <span className="hidden sm:inline">View Result</span>
+    </button>
+    <button
+      onClick={handleCreateClick}
+      className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl shadow-lg hover:shadow-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2 font-semibold w-12 h-12 sm:w-auto sm:h-auto sm:px-6 sm:py-2.5 justify-center"
+    >
+      <span className="text-md font-bold">+</span>
+      <span className="hidden sm:inline">Create Title</span>
+    </button>
+
+   
+  </div>
+</div>
 
       {loading ? (
         <div className="text-center py-20">
@@ -290,7 +305,7 @@ const DisplayTitle = () => {
                           onClick={() => openAssignModal(title)}
                           className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
                         >
-                          Assign
+                          Select
                         </button>
                         <button
                           onClick={() => promptDelete(title)}

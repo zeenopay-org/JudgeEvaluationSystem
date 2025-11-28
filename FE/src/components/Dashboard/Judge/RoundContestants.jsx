@@ -63,6 +63,10 @@ const RoundScoring = () => {
         toast.error(`Max score is ${round.max_score}`);
         return;
       }
+      if (score < 0) {
+        toast.error(`Score can't be less than 0`);
+        return;
+      }
 
       // for qna type, question is required
       if (round.type === "qna" && !question) {

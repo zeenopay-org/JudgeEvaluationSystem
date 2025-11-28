@@ -9,13 +9,10 @@ const createRound = () => {
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
-  const [visible, setVisible] = useState(false);
   const [questions, setQuestions] = useState([""]);
 
-  const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1"; 
-    // const BACKEND_URL = "http://localhost:5000/api/v1";
+  const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1";
 
-  // Fetch events on component mount
   useEffect(() => {
     fetchEvents();
   }, []);
@@ -24,7 +21,6 @@ const createRound = () => {
     setIsLoadingEvents(true);
     try {
       const response = await fetch(`${BACKEND_URL}/events`, {
-        method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -44,6 +40,105 @@ const createRound = () => {
     }
   };
 
+  const validateForm = () => {
+    // Round Name
+    if (!name.trim()) {
+      toast.error("Round name is required");
+      return false;
+    }
+    if (name.length < 3 || name.length > 50) {
+      toast.error("Round name must be 3–50 characters long");
+      return false;
+    }
+
+    // Type
+    if (!type) {
+      toast.error("Select round type");
+      return false;
+    }
+
+    // QNA Questions
+    if (type === "qna") {
+      const filled = questions.filter((q) => q.trim() !== "");
+
+      if (filled.length === 0) {
+        toast.error("At least one question is required");
+        return false;
+      }
+
+      for (let q of filled) {
+        if (q.length < 5) {
+          toast.error("Each question must be at least 5 characters");
+          return false;
+        }
+      }
+    }
+
+    // Max score
+    if (!max_score) {
+      toast.error("Max score is required");
+      return false;
+    }
+    if (!/^[0-9]+$/.test(max_score)) {
+      toast.error("Max score must be a positive number");
+      return false;
+    }
+    if (Number(max_score) <= 0) {
+      toast.error("Max score must be greater than 0");
+      return false;
+    }
+
+    // Event
+    if (!eventId) {
+      toast.error("Please select an event");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/rounds/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          name,
+          type,
+          max_score,
+          eventId,
+          questions:
+            type === "qna" ? questions.filter((q) => q.trim() !== "") : [],
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create round");
+      }
+
+      toast.success("Round created successfully!");
+
+      setName("");
+      setType("");
+      setMaxScore("");
+      setEventId("");
+      setQuestions([""]);
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleQuestionChange = (index, value) => {
     const updated = [...questions];
     updated[index] = value;
@@ -59,95 +154,41 @@ const createRound = () => {
     setQuestions(updated);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(
-        `${BACKEND_URL}/rounds/create`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
-            name,
-            type,
-            max_score,
-            eventId,
-            questions:
-              type === "qna" ? questions.filter((q) => q.trim() !== "") : [],
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create round");
-      }
-
-      const data = await response.json();
-      toast.success("Round created successfully!");
-
-      // Reset form
-      setName("");
-      setType("");
-      setMaxScore("");
-      setEventId("");
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
         <div className="text-center mb-8">
           <h1 className="text-xl font-bold text-gray-900">Create New Round</h1>
-          <p className="text-gray-600  text-sm  mt-2">
+          <p className="text-gray-600 text-sm mt-2">
             Add a new round to the evaluation system
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Username Field */}
+          {/* Round Name */}
           <div>
-            <label
-              htmlFor="round-name"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Round Name
             </label>
             <input
               type="text"
-              id="round-name"
-              name="round-name"
               placeholder="Enter round name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full  text-sm  px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+              className="w-full text-sm px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
 
-          {/* Type Field */}
+          {/* Type */}
           <div>
-            <label
-              htmlFor="type"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Type
             </label>
             <select
-              id="type"
-              name="type"
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className="w-full  text-sm  px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white"
+              className="w-full text-sm px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               required
             >
               <option value="">Select round type</option>
@@ -160,17 +201,16 @@ const createRound = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Questions
                 </label>
-                {questions.map((question, index) => (
+                {questions.map((q, index) => (
                   <div key={index} className="flex items-center mb-2">
                     <input
                       type="text"
                       placeholder={`Question ${index + 1}`}
-                      value={question}
+                      value={q}
                       onChange={(e) =>
                         handleQuestionChange(index, e.target.value)
                       }
-                      className="flex-grow  text-sm px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
+                      className="flex-grow text-sm px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
                     <button
                       type="button"
@@ -192,113 +232,56 @@ const createRound = () => {
             )}
           </div>
 
-          {/* Max_score Field*/}
-          <div className="relative">
-            <label
-              htmlFor="max_score"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
+          {/* Max Score */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Max Score
             </label>
-            <div className="relative">
-              <input
-                id="max_score"
-                type={visible ? "text" : "number"}
-                placeholder="Enter max score"
-                value={max_score}
-                onChange={(e) => setMaxScore(e.target.value)}
-                className="w-full  text-sm  max-w-full px-3 py-2 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Event_id Field */}
-          <div>
-            {/* <label htmlFor="eventId" className="block text-sm font-medium text-gray-700 mb-2">
-              Event ID
-            </label> */}
             <input
-              type="hidden"
-              id="eventId"
-              name="eventId"
-              placeholder="Enter event id"
-              value={eventId}
-              onChange={(e) => setEventId(e.target.value)}
-              className="w-full  text-sm  px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+              type="number"
+              placeholder="Enter max score"
+              value={max_score}
+              onChange={(e) => setMaxScore(e.target.value)}
+              className="w-full text-sm px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
 
-          {/* Event Selection Dropdown */}
+          {/* Event */}
           <div>
-            <label
-              htmlFor="eventId"
-              className="block font-medium text-gray-700 mb-2"
-            >
+            <label className="block font-medium text-gray-700 mb-2">
               Select Event
             </label>
-            <div className="relative">
-              <select
-                id="eventId"
-                name="eventId"
-                value={eventId}
-                onChange={(e) => setEventId(e.target.value)}
-                className="w-full  text-sm  px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 appearance-none bg-white"
-                required
-                disabled={isLoadingEvents}
-              >
-                <option value="">
-                  {isLoadingEvents
-                    ? "Loading events..."
-                    : "Select an event to assign round"}
+            <select
+              value={eventId}
+              onChange={(e) => setEventId(e.target.value)}
+              className="w-full text-sm px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+              required
+            >
+              <option value="">
+                {isLoadingEvents ? "Loading events..." : "Select an event"}
+              </option>
+
+              {events.map((event) => (
+                <option key={event._id} value={event._id}>
+                  {event.name}
                 </option>
-                {events.map((event) => (
-                  <option key={event._id} value={event._id}>
-                    {event.name}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg
-                  className="w-5 h-5 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </div>
-            </div>
-            {isLoadingEvents && (
-              <p className="mt-2 text-sm text-gray-500">Loading events...</p>
-            )}
-            {events.length === 0 && !isLoadingEvents && (
-              <p className="mt-2 text-sm text-amber-600">
-                No events available. Please create an event first.
-              </p>
-            )}
+              ))}
+            </select>
           </div>
 
-          {/* Submit Button */}
-          <div className="pt-4">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition duration-200 ${
-                isLoading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              }`}
-            >
-              {isLoading ? "Creating Round..." : "Create Round"}
-            </button>
-          </div>
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`w-full py-3 px-6 rounded-lg font-semibold text-white ${
+              isLoading
+                ? "bg-gray-400"
+                : "bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-blue-500"
+            }`}
+          >
+            {isLoading ? "Creating Round..." : "Create Round"}
+          </button>
         </form>
       </div>
     </div>

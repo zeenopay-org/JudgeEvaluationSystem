@@ -4,7 +4,7 @@ import { AuthContext } from "../../../context/AuthContext";
 import { toast } from "react-toastify";
 
 const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1";
-  // const BACKEND_URL = "http://localhost:5000/api/v1";
+// const BACKEND_URL = "http://localhost:5000/api/v1";
 
 const EditRound = () => {
   const { id } = useParams();
@@ -86,9 +86,53 @@ const EditRound = () => {
     setQuestions(updated.length ? updated : [""]);
   };
 
+  //validation
+  const validateForm = () => {
+    if (!name.trim()) {
+      toast.error("Round name is required");
+      return false;
+    }
+
+    if (!type) {
+      toast.error("please select a valid round type");
+      return false;
+    }
+
+    if (!maxScore || isNaN(maxScore) || Number(maxScore) <= 0) {
+      toast.error("Max score must be a positive number");
+      return false;
+    }
+
+    if (type === "qna") {
+      // Remove spaces from each question
+      const cleanedQuestions = questions.map((q) => q.trim());
+      for (let i = 0; i < cleanedQuestions.length; i++) {
+        if (cleanedQuestions[i].length < 5) {
+          toast.error(`Question ${i + 1} must be at least 5 characters long`);
+          return false;
+        }
+      }
+      // Check for duplicates
+      const unique = new Set(cleanedQuestions);
+      if (unique.size !== cleanedQuestions.length) {
+        toast.error("Duplicate questions are not allowed");
+        return false;
+      }
+    }
+    return true;
+  };
+  useEffect(() => {
+    if (type !== "qna") {
+      setQuestions([""]);
+    }
+  }, [type]);
+
   // Submit handler
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) return;
+
     setIsLoading(true);
 
     const payload = {

@@ -66,7 +66,7 @@ const AssignTitleModal = ({ titleId, eventId, onClose, onAssignSuccess }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-opacity-40 bg-grey-200 flex justify-center items-start pt-10 z-50 px-4">
+    <div className="fixed inset-0 bg-opacity-20 backdrop-blur-sm flex justify-center items-start pt-10 z-50 px-4">
       <div className="mt-24 bg-white rounded-lg shadow-lg w-full max-w-3xl max-h-[80vh] p-6 relative overflow-hidden">
         {/* Close Button */}
         <button
@@ -87,7 +87,7 @@ const AssignTitleModal = ({ titleId, eventId, onClose, onAssignSuccess }) => {
         {loading ? (
           <p className="text-center text-sm text-gray-600">Loading contestants...</p>
         ) : Array.isArray(contestants) && contestants.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto max-h-[60vh] pr-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-4 overflow-y-auto max-h-[60vh] pr-1">
             {contestants.map((c) => (
               <div
                 key={c._id}
@@ -104,7 +104,7 @@ const AssignTitleModal = ({ titleId, eventId, onClose, onAssignSuccess }) => {
                   onClick={() => handleAssign(c._id)}
                   className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition text-sm"
                 >
-                  Assign
+                  Select As Winner
                 </button>
               </div>
             ))}

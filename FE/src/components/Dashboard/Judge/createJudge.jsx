@@ -4,7 +4,7 @@ import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
 const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1";
-  // const BACKEND_URL = "http://localhost:5000/api/v1";
+// const BACKEND_URL = "http://localhost:5000/api/v1";
 
 const CreateJudge = () => {
   const [username, setUserName] = useState("");
@@ -40,12 +40,57 @@ const CreateJudge = () => {
     }
   };
 
+  const validateForm = () => {
+    if (!username || !email || !password || !contact || !eventId) {
+      toast.error("Please fill out all fields");
+      return false;
+    }
+
+    // Username
+    if (username.length < 5 || username.length > 25) {
+      toast.error("Username must be between 5-25 characters");
+      return false;
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      toast.error("Username can contain letters, numbers, underscores only");
+      return false;
+    }
+
+    // STRONG EMAIL VALIDATION
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Invalid email format");
+      return false;
+    }
+
+    // STRONG PASSWORD VALIDATION
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      toast.error(
+        "Password must include uppercase, lowercase, number, special character (min 8 chars)"
+      );
+      return false;
+    }
+
+    // Contact
+    if (!/^[0-9]{10}$/.test(contact)) {
+      toast.error("Contact must be exactly 10 digits and should contain numeric values only");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!username || !email || !password || !contact || !eventId) {
-      toast.error("Please fill out all fields.");
-      return;
-    }
+
+    const valid = validateForm();
+    console.log("VALIDATION:", valid);
+    if (!valid) return;
+
     setIsLoading(true);
     try {
       const response = await fetch(`${BACKEND_URL}/judges/create`, {
@@ -68,7 +113,7 @@ const CreateJudge = () => {
         setEventId("");
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error("Network error. Please try again.", error.message);
     } finally {
       setIsLoading(false);
     }

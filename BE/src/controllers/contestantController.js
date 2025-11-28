@@ -9,8 +9,19 @@ export const createContestant = async (req, res) => {
     const { name, contestant_number, image, eventId } = req.body;
     const file = req.file;
 
+    if (!name || !contestant_number || !eventId) {
+      return res.status(400).json({ error: "All fields (name, contestant_number, eventId) are required" });
+    }
+
     if (!file) {
       return res.status(400).json({ error: "Image file is required" });
+    }
+
+    if(name.length<5){
+      return res.status(400).json({error: "Name must be at least 5 characters long"} )
+    }
+    if (/\d/.test(name)) {
+      return res.status(400).json({ error: "Name must not contain numbers" });
     }
 
     const imageUrl = await uploadToS3(file);

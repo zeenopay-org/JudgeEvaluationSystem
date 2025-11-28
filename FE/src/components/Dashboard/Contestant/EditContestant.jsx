@@ -3,8 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/AuthContext";
 import { toast } from "react-toastify";
 
-const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1"; 
-  // const BACKEND_URL = "http://localhost:5000/api/v1";
+const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1";
+// const BACKEND_URL = "http://localhost:5000/api/v1";
 
 const EditContestant = () => {
   const { id } = useParams(); // contestant id from URL
@@ -106,7 +106,10 @@ const EditContestant = () => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="contestant-name" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="contestant-name"
+            className="block text-sm font-medium text-gray-700"
+          >
             Contestant Name
           </label>
           <input
@@ -120,7 +123,10 @@ const EditContestant = () => {
         </div>
 
         <div>
-          <label htmlFor="contestant-number" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="contestant-number"
+            className="block text-sm font-medium text-gray-700"
+          >
             Contestant Number
           </label>
           <input
@@ -134,7 +140,10 @@ const EditContestant = () => {
         </div>
 
         <div>
-          <label htmlFor="image" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="image"
+            className="block text-sm font-medium text-gray-700"
+          >
             Contestant Image
           </label>
           <input

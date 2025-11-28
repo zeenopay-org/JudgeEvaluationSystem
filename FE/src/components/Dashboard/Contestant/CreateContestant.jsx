@@ -1,14 +1,14 @@
-import React, { useState, useContext } from 'react';
-import { AuthContext } from '../../../context/AuthContext';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import React, { useState, useContext } from "react";
+import { AuthContext } from "../../../context/AuthContext";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
-const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1"; 
-  // const BACKEND_URL = "http://localhost:5000/api/v1";
+const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1";
+// const BACKEND_URL = "http://localhost:5000/api/v1";
 
 const CreateContestant = () => {
-  const [contestantName, setContestantName] = useState('');
-  const [contestant_number, setContestantNumber] = useState('');
+  const [contestantName, setContestantName] = useState("");
+  const [contestant_number, setContestantNumber] = useState("");
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -21,7 +21,9 @@ const CreateContestant = () => {
   const eventId =
     eventIdFromParams ||
     location.state?.eventId ||
-    (typeof window !== 'undefined' ? localStorage.getItem('selectedEventId') : '');
+    (typeof window !== "undefined"
+      ? localStorage.getItem("selectedEventId")
+      : "");
 
   // Preview selected image
   const handleImageChange = (e) => {
@@ -36,12 +38,28 @@ const CreateContestant = () => {
     e.preventDefault();
 
     if (!eventId) {
-      toast.error('Missing event context. Please start from the Events page.');
+      toast.error("Missing event context. Please start from the Events page.");
       return;
     }
 
-    if (!contestantName || !contestant_number) {
-      toast.error('Please fill out all fields.');
+    if (!contestantName || !contestant_number || !image) {
+      toast.error("Please fill out all fields.");
+      return;
+    }
+
+    if (contestantName.length < 5) {
+      toast.error("Name should at least be 5 characters long");
+      return;
+    }
+
+    if (/\d/.test(contestantName)) {
+      toast.error("Name must not contain numbers");
+      return;
+    }
+
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+    if (!allowedTypes.includes(image.type)) {
+      toast.error("Only JPG, JPEG, and PNG files are allowed.");
       return;
     }
 
@@ -50,13 +68,13 @@ const CreateContestant = () => {
     try {
       // Prepare FormData
       const formData = new FormData();
-      formData.append('name', contestantName);
-      formData.append('contestant_number', Number(contestant_number));
-      formData.append('eventId', eventId);
-      if (image) formData.append('image', image);
+      formData.append("name", contestantName);
+      formData.append("contestant_number", Number(contestant_number));
+      formData.append("eventId", eventId);
+      if (image) formData.append("image", image);
 
       const res = await fetch(`${BACKEND_URL}/contestants/create`, {
-        method: 'POST',
+        method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -64,22 +82,22 @@ const CreateContestant = () => {
       });
 
       const data = await res.json();
-      console.log('Response:', data);
+      console.log("Response:", data);
 
       if (res.ok) {
-        toast.success('Contestant created successfully!');
-        setContestantName('');
-        setContestantNumber('');
+        toast.success("Contestant created successfully!");
+        setContestantName("");
+        setContestantNumber("");
         setImage(null);
         setPreview(null);
-        localStorage.removeItem('selectedEventId');
-        navigate('/contestant');
+        localStorage.removeItem("selectedEventId");
+        navigate("/contestant");
       } else {
-        toast.error(data.error || 'Failed to create contestant');
+        toast.error(data.error || "Failed to create contestant");
       }
     } catch (error) {
-      console.error('Error:', error);
-      toast.error('Network error. Please check if the server is running.');
+      console.error("Error:", error);
+      toast.error("Network error. Please check if the server is running.");
     } finally {
       setIsLoading(false);
     }
@@ -95,9 +113,16 @@ const CreateContestant = () => {
         </p>
       )} */}
 
-      <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4"
+        encType="multipart/form-data"
+      >
         <div>
-          <label htmlFor="contestant-name" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="contestant-name"
+            className="block text-sm font-medium text-gray-700"
+          >
             Contestant Name
           </label>
           <input
@@ -112,7 +137,10 @@ const CreateContestant = () => {
         </div>
 
         <div>
-          <label htmlFor="contestant_number" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="contestant_number"
+            className="block text-sm font-medium text-gray-700"
+          >
             Contestant Number
           </label>
           <input
@@ -128,7 +156,10 @@ const CreateContestant = () => {
 
         {/* Image Upload Field */}
         <div>
-          <label htmlFor="image" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="image"
+            className="block text-sm font-medium text-gray-700"
+          >
             Contestant Image
           </label>
           <input
@@ -152,11 +183,11 @@ const CreateContestant = () => {
           disabled={isLoading}
           className={`w-full py-2 px-4 rounded-md transition ${
             isLoading
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-green-600 hover:bg-green-700'
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-green-600 hover:bg-green-700"
           } text-white`}
         >
-          {isLoading ? 'Creating Contestant...' : 'Create Contestant'}
+          {isLoading ? "Creating Contestant..." : "Create Contestant"}
         </button>
       </form>
     </div>

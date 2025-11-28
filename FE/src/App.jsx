@@ -23,6 +23,7 @@ import "react-toastify/dist/ReactToastify.css";
 import EditRound from "./components/Dashboard/Round/EditRound";
 import EditContestant from "./components/Dashboard/Contestant/EditContestant";
 import ErrorPage from "./pages/ErrorPage";
+import TitleWinner from "./components/Dashboard/Title/TitleWinner";
 
 function App() {
   const { admin, judge } = useContext(AuthContext);
@@ -96,7 +97,7 @@ function App() {
         />
         <Route path="/scores" element={<ScorePage />}></Route>
         <Route path="/title" element={<TitlePage />}></Route>
-         <Route path="/*" element={<ErrorPage />}></Route>
+        <Route path="/*" element={<ErrorPage />}></Route>
         <Route
           path="/title/create"
           element={
@@ -105,7 +106,16 @@ function App() {
             </Layout>
           }
         />
+        <Route
+          path="/title/winner"
+          element={
+            <Layout>
+              <TitleWinner />
+            </Layout>
+          }
+        />
       </Routes>
+
       <ToastContainer
         position="top-center"
         autoClose={3000}

@@ -39,58 +39,56 @@ const DisplayScore = () => {
 
   if (!token) return <Navigate to="/login" replace />;
 
- // SINGLE data loading function - ADD THIS
-const loadAllData = async () => {
-  try {
-    setLoading(true);
-    
-    // Make all API calls in parallel
-    const [scoreRes, analyticRes, perContestantRes, judgeBreakdownRes] = 
-      await Promise.all([
-        fetch(`${BACKEND_URL}/scores/`, { 
-          headers: { Authorization: `Bearer ${token}` } 
-        }),
-        fetch(`${BACKEND_URL}/scores/getanalytics`, { 
-          headers: { Authorization: `Bearer ${token}` } 
-        }),
-        fetch(`${BACKEND_URL}/scores/per-contestant-round`, { 
-          headers: { Authorization: `Bearer ${token}` } 
-        }),
-        fetch(`${BACKEND_URL}/scores/judge-breakdown`, { 
-          headers: { Authorization: `Bearer ${token}` } 
-        })
-      ]);
+  // SINGLE data loading function - ADD THIS
+  const loadAllData = async () => {
+    try {
+      setLoading(true);
 
-    // Process all responses in parallel
-    const [scoresData, analyticsData, perRoundData, judgeData] = 
-      await Promise.all([
-        scoreRes.ok ? scoreRes.json() : Promise.resolve([]),
-        analyticRes.ok ? analyticRes.json() : Promise.resolve([]),
-        perContestantRes.ok ? perContestantRes.json() : Promise.resolve([]),
-        judgeBreakdownRes.ok ? judgeBreakdownRes.json() : Promise.resolve([])
-      ]);
+      // Make all API calls in parallel
+      const [scoreRes, analyticRes, perContestantRes, judgeBreakdownRes] =
+        await Promise.all([
+          fetch(`${BACKEND_URL}/scores/`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch(`${BACKEND_URL}/scores/getanalytics`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch(`${BACKEND_URL}/scores/per-contestant-round`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch(`${BACKEND_URL}/scores/judge-breakdown`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
 
-    // Update all state
-    setScores(scoresData);
-    setAnalytics(analyticsData);
-    setPerRound(perRoundData);
-    setJudgeBreakdown(judgeData);
-    
-  } catch (error) {
-    console.error("Error loading data:", error);
-    toast.error("Failed to load data");
-  } finally {
-    setLoading(false);
-  }
-};
+      // Process all responses in parallel
+      const [scoresData, analyticsData, perRoundData, judgeData] =
+        await Promise.all([
+          scoreRes.ok ? scoreRes.json() : Promise.resolve([]),
+          analyticRes.ok ? analyticRes.json() : Promise.resolve([]),
+          perContestantRes.ok ? perContestantRes.json() : Promise.resolve([]),
+          judgeBreakdownRes.ok ? judgeBreakdownRes.json() : Promise.resolve([]),
+        ]);
 
-useEffect(() => {
-  loadAllData();
-}, [token]);
+      // Update all state
+      setScores(scoresData);
+      setAnalytics(analyticsData);
+      setPerRound(perRoundData);
+      setJudgeBreakdown(judgeData);
+    } catch (error) {
+      console.error("Error loading data:", error);
+      toast.error("Failed to load data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const wsUrl = 'wss://judgeevaluationsystem.onrender.com/ws';
+    loadAllData();
+  }, [token]);
 
+  useEffect(() => {
+    const wsUrl = "wss://judgeevaluationsystem.onrender.com/ws";
 
     const ws = new WebSocket(wsUrl);
 
@@ -148,12 +146,11 @@ useEffect(() => {
   } = usePagination(perRound, 5);
 
   const {
-    page:analyticsPage,
-    pages:analyticsPages,
-    currentData:currentAnalytics,
-    setPage:setAnalyticsPage,
-  } =usePagination(analytics,5)
-
+    page: analyticsPage,
+    pages: analyticsPages,
+    currentData: currentAnalytics,
+    setPage: setAnalyticsPage,
+  } = usePagination(analytics, 5);
 
   if (loading) return <div className="loading-text">Loading data...</div>;
 
@@ -219,55 +216,100 @@ useEffect(() => {
         <div className="card" ref={tableRef}>
           <h2 className="card-title">Total Score</h2>
 
-          <div className="table-wrapper">
-            <table className="table">
-              <thead>
-                <tr>
-                  {[
-                    "Contestant",
-                    "Round",
-                    "Score by Judges",
-                    "Total Score",
-                    "Average",
-                    "Total Possible Score",
-                    "Judge Count",
-                  ].map((h) => (
-                    <th key={h}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
+      <div className="table-wrapper overflow-x-auto -mx-4 sm:mx-0">
+  <div className="inline-block min-w-full align-middle">
+    <table className="min-w-full border-collapse border border-gray-200 shadow-sm">
+      <thead className="bg-gradient-to-r from-green-500 to-green-700">
+        <tr>
+          {[
+            "Contestant",
+            "Round",
+            "Total Score",
+            "Average",
+            "Judge Count",
+          ].map((h) => (
+            <th
+              key={h}
+              className="text-left py-2 px-2 md:py-3 md:px-4 border-b-2 font-semibold text-white text-xs md:text-sm uppercase tracking-wide whitespace-nowrap"
+            >
+              {h}
+            </th>
+          ))}
+        </tr>
+      </thead>
 
-              <tbody>
-                {currentScores.map((score, index) => (
-                  <tr key={index}>
-                    <td>{`${score.contestantNumber}-${score.contestantName}`}</td>
-                    <td>{score.roundName}</td>
-                    <td>
-                      <ul className="judge-list">
-                        {score.judges.map((j, i) => (
-                          <li key={i}>
-                            <span className="judge-name">{j.judgeName}</span>-
-                            <span className="judge-score">{j.score}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td>{score.totalScore}</td>
-                    <td>{Number(score.averageScore).toFixed(2)}</td>
-                    <td>{score.totalPossibleScore}</td>
-                    <td>{score.judgeCount}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <div className="mt-8 flex justify-center">
-              <Pagination
-                page={scorePage}
-                pages={scorePages}
-                onPageChange={setScorePage}
-              />
-            </div>
-          </div>
+      <tbody className="bg-white divide-y divide-gray-200">
+        {currentScores.map((score, index) => (
+          <tr
+            key={index}
+            className="hover:bg-gray-50 transition-colors duration-150"
+          >
+            {/* Contestant + Judge Scores */}
+            <td className="py-3 px-2 md:py-4 md:px-4 align-top min-w-[180px] md:min-w-[250px]">
+              <div className="font-semibold text-gray-900 mb-1 md:mb-2 text-xs md:text-base break-words">
+                {`${score.contestantNumber} - ${score.contestantName}`}
+              </div>
+
+              <div className="mt-1 pt-1 md:mt-2 md:pt-2 border-t border-gray-100">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-2 md:gap-x-6 gap-y-1 md:gap-y-1.5 text-[10px] md:text-sm">
+                  {score.judges.map((j, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between bg-gray-50 px-1.5 py-0.5 md:px-2 md:py-1 rounded min-w-0"
+                    >
+                      <span className="text-gray-600 font-medium truncate mr-1">
+                        {j.judgeName}
+                      </span>
+                      <span className="text-gray-900 font-bold flex-shrink-0">
+                        {j.score}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </td>
+
+            {/* Round */}
+            <td className="py-3 px-2 md:py-4 md:px-4 text-gray-700 font-medium text-xs md:text-base min-w-[80px] md:min-w-0">
+              <span className="block break-words">
+                {score.roundName}
+              </span>
+            </td>
+
+            {/* Total Score */}
+            <td className="py-3 px-1 md:py-4 md:px-4 text-center min-w-[60px] md:min-w-0">
+              <span className="inline-flex items-center justify-center w-10 h-10 md:w-16 md:h-16 text-gray-700 font-bold text-sm md:text-lg">
+                {score.totalScore}
+              </span>
+            </td>
+
+            {/* Average */}
+            <td className="py-3 px-1 md:py-4 md:px-4 text-center min-w-[60px] md:min-w-0">
+              <span className="inline-flex items-center justify-center w-10 h-10 md:w-16 md:h-16 text-gray-700 font-medium text-sm md:text-lg">
+                {Number(score.averageScore).toFixed(2)}
+              </span>
+            </td>
+
+            {/* Judge Count */}
+            <td className="py-3 px-1 md:py-4 md:px-4 text-center min-w-[50px] md:min-w-0">
+              <span className="inline-flex items-center justify-center text-gray-700 font-medium text-xs md:text-base">
+                {score.judgeCount}
+              </span>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <div className="mt-4 md:mt-8 flex justify-center px-4 md:px-0">
+    <Pagination
+      page={scorePage}
+      pages={scorePages}
+      onPageChange={setScorePage}
+    />
+  </div>
+</div>
         </div>
       )}
 
@@ -315,11 +357,11 @@ useEffect(() => {
                 ))}
               </tbody>
             </table>
-             <Pagination
-                page={analyticsPage}
-                pages={analyticsPages}
-                onPageChange={setAnalyticsPage}
-              />
+            <Pagination
+              page={analyticsPage}
+              pages={analyticsPages}
+              onPageChange={setAnalyticsPage}
+            />
           </div>
         </div>
       )}
@@ -440,7 +482,9 @@ useEffect(() => {
                   .sort((a, b) => b.totalScore - a.totalScore)
                   .map((a, i) => (
                     <tr key={i}>
-                      <td className="rank">{(analyticsPage - 1) * 5 + i + 1}</td>
+                      <td className="rank">
+                        {(analyticsPage - 1) * 5 + i + 1}
+                      </td>
                       <td>{a.name}</td>
                       <td>{a.totalScore}</td>
                       <td className="highlight">{a.averageScore}</td>
@@ -449,10 +493,10 @@ useEffect(() => {
               </tbody>
             </table>
             <Pagination
-                page={analyticsPage}
-                pages={analyticsPages}
-                onPageChange={setAnalyticsPage}
-              />
+              page={analyticsPage}
+              pages={analyticsPages}
+              onPageChange={setAnalyticsPage}
+            />
           </div>
         </div>
       )}

@@ -6,9 +6,8 @@ const DeleteModal = ({ show, itemName, onConfirm, onCancel }) => {
   return (
     <>
       {/* Overlay */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-40 bg-gray-50  px-4">
-        {/* Modal content */}
-        <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 sm:p-6">
+         <div className="fixed inset-0 bg-opacity-20 backdrop-blur-sm flex justify-center items-start pt-10 z-50 px-4">
+        <div className="mt-40 bg-gray-50 rounded-lg shadow-lg w-full max-w-md p-6 sm:p-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
             Confirm Deletion
           </h2>

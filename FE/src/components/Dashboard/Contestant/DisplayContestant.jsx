@@ -15,7 +15,7 @@ import { toast } from "react-toastify";
 import Pagination from "../../../utils/Pagination";
 
 const BACKEND_URL = "https://judgeevaluationsystem.onrender.com/api/v1";
-  // const BACKEND_URL = "http://localhost:5000/api/v1";
+// const BACKEND_URL = "http://localhost:5000/api/v1";
 
 const DisplayContestant = () => {
   const { token, admin, judge } = useContext(AuthContext);
@@ -51,7 +51,9 @@ const DisplayContestant = () => {
       return eventObj ? eventObj.name : "Unknown Event";
     }
 
-    const eventObj = events.find((e) => e._id === eventRef || e.id === eventRef);
+    const eventObj = events.find(
+      (e) => e._id === eventRef || e.id === eventRef
+    );
     return eventObj ? eventObj.name : "Unknown Event";
   };
 
@@ -141,7 +143,9 @@ const DisplayContestant = () => {
           });
           const data = await res.json();
 
-          setContestants(Array.isArray(data.contestants) ? data.contestants : []);
+          setContestants(
+            Array.isArray(data.contestants) ? data.contestants : []
+          );
           if (typeof data.event === "string") setJudgeEventName(data.event);
         } else {
           const contestantsRes = await fetch(`${BACKEND_URL}/contestants`, {
@@ -201,7 +205,7 @@ const DisplayContestant = () => {
       <div className="mb-8 relative">
         <div className="pr-14 sm:pr-0">
           <h2 className="text-md sm:text-xl font-bold text-gray-800 flex items-center gap-3">
-            <span className="w-1 h-8 bg-gradient-to-b from-green-500 to-green-700 rounded-full"></span>
+            <span className="w-1 h-8 rounded-full"></span>
             Available Contestants
           </h2>
           <p className="text-sm text-gray-500 mt-2 ml-4">
@@ -330,16 +334,24 @@ const DisplayContestant = () => {
                             state: { contestant: c },
                           })
                         }
-                        className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg"
+                        className="flex-1 px-2 py-1 text-xs sm:px-3 sm:py-2 sm:text-sm bg-green-600 text-white rounded-lg flex items-center justify-center gap-1"
                       >
-                        <FontAwesomeIcon icon={faEdit} /> Edit
+                        <FontAwesomeIcon
+                          icon={faEdit}
+                          className="text-xs sm:text-sm"
+                        />
+                        <span>Edit</span>
                       </button>
 
                       <button
                         onClick={() => promptDelete(c)}
-                        className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg"
+                        className="flex-1 px-2 py-1 text-xs sm:px-3 sm:py-2 sm:text-sm bg-red-600 text-white rounded-lg flex items-center justify-center gap-1"
                       >
-                        <FontAwesomeIcon icon={faTrash} /> Delete
+                        <FontAwesomeIcon
+                          icon={faTrash}
+                          className="text-xs sm:text-sm"
+                        />
+                        <span>Delete</span>
                       </button>
                     </div>
                   )}
