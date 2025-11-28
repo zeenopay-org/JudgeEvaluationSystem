@@ -42,46 +42,57 @@ const Sidebar = ({ isOpen, collapsed, onToggleCollapse }) => {
       }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between h-16 px-3 bg-green-900 relative">
-        <div className="flex items-center gap-2">
-          <div className="h-9 w-9 rounded bg-green-200 flex items-center justify-center text-green-900 font-bold text-lg transform transition-all duration-300 hover:scale-110 hover:rotate-6 hover:shadow-lg">
+      <div className="flex items-center justify-between h-16 px-4 bg-green-900 relative">
+        <div className="flex items-center gap-3 flex-1">
+          {/* Z Icon - Also clickable */}
+          <button
+            onClick={onToggleCollapse}
+            className="h-9 w-9 rounded bg-green-200 flex items-center justify-center text-green-900 font-bold text-lg transform transition-all duration-300 hover:scale-110  hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-300"
+          >
             Z
-          </div>
+          </button>
 
+          {/* ZeenoPay Text */}
           <span
             className={`text-white font-bold text-[17px] tracking-wide transition-all duration-300 origin-left ${
               collapsed
-                ? "opacity-0 -translate-x-2 pointer-events-none"
-                : "opacity-100 translate-x-0"
+                ? "opacity-0 -translate-x-2 pointer-events-none w-0"
+                : "opacity-100 translate-x-0 w-auto"
             }`}
           >
             ZeenoPay
           </span>
         </div>
 
-        {/* Toggle Button */}
-        <button
-          onClick={onToggleCollapse}
-          className="absolute -right-2 top-1/2 transform -translate-y-1/2 bg-green-700 hover:bg-green-800 text-white rounded-full p-1.5 transition-all duration-300 shadow-lg border-2 border-gray-100 hover:scale-110 hover:shadow-xl active:scale-95"
-          aria-label="Toggle sidebar"
+        {/* Toggle Button - Only visible when expanded */}
+        <div
+          className={`transition-all duration-300 ${
+            collapsed
+              ? "opacity-0 pointer-events-none w-0"
+              : "opacity-100 pointer-events-auto w-auto"
+          }`}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className={`w-4 h-4 transform transition-transform duration-300 ${
-              collapsed ? "rotate-0" : "rotate-180"
-            }`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="2"
+          <button
+            onClick={onToggleCollapse}
+            className="bg-green-800 hover:bg-green-700 text-white rounded-md p-2 transition-all duration-300 shadow-md border border-green-600 hover:scale-105 hover:shadow-lg active:scale-95 flex items-center justify-center"
+            aria-label="Collapse sidebar"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d={collapsed ? "M9 5l7 7-7 7" : "M6 18L18 6M6 6l12 12"}
-            />
-          </svg>
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-4 h-4 transform transition-transform duration-300"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Navigation */}
@@ -227,8 +238,6 @@ const Sidebar = ({ isOpen, collapsed, onToggleCollapse }) => {
           </div>
         </div>
       </div>
-
-      
     </aside>
   );
 };

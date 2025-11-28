@@ -23,6 +23,7 @@ import "react-toastify/dist/ReactToastify.css";
 import EditRound from "./components/Dashboard/Round/EditRound";
 import EditContestant from "./components/Dashboard/Contestant/EditContestant";
 import ErrorPage from "./pages/ErrorPage";
+import WinnerPage from "./pages/winnerPage";
 import TitleWinner from "./components/Dashboard/Title/TitleWinner";
 
 function App() {
@@ -110,7 +111,7 @@ function App() {
           path="/title/winner"
           element={
             <Layout>
-              <TitleWinner />
+              <TitleWinner/>
             </Layout>
           }
         />

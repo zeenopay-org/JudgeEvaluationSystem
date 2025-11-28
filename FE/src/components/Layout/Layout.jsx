@@ -32,18 +32,18 @@ const Layout = ({ children }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // ✅ Toggle sidebar only via hamburger
- const handleOpenSidebar = () => {
-  if (isMobile) {
-    setSidebarOpen((prev) => !prev); // toggle open/close
-  }
-};
+  //Toggle sidebar only via hamburger
+  const handleOpenSidebar = () => {
+    if (isMobile) {
+      setSidebarOpen((prev) => !prev);
+    }
+  };
 
   const handleCollapseToggle = () => {
     if (!isMobile) setSidebarCollapsed(!sidebarCollapsed);
   };
 
-  // ✅ Prevent background scroll on mobile when sidebar is open
+  //Prevent background scroll on mobile when sidebar is open
   useEffect(() => {
     if (isMobile && sidebarOpen) {
       document.body.style.overflow = "hidden";
@@ -69,31 +69,30 @@ const Layout = ({ children }) => {
       )}
 
       {/* ✅ Mobile Sidebar (under the fixed navbar) */}
-      {/* ✅ Overlay for mobile when sidebar is open */}
-{isMobile && sidebarOpen && (
-  <div
-    className="fixed inset-0 bg-black/30 z-[9997]"
-    onClick={() => setSidebarOpen(false)}
-  />
-)}
+      {isMobile && sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/30 z-[9997]"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-{/* ✅ Mobile Sidebar */}
-{isMobile && (
-  <div
-    className={`fixed top-0 left-0 h-full transform transition-transform duration-300 ease-in-out w-4/5 sm:w-2/3 md:w-1/2 z-[9998] ${
-      sidebarOpen ? "translate-x-0" : "-translate-x-full"
-    }`}
-  >
-    <Sidebar
-      isOpen={sidebarOpen}
-      collapsed={false}
-      onToggleCollapse={handleCollapseToggle}
-      isMobile={true}
-    />
-  </div>
-)}
+      {/* ✅ Mobile Sidebar */}
+      {isMobile && (
+        <div
+          className={`fixed top-0 left-0 h-full transform transition-transform duration-300 ease-in-out w-4/5 sm:w-2/3 md:w-1/2 z-[9998] ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <Sidebar
+            isOpen={sidebarOpen}
+            collapsed={false}
+            onToggleCollapse={handleCollapseToggle}
+            isMobile={true}
+          />
+        </div>
+      )}
 
-      {/* ✅ Main Content */}
+      {/*Main Content */}
       <div
         className="flex-1 min-w-0 pt-16 transition-all duration-300"
         style={{
@@ -101,11 +100,11 @@ const Layout = ({ children }) => {
             !judge && !isMobile && sidebarOpen ? `${sidebarWidth}px` : 0,
         }}
       >
-        {/* ✅ Navbar (fixed only on mobile, above sidebar) */}
+        {/*Navbar (fixed only on mobile, above sidebar) */}
         <div
           className={`${
             isMobile
-              ? "fixed top-0 left-0 w-full z-[10000]" // Navbar overlaps sidebar
+              ? "fixed top-0 left-0 w-full z-[10000]"
               : "sticky top-0 z-[40]"
           }`}
         >
