@@ -8,6 +8,7 @@ import {
   faTrophy,
   faCrown,
   faCheck,
+  faEye,
 } from "@fortawesome/free-solid-svg-icons";
 import DeleteModal from "../../DeleteModal";
 
@@ -31,9 +32,9 @@ const DisplayTitle = () => {
   const handleCreateClick = () => {
     navigate("/title/create");
   };
-  const handleViewResultClick = () =>{
-    navigate("/title/winner")
-  }
+  const handleViewResultClick = () => {
+    navigate("/title/winner");
+  };
 
   const promptDelete = (title) => {
     setSelectedTitle(title);
@@ -147,32 +148,33 @@ const DisplayTitle = () => {
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
       {/* Header */}
-     <div className="mb-8 relative">
-  <h2 className="text-md sm:text-xl font-bold text-gray-800 flex items-center gap-3 pr-14 sm:pr-0">
-    <span className="w-1 h-8 rounded-full"></span>
-    Event Titles
-  </h2>
+      <div className="mb-8 relative">
+        <h2 className="text-md sm:text-xl font-bold text-gray-800 flex items-center gap-3 pr-14 sm:pr-0">
+          <span className="w-1 h-8 rounded-full"></span>
+          Event Titles
+        </h2>
 
-  {/* Button container */}
-  <div className="absolute top-0 right-0 flex gap-3">
-     <button
-      onClick={handleViewResultClick}
-      className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl shadow-lg hover:shadow-xl hover:from-indigo-600 hover:to-indigo-700 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2 font-semibold w-12 h-12 sm:w-auto sm:h-auto sm:px-6 sm:py-2.5 justify-center"
-    >
-      <span className="text-md font-bold">👁️</span>
-      <span className="hidden sm:inline">View Result</span>
-    </button>
-    <button
-      onClick={handleCreateClick}
-      className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl shadow-lg hover:shadow-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2 font-semibold w-12 h-12 sm:w-auto sm:h-auto sm:px-6 sm:py-2.5 justify-center"
-    >
-      <span className="text-md font-bold">+</span>
-      <span className="hidden sm:inline">Create Title</span>
-    </button>
-
-   
-  </div>
-</div>
+        {/* Button container */}
+        <div className="absolute top-0 right-0 flex gap-3">
+          <button
+            onClick={handleViewResultClick}
+            className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl shadow-lg hover:shadow-xl hover:from-indigo-600 hover:to-indigo-700 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2 font-semibold w-12 h-12 sm:w-auto sm:h-auto sm:px-6 sm:py-2.5 justify-center"
+          >
+            <FontAwesomeIcon
+              icon={faEye}
+              className="text-md opacity-50 text-yellow-500"
+            />
+            <span className="hidden sm:inline">View Result</span>
+          </button>
+          <button
+            onClick={handleCreateClick}
+            className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl shadow-lg hover:shadow-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2 font-semibold w-12 h-12 sm:w-auto sm:h-auto sm:px-6 sm:py-2.5 justify-center"
+          >
+            <span className="text-md font-bold">+</span>
+            <span className="hidden sm:inline">Create Title</span>
+          </button>
+        </div>
+      </div>
 
       {loading ? (
         <div className="text-center py-20">
@@ -180,11 +182,6 @@ const DisplayTitle = () => {
         </div>
       ) : Object.keys(groupedTitles).length === 0 ? (
         <div className="text-center py-20">
-          <FontAwesomeIcon
-            icon={faTrophy}
-            className="text-yellow-500 text-6xl mb-4 opacity-90"
-          />
-
           <p className="text-gray-500 text-lg">No titles found</p>
         </div>
       ) : (
@@ -192,18 +189,11 @@ const DisplayTitle = () => {
           <div key={eventName || "unknown-event"} className="mb-10">
             {/* Event Header */}
             <div className="mb-6 pb-3 border-b-2 border-green-200">
-              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-3">
-                <FontAwesomeIcon
-                  icon={faTrophy}
-                  className="text-2xl text-yellow-500"
-                />
-
-                <span>{eventName || "Unknown Event"}</span>
-                <span className="text-sm font-normal text-gray-500">
-                  ({eventTitles.length}{" "}
-                  {eventTitles.length === 1 ? "title" : "titles"})
-                </span>
-              </h3>
+              <span>{eventName || "Unknown Event"}</span>
+              <span className="text-sm font-normal text-gray-500">
+                ({eventTitles.length}{" "}
+                {eventTitles.length === 1 ? "title" : "titles"})
+              </span>
             </div>
 
             {/* Titles Grid */}

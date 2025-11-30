@@ -22,13 +22,13 @@ export const registerAdmin = async (req, res) => {
     const admin = new Admin({ email, password: hashedPassword });
     await admin.save();
 
-    const { id, name, role, timestamps } = admin;
+    const { _id, name, role, timestamps } = admin;
 
     res
       .status(201)
       .json({
         message: "Admin registered successfully",
-        admin: { id, name, email, role },
+        admin: { id:_id, name, email, role },
       });
   } catch (err) {
     res.status(500).json({ error: err.message });

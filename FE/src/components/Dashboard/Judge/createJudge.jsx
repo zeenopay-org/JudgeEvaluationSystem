@@ -57,6 +57,18 @@ const CreateJudge = () => {
       return false;
     }
 
+    const repeatedCharPattern = /(.)\1{2,}/;
+    if (repeatedCharPattern.test(username)) {
+      toast.error("Username has repeated characters");
+      return false;
+    }
+
+    const simplePatterns = /(abc|123|xyz|qwe|aaa)/i;
+    if (simplePatterns.test(username)) {
+      toast.error("Username contains invalid pattern");
+      return false;
+    }
+
     // STRONG EMAIL VALIDATION
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
@@ -77,7 +89,9 @@ const CreateJudge = () => {
 
     // Contact
     if (!/^[0-9]{10}$/.test(contact)) {
-      toast.error("Contact must be exactly 10 digits and should contain numeric values only");
+      toast.error(
+        "Contact must be exactly 10 digits and should contain numeric values only"
+      );
       return false;
     }
 

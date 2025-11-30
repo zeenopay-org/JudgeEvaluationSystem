@@ -126,7 +126,7 @@ const DisplayEvent = () => {
           <p className="text-gray-500 text-lg">No events yet</p>
           <button
             onClick={handleCreateClick}
-            className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-xl shadow-lg hover:shadow-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-3 text-lg font-semibold"
+            className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-2 rounded-xl shadow-lg hover:shadow-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-3 text-md font-semibold"
           >
             <span className="text-2xl font-bold">+</span>
             <span>Create Event</span>

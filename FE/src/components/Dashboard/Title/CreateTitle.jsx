@@ -77,7 +77,7 @@ const CreateTitleForm = ({ onSuccess }) => {
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg mx-auto">
-      <h2 className="text-xl font-bold text-gray-800 mb-6">🎀 Create New Title</h2>
+      <h2 className="text-xl font-bold text-gray-800 mb-6">Create New Title</h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Title Name */}

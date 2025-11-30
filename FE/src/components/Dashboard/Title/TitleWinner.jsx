@@ -1,11 +1,42 @@
 import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../../context/AuthContext";
 import { toast } from "react-toastify";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faDownload } from "@fortawesome/free-solid-svg-icons";
+
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const TitleWinner = () => {
   const { token } = useContext(AuthContext);
   const [winners, setWinners] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleDownloadPDF = () =>{
+    const doc = new jsPDF();
+
+    doc.setFontSize(16);
+    doc.text("Title winners Report", 14,15 );
+
+    const tableRows= [];
+
+    winners.forEach((titleobj)=>{
+      titleobj.contestants.forEach((c)=>{
+        tableRows.push([
+          titleobj.titleName,
+          c.contestantName,
+          c.contestantNumber
+        ]);
+      });
+    });
+
+    autoTable(doc, {
+      startY: 25,
+      head:[["Title", "Contestant Name", "Contestant Number"]],
+      body: tableRows,
+    });
+    doc.save("title_winners.pdf");
+  };
 
   useEffect(() => {
     const fetchWinners = async () => {
@@ -36,8 +67,15 @@ const TitleWinner = () => {
   return (
     <div className="min-h-screen p-4 sm:p-6 bg-gray-50">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="px-6 py-4 border-b bg-green-600 text-white">
+        <div className="px-6 py-4 border-b flex items-center justify-between bg-green-600 text-white">
           <h2 className="text-lg font-bold">Title Winners</h2>
+          <button
+            onClick={handleDownloadPDF}
+            className="flex items-center space-x-2"
+          >
+            <FontAwesomeIcon icon={faDownload} />
+            <span className="hidden md:inline">Download as PDF</span>
+          </button>
         </div>
 
         <div className="overflow-x-auto">
@@ -110,7 +148,7 @@ const TitleWinner = () => {
                               {c.contestantName}
                             </span>
                             <span className="text-xs font-semibold bg-green-600 text-white px-2 py-1 rounded-full">
-                              #{c.contestantNumber}
+                              {c.contestantNumber}
                             </span>
                           </div>
                         ))}

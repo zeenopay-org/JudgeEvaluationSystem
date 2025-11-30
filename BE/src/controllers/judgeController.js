@@ -11,38 +11,55 @@ const JWT_SECRET = process.env.JWT_SECRET || "hfdhgshdgghd";
 // ============================
 // Create a new judge (Admin Only)
 // ============================
+const validateUsername = (username) => {
+  // Length check
+  if (username.length < 5 || username.length > 25) {
+    return "Username must be between 5–25 characters";
+  }
+
+  // Allowed characters: letters, numbers, dot, underscore
+  const usernameRegex = /^[a-zA-Z0-9._]+$/;
+  if (!usernameRegex.test(username)) {
+    return "Username can only contain letters, numbers, dots, and underscores";
+  }
+
+  // Repeated characters
+  const repeatedCharPattern = /(.)\1{2,}/;
+  if (repeatedCharPattern.test(username)) {
+    return "Username has repeated characters";
+  }
+
+  // Simple/obvious patterns
+  const simplePatterns = /(abc|123|xyz|qwe|aaa)/i;
+  if (simplePatterns.test(username)) {
+    return "Username contains invalid pattern";
+  }
+
+  return null; // valid
+};
+
 export const createJudge = async (req, res) => {
   try {
     const { username, password, email, contact, eventId } = req.body;
 
-    // Empty fields
+    // Check empty fields
     if (!username || !password || !email || !contact || !eventId) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    // Username validation
-    if (username.length < 5 || username.length > 25) {
-      return res.status(400).json({
-        error: "Username must be between 5–25 characters",
-      });
-    }
+    // Validate username
+    const usernameError = validateUsername(username);
+    if (usernameError) return res.status(400).json({ error: usernameError });
 
-    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      return res.status(400).json({
-        error: "Username can only contain letters, numbers, and underscores",
-      });
-    }
-
-    // STRONG EMAIL VALIDATION
+    // Strong email validation
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ error: "Invalid email format" });
     }
 
-    // STRONG PASSWORD VALIDATION
+    // Strong password validation
     const passwordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
-
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
         error:
@@ -50,11 +67,9 @@ export const createJudge = async (req, res) => {
       });
     }
 
-    // Contact validation
+    // Contact validation (exactly 10 digits)
     if (!/^[0-9]{10}$/.test(contact)) {
-      return res
-        .status(400)
-        .json({ error: "Contact must be exactly 10 digits" });
+      return res.status(400).json({ error: "Contact must be exactly 10 digits" });
     }
 
     // Check if user exists
@@ -67,8 +82,10 @@ export const createJudge = async (req, res) => {
         .json({ error: "User with this email or username already exists" });
     }
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Create user
     const user = await Users.create({
       username,
       email,
@@ -76,6 +93,7 @@ export const createJudge = async (req, res) => {
       role: "judge",
     });
 
+    // Create judge linked to user
     const judge = await Judge.create({
       contact,
       user: user._id,
@@ -88,9 +106,10 @@ export const createJudge = async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating judge:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 // ============================
 // Judge Sign In
